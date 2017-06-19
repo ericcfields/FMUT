@@ -2,8 +2,8 @@
 Factorial Extension to the Mass Univariate Toolbox (FMUT)
 ============================================================
 
-Author: Eric Fields
-Contact: Eric.Fields@tufts.edu
+| AUTHOR:  Eric Fields
+| CONTACT: Eric.Fields@tufts.edu
 
 The Factorial Extension to the Mass Univariate Toolbox (FMUT) is an extension to David Groppe's Mass Univariate Toolbox. The MUT implements t-tests for several different mass univariate approaches to the analysis of ERP data. The FMUT adds to this by implementing one-way and factorial ANOVA versions of the same mass univariate approaches.
 
