@@ -6,12 +6,12 @@
 if ispc()
 
     addpath('R:\Public\GK_lab\Eric\FMUT_development\FMUT_functions');
-    addpath('R:\Public\GK_lab\Eric\FMUT_development\FMUT_functions\in_progress');
+    addpath('R:\Public\GK_lab\Eric\FMUT_development\FMUT_functions\dev');
 
     %Clear spreadsheet outputs folder
-    cd('R:\Public\GK_lab\Eric\FMUT_development\testing\tests\outputs')
+    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT_functions\testing\tests\outputs')
     delete *.xlsx
-    cd('R:\Public\GK_lab\Eric\FMUT_development\testing\tests')
+    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT_functions\testing\tests')
 
     %Add EEGLAB and MUT to path
     [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
@@ -24,12 +24,12 @@ elseif ismac()
     
     addpath('/Users/efield02/Desktop/ncl_eeglab-erplab-pipeline');
     addpath('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT_functions');
-    addpath('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT_functions/in_progress');
+    addpath('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT_functions/dev');
 
     %Clear spreadsheet outputs folder
-    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/testing/tests/outputs')
+    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT_functions/testing/tests/outputs')
     delete *.xlsx
-    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/testing/tests')
+    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT_functions/testing/tests')
 
     %Add EEGLAB and MUT to path
     [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
