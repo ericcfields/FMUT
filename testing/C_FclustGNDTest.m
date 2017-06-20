@@ -1,6 +1,6 @@
 %Test FclustGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 June 2017
+%VERSION DATE: 20 June 2017
 
 %Load a GND for testing
 if ispc()

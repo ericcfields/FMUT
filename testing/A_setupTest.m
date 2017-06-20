@@ -1,7 +1,7 @@
 %FMUT unit testing
 %General setup
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 June 2017
+%VERSION DATE: 20 June 2017
 
 if ispc()
 
