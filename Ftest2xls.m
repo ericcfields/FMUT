@@ -11,7 +11,7 @@
 % format_output     - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 16 June 2017
+%VERSION DATE: 20 June 2017
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -33,9 +33,12 @@
 % 5/24/17   - Updated for new xls formatting function; added optional argument
 %             to specify whether to format or not
 % 6/15/17   - Updated to use xlwrite and better output of critical values
+% 6/20/17   - Output for mean window analyses
 
 function Ftest2xls(GND, test_id, output_fname, format_output)
     
+    %% Set-up
+
     %Set formatting option if no input
 	if nargin < 4
         if ispc()
@@ -62,13 +65,6 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         writexls = @xlwrite;
     end
     
-    %Writing to spreadsheet for mean window analyses is not currently
-    %supported
-    if strcmpi(GND.F_tests(test_id).mean_wind, 'yes') || strcmpi(GND.F_tests(test_id).mean_wind, 'y')
-        watchit('Writing to spreadsheet is currently not supported when the mean_wind option is used. No file written')
-        return
-    end
-    
     %Make sure we're not adding sheets to existing file
     if exist(output_fname, 'file')
         user_resp = questdlg(sprintf('WARNING: %s already exists. Do you want to overwrite it?', output_fname), 'WARNING');
@@ -90,7 +86,8 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
     
     warning('off','MATLAB:xlswrite:AddSheet')
 
-    %Write sheet with summary of test
+    %% Summary sheet
+    
     fact_levels = sprintf('%d X ', results.factor_levels);
     fact_levels = fact_levels(1:end-2);
     summary = {'Study', GND.exp_desc; ...
@@ -98,7 +95,8 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
                'Bins', sprintf('%d ', results.bins); ...
                'Factors', [sprintf('%s X ', results.factors{1:end-1}), results.factors{end}]; ...
                'Factor_levels', fact_levels; ...
-               'Time Window', sprintf('%d - %d', results.time_wind(:)); ...
+               'Time Window', sprintf('%d-%d ', results.time_wind'); ...
+               'Mean window', results.mean_wind; ...
                'Electrodes', [sprintf('%s, ', results.include_chans{1:end-1}), results.include_chans{end}]; ...
                'Multiple comparisons correction method', results.mult_comp_method; ...
                'Interaction method', results.interaction_method; ...
@@ -117,7 +115,8 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
     end
     writexls(output_fname, summary, 'test summary');
     
-    %Write cluster summary sheet
+    %% Cluster summary sheet
+    
     if strcmpi(results.mult_comp_method, 'cluster mass perm test')
         clust_sum = cell(11, 3*length(effects_labels)-1);
         col = 1;
@@ -152,19 +151,31 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
                 %spatial extent
                 clust_sum{row+3, col+1} = sprintf('%s, ', results.include_chans{any(clust_Fobs, 2)});
                 %temporal extent
-                clust_sum{row+4, col+1} = sprintf('%d - %d', ...
-                                                  GND.time_pts(min(results.used_tpt_ids(any(clust_Fobs, 1)))), ... 
-                                                  GND.time_pts(max(results.used_tpt_ids(any(clust_Fobs, 1)))));
+                if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
+                    clust_sum{row+4, col+1} = sprintf('Mean window: %d-%d', results.time_wind(1), results.time_wind(2));
+                else
+                    clust_sum{row+4, col+1} = sprintf('%d - %d', ...
+                                                      GND.time_pts(min(results.used_tpt_ids(any(clust_Fobs, 1)))), ... 
+                                                      GND.time_pts(max(results.used_tpt_ids(any(clust_Fobs, 1)))));
+                end
                 %Spatial and temporal peak
                 [max_elec, max_timept] = find(clust_Fobs == max(clust_Fobs(:))); %find location of max F in cluster
-                clust_sum{row+5, col+1} = results.include_chans{max_elec}; 
-                clust_sum{row+6, col+1} = GND.time_pts(results.used_tpt_ids(max_timept));
+                clust_sum{row+5, col+1} = results.include_chans{max_elec};
+                if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
+                    clust_sum{row+6, col+1} = sprintf('Mean window: %d-%d', results.time_wind(1), results.time_wind(2));
+                else
+                    clust_sum{row+6, col+1} = GND.time_pts(results.used_tpt_ids(max_timept));
+                end
                 %Spatial and temporal center (collapsed across the other
                 %dimension)
                 [~, max_elec_clust] = max(sum(clust_Fobs, 2));
                 clust_sum{row+7, col+1} = results.include_chans{max_elec_clust};
-                [~, max_time_clust] = max(sum(clust_Fobs, 1));
-                clust_sum{row+8, col+1} = GND.time_pts(results.used_tpt_ids(max_time_clust));
+                if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
+                    clust_sum{row+8, col+1} = sprintf('Mean window: %d-%d', results.time_wind(1), results.time_wind(2));
+                else
+                    [~, max_time_clust] = max(sum(clust_Fobs, 1));
+                    clust_sum{row+8, col+1} = GND.time_pts(results.used_tpt_ids(max_time_clust));
+                end
                 row = row+10;
             end
             col = col+3;
@@ -172,7 +183,20 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         writexls(output_fname, clust_sum, 'cluster summary');
     end
     
-    %Write sheets of results for each effect
+    %% Results: Cluster IDs, F obs, p-values
+    
+    %Create headers
+    chan_header = [' '; results.include_chans'];
+    if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
+        time_header = cell(1, size(results.time_wind, 1));
+        for t = 1:size(results.time_wind, 1)
+            time_header{t} = sprintf('%d-%d', results.time_wind(t,1), results.time_wind(t,2));
+        end 
+    else
+        time_header = num2cell(GND.time_pts(results.used_tpt_ids));
+    end
+    
+    %Write sheets
     if length(effects_labels) == 1
         
         %Sheet names are limited to 31 characters
@@ -183,17 +207,17 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         %Cluster_ids
         if strcmpi(results.mult_comp_method, 'cluster mass perm test')
             %cluster ids
-            clust_ids = [[' '; results.include_chans'], [num2cell(GND.time_pts(results.used_tpt_ids)); num2cell(results.clust_info.clust_ids)]];
+            clust_ids = [chan_header, [time_header; num2cell(results.clust_info.clust_ids)]];
             writexls(output_fname, clust_ids, sprintf('%s_clust_IDs', effects_labels{1}));
         end
 
         %F_obs
-        F_obs_table = [[' '; results.include_chans'], [num2cell(GND.time_pts(results.used_tpt_ids)); num2cell(results.F_obs)]];
+        F_obs_table = [chan_header, [time_header; num2cell(results.F_obs)]];
         writexls(output_fname, F_obs_table, sprintf('%s_F_obs', effects_labels{1}));
 
         %p-values
         if ~strcmpi(results.mult_comp_method, 'bky')
-            adj_pvals = [[' '; results.include_chans'], [num2cell(GND.time_pts(results.used_tpt_ids)); num2cell(results.adj_pval)]];
+            adj_pvals = [chan_header, [time_header; num2cell(results.adj_pval)]];
             writexls(output_fname, adj_pvals, sprintf('%s_adj_pvals', effects_labels{1}));
         end
         
@@ -202,22 +226,22 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
             
             %Sheet names are limited to 31 characters
             if length(effects_labels{i}) > 19
-                effects_labels{1} = effects_labels{i}(1:19);
+                effects_labels{i} = effects_labels{i}(1:19);
             end
 
             %Cluster_ids
             if strcmpi(results.mult_comp_method, 'cluster mass perm test')
-                clust_ids = [[' '; results.include_chans'], [num2cell(GND.time_pts(results.used_tpt_ids)); num2cell(results.clust_info.(effects_labels{i}).clust_ids)]];
+                clust_ids = [chan_header, [time_header; num2cell(results.clust_info.(effects_labels{i}).clust_ids)]];
                 writexls(output_fname, clust_ids, sprintf('%s_clust_IDs', effects_labels{i}));
             end
 
             %F_obs
-            F_obs_table = [[' '; results.include_chans'], [num2cell(GND.time_pts(results.used_tpt_ids)); num2cell(results.F_obs.(effects_labels{i}))]];
+            F_obs_table = [chan_header, [time_header; num2cell(results.F_obs.(effects_labels{i}))]];
             writexls(output_fname, F_obs_table, sprintf('%s_F_obs', effects_labels{i}));
 
             %p-values
             if ~strcmpi(results.mult_comp_method, 'bky')
-                adj_pvals = [[' '; results.include_chans'], [num2cell(GND.time_pts(results.used_tpt_ids)); num2cell(results.adj_pval.(effects_labels{i}))]];
+                adj_pvals = [chan_header, [time_header; num2cell(results.adj_pval.(effects_labels{i}))]];
                 writexls(output_fname, adj_pvals, sprintf('%s_adj_pvals', effects_labels{i}));
             end
 
