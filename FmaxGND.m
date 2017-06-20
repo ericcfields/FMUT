@@ -142,7 +142,7 @@
 %Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
 %
 %
-%VERSION DATE: 14 June 2017
+%VERSION DATE: 20 June 2017
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -174,7 +174,8 @@
 % 6/12/17        - Added estimated alpha to output; Added verblevel related
 %                  reports
 % 6/14/17        - Updated error report for incorrect channel names; fixed
-%                  bug in command window output for oneway ANOVA 
+%                  bug in command window output for oneway ANOVA
+% 6/20/17        - Command window output for mean window analyses
 
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
@@ -521,7 +522,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
     
-    if VERBLEVEL && ~strcmpi(mean_wind, 'yes') && ~strcmpi(mean_wind, 'y')
+    if VERBLEVEL
         fprintf('\n##### RESULTS #####\n');
         for i = 1:length(effects)
             fprintf('\n%s effect\n', effects_labels{i});
@@ -530,12 +531,20 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                     fprintf('Critical F-value: %.3f\n', results.F_crit);
                     fprintf('That corresponds to a test-wise alpha level of %.3f\n', ...
                             fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
-                    fprintf('Electrodes and time points with significant effects:\n');
-                    for t = 1:length(results.used_tpt_ids)
-                        if any(results.null_test(:, t))
-                            fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                    if strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y')
+                        for t = 1:size(time_wind, 1)
+                            fprintf('Significant electrodes for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
                             fprintf('%s ', results.include_chans{results.null_test(:, t)});
                             fprintf('\n');
+                        end
+                    else
+                        fprintf('Electrodes and time points with significant effects:\n');
+                        for t = 1:length(results.used_tpt_ids)
+                            if any(results.null_test(:, t))
+                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                                fprintf('%s ', results.include_chans{results.null_test(:, t)});
+                                fprintf('\n');
+                            end
                         end
                     end
                     fprintf('All significant corrected p-values are between %f and %f\n', ... 
@@ -549,12 +558,20 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                     fprintf('Critical F-value: %.3f\n', results.F_crit.(effects_labels{i}));
                     fprintf('That corresponds to a test-wise alpha level of %.3f\n', ...
                             fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
-                    fprintf('Electrodes and time points with significant effects:\n');
-                    for t = 1:length(results.used_tpt_ids)
-                        if any(results.null_test.(effects_labels{i})(:, t))
-                            fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                    if strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y')
+                        for t = 1:size(time_wind, 1)
+                            fprintf('Significant electrodes for time windonw %d - %d: ', time_wind(t, 1), time_wind(t, 2));
                             fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
                             fprintf('\n');
+                        end
+                    else
+                        fprintf('Electrodes and time points with significant effects:\n');
+                        for t = 1:length(results.used_tpt_ids)
+                            if any(results.null_test.(effects_labels{i})(:, t))
+                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                                fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
+                                fprintf('\n');
+                            end
                         end
                     end
                     fprintf('All significant corrected p-values are between %f and %f\n', ... 

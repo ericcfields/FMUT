@@ -119,7 +119,7 @@
 % Benjamini, Y., & Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. The Annals of Statistics, 29(4), 1165-1188. 
 %
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-%VERSION DATE: 15 June 2017
+%VERSION DATE: 20 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -140,7 +140,8 @@
 % 6/3/17          - Fixed problems with factorial ANOVA
 % 6/12/17         - Added verblevel reports
 % 6/14/17         - Updated error for incorrectly supplied electrode name;
-%                   fixed command window output for one-way ANOVA 
+%                   fixed command window output for one-way ANOVA
+% 6/20/17         - Command window output for mean window analyses
 
 function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargin)
 
@@ -290,6 +291,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     %% ~~~~~ SET-UP ~~~~~
     
     %Some useful numbers
+    n_conds      = prod(factor_levels);
     n_subs       = size(GND.indiv_erps, 4);
     n_electrodes = length(electrodes); 
 
@@ -451,9 +453,9 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
  
     %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
     
-    if VERBLEVEL && ~strcmpi(mean_wind, 'yes') && ~strcmpi(mean_wind, 'y')
+    if VERBLEVEL
         fprintf('\n##### RESULTS #####\n');
-        if length(effects) ==1
+        if length(effects) == 1
                 fprintf('\n%s effect\n', effects_labels{1});
                 if any(results.null_test(:))
                     fprintf('Critical F-value: %.3f\n', results.F_crit);
@@ -461,12 +463,20 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                             fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
                     fprintf('Total number of significant differences: %d\n', sum(results.null_test(:)));
                     fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test(:))*q);
-                    fprintf('Electrodes and time points with significant effects:\n');
-                    for t = 1:length(results.used_tpt_ids)
-                        if any(results.null_test(:, t))
-                            fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                    if strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y')
+                        for t = 1:size(time_wind, 1)
+                            fprintf('Significant electrodes for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
                             fprintf('%s ', results.include_chans{results.null_test(:, t)});
                             fprintf('\n');
+                        end
+                    else
+                        fprintf('Electrodes and time points with significant effects:\n');
+                        for t = 1:length(results.used_tpt_ids)
+                            if any(results.null_test(:, t))
+                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                                fprintf('%s ', results.include_chans{results.null_test(:, t)});
+                                fprintf('\n');
+                            end
                         end
                     end
                     if ~strcmpi(method, 'bky')
@@ -486,12 +496,20 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                             fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
                     fprintf('Total number of significant differences: %d\n', sum(results.null_test.(effects_labels{i})(:)));
                     fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test.(effects_labels{i})(:))*q);
-                    fprintf('Electrodes and time points with significant effects:\n');
-                    for t = 1:length(results.used_tpt_ids)
-                        if any(results.null_test.(effects_labels{i})(:, t))
-                            fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                    if strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y')
+                        for t = 1:size(time_wind, 1)
+                            fprintf('Significant electrodes for time windonw %d - %d: ', time_wind(t, 1), time_wind(t, 2));
                             fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
                             fprintf('\n');
+                        end
+                    else
+                        fprintf('Electrodes and time points with significant effects:\n');
+                        for t = 1:length(results.used_tpt_ids)
+                            if any(results.null_test.(effects_labels{i})(:, t))
+                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                                fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
+                                fprintf('\n');
+                            end
                         end
                     end
                     if ~strcmpi(method, 'bky')

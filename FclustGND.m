@@ -174,7 +174,7 @@
 %
 %
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-%VERSION DATE: 14 June 2017
+%VERSION DATE: 20 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -207,7 +207,8 @@
 %                matches MUT functions
 % 6/12/17      - Added verblevel related reports
 % 6/14/17      - Updated error for incorrectly supplied electrode name;
-%                fixed command window output for one-way ANOVA 
+%                fixed command window output for one-way ANOVA
+% 6/20/17      - Command window output for mean window analyses
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -543,7 +544,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
     
-    if VERBLEVEL && ~strcmpi(mean_wind, 'yes') && ~strcmpi(mean_wind, 'y')
+    if VERBLEVEL
         fprintf('\n##### RESULTS #####\n');
         if length(effects) == 1
                 fprintf('\n%s effect\n', effects_labels{1});
