@@ -9,9 +9,9 @@ if ispc()
     addpath('R:\Public\GK_lab\Eric\FMUT_development\FMUT\dev');
 
     %Clear spreadsheet outputs folder
-    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\tests\outputs')
+    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\outputs')
     delete *.xlsx
-    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\tests')
+    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\')
 
     %Add EEGLAB and MUT to path
     [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
@@ -27,9 +27,9 @@ elseif ismac()
     addpath('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/dev');
 
     %Clear spreadsheet outputs folder
-    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/tests/outputs')
+    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/outputs')
     delete *.xlsx
-    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/tests')
+    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/')
 
     %Add EEGLAB and MUT to path
     [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
