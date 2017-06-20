@@ -133,7 +133,7 @@
 
 %%%%%%%%%%%%%%%% REVISION LOG %%%%%%%%%%%%%%%%%
 % 6/13/17      - Initial version in progress
-% 6/14/17      - Corrected problems titles for one-way ANOVA
+% 6/14/17      - Corrected problems with titles for one-way ANOVA
 
 
 function [img, h_ax] = F_sig_raster(GND_GRP_specGND_or_fname,test_id,varargin)
