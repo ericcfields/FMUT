@@ -209,6 +209,9 @@
 % 6/14/17      - Updated error for incorrectly supplied electrode name;
 %                fixed command window output for one-way ANOVA
 % 6/20/17      - Command window output for mean window analyses
+% 6/21/17      - time_wind field of results struct is now accurate;
+%                changed used_tpt_ids field to cell array for mean window
+%                analyses
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -429,6 +432,8 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if ~strcmpi(mean_wind, 'yes') && ~strcmpi(mean_wind, 'y')
         [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
         [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
+        time_wind(1) = GND.time_pts(start_sample);
+        time_wind(2) = GND.time_pts(end_sample);
         use_time_pts = start_sample:end_sample;
         n_time_pts = length(use_time_pts);
         the_data = GND.indiv_erps(electrodes, use_time_pts, bins, :);
@@ -439,6 +444,8 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         n_time_pts = 1;
         [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
         [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
+        time_wind(1) = GND.time_pts(start_sample);
+        time_wind(2) = GND.time_pts(end_sample);
         the_data = mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2);
         if VERBLEVEL
             fprintf('\nConducting cluster mass permutation test in the mean time window from %d ms to %d ms\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
@@ -484,6 +491,9 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
 
     %% ~~~~~ ADD RESULTS STRUCT TO GND AND ASSIGN OTHER OUTPUT ~~~~~
     
+    if (strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y'))
+        use_time_pts = {{use_time_pts}};
+    end
     %Create results struct
     results = struct('bins', bins, ...
                      'factors', {factor_names}, ...
@@ -595,7 +605,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     %Output to spreadsheet if requested
     if output_file
         if VERBLEVEL
-            fprintf('\nWriting results to spreadsheet . . . \n')
+            fprintf('\nWriting results to spreadsheet . . . ')
         end
         Ftest2xls(GND, length(GND.F_tests), output_file);
         if VERBLEVEL

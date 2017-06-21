@@ -142,7 +142,7 @@
 %Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
 %
 %
-%VERSION DATE: 20 June 2017
+%VERSION DATE: 21 June 2017
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -176,6 +176,9 @@
 % 6/14/17        - Updated error report for incorrect channel names; fixed
 %                  bug in command window output for oneway ANOVA
 % 6/20/17        - Command window output for mean window analyses
+% 6/21/17        - time_wind field of results struct is now accurate;
+%                  changed used_tpt_ids field to cell array for mean window
+%                  analyses
 
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
@@ -393,6 +396,8 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         for i = 1:size(time_wind, 1)
             [~, start_sample] = min(abs( GND.time_pts - time_wind(i, 1) ));
             [~, end_sample  ] = min(abs( GND.time_pts - time_wind(i, 2) ));
+            time_wind(i, 1) = GND.time_pts(start_sample);
+            time_wind(i, 2) = GND.time_pts(end_sample);
             use_time_pts = [use_time_pts start_sample:end_sample]; %#ok<AGROW>
             if VERBLEVEL
                 if i == 1
@@ -409,11 +414,13 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         the_data = GND.indiv_erps(electrodes, use_time_pts, bins, :);
     else
         n_time_pts = size(time_wind, 1);
-        use_time_pts = cell(n_time_pts, 1);
+        use_time_pts = cell(1, n_time_pts);
         the_data = NaN(n_electrodes, n_time_pts, n_conds, n_subs);
         for i = 1:size(time_wind, 1)
             [~, start_sample] = min(abs( GND.time_pts - time_wind(i, 1) ));
             [~, end_sample  ] = min(abs( GND.time_pts - time_wind(i, 2) ));
+            time_wind(i, 1) = GND.time_pts(start_sample);
+            time_wind(i, 2) = GND.time_pts(end_sample);
             use_time_pts{i} = start_sample:end_sample;
             the_data(:, i, :, :) = mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2);
             if VERBLEVEL
@@ -462,6 +469,9 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
 
     %% ~~~~~ ADD RESULTS STRUCT TO GND AND ASSIGN OTHER OUTPUT ~~~~~
     
+    if (strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y'))
+        use_time_pts = {use_time_pts};
+    end
     %Create results struct with basic parameters
     results = struct('bins', bins, ...
                      'factors', {factor_names}, ...

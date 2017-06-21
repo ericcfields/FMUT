@@ -43,10 +43,6 @@
 %                     (nonsignificant). If 'rgb', raster will use a 
 %                     temperature scale to indicate graded values of 
 %                     significance. {default: 'n'} 
-%  units            - ['t' or 'uV'] If 'use_color' is set to 'rgb', 't'
-%                     means that raster values will be in units of t-scores. 
-%                     'uV' means that raster values will be in microvolts 
-%                     (minus the mean of the null hypothesis). {default: 't'}
 %  plot_vert_lines  - [integer] If non-zero, vertical lines separating all
 %                     time points included in the F-test will be 
 %                     shown. If 0, the only vertical lines drawn will be 
@@ -116,7 +112,7 @@
 % electrodes is based on the GND.chanlocs(x).theta coordinate.  Anterior to
 % posterior organization of electrodes is based on GND.chanlocs(x).radius.
 %
-%VERSION DATE: 14 June 2017
+%VERSION DATE: 20 June 2017
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
 %Modified from sig_raster.m by David Groppe
 %
@@ -196,7 +192,7 @@ end
 results = GND.F_tests(test_id);
 if isempty(p.Results.effect)
     if isstruct(results.F_obs)
-        error('You must specify which effect in the factorial ANOVA you want a raster plot for.');
+        error('You must specify which effect in the factorial ANOVA you want to plot.');
     else
         null_test   = results.null_test;
         Fval        = results.F_obs;
@@ -204,10 +200,14 @@ if isempty(p.Results.effect)
         effect_name = results.factors{1};
     end
 else
-    null_test   = results.null_test.(p.Results.effect);
-    Fval        = results.F_obs.(p.Results.effect);
-    pval        = results.adj_pval.(p.Results.effect);
-    effect_name = p.Results.effect;
+    if ~isfield(results.F_obs, p.Results.effect)
+        error('''%s'' does not name an effect in GND.F_tests(%d).', p.Results.effect, test_id); 
+    else
+        null_test   = results.null_test.(p.Results.effect);
+        Fval        = results.F_obs.(p.Results.effect);
+        pval        = results.adj_pval.(p.Results.effect);
+        effect_name = p.Results.effect;
+    end
 end
 
     
@@ -217,7 +217,7 @@ if isnan(results.n_perm)
     fdr_crct=1;
     if VERBLEVEL,
        fprintf('Correcting for multiple comparisons via FDR procedure: %s\n', ...
-           results.mult_comp_method); 
+               results.mult_comp_method); 
     end
 else
     fdr_crct=0;
@@ -250,41 +250,41 @@ end
 %Clean up code by copying some GND.F_tests variables to their own
 %variable
 use_chans = results.used_chan_ids;
-n_wind    = size(results.time_wind,1);
+n_wind    = size(results.time_wind, 1);
 if strcmpi(results.mean_wind, 'yes'),
-    watchit('F_sig_raster does not currently support mean time window analyses.')
-    return;
-%     use_tpts = zeros(1,length(GND.time_pts)); %preallocate mem
-%     pval = repmat(use_tpts, length(results.used_chan_ids), 1);
-%     grands_t = pval;
-%     for w = 1:n_wind,
-%         ids = results.used_tpt_ids{w};
-%         use_tpts(ids)= use_tpts(ids)+1;
-%         if fdr_crct,
-%             pval(:,ids) = repmat(1-results.fdr_rej(:,w), 1, length(ids));
-%         else
-%             pval(:,ids) = repmat(results.adj_pval(:,w), 1, length(ids));
-%         end
-%         if strcmpi(p.Results.units, 'F')
-%             grands_t(:,ids)=repmat(results.F_obs(:,w), 1, length(ids));
-%         else
+    use_tpts=zeros(1,length(GND.time_pts)); %preallocate mem
+    mean_pval = pval;
+    mean_Fval = Fval;
+    pval=repmat(use_tpts,length(results.used_chan_ids),1);
+    Fval=pval;
+    for w=1:n_wind,
+        ids=results.used_tpt_ids{w};
+        use_tpts(ids)= ...
+            use_tpts(ids)+1;
+        if fdr_crct,
+            pval(:,ids)=repmat(1-null_test(:,w),1,length(ids));
+        else
+            pval(:,ids)=repmat(mean_pval(:,w),1,length(ids));
+        end
+        if strcmpi(p.Results.units,'F')
+            Fval(:,ids)=repmat(mean_Fval(:,w),1,length(ids));
+        else
 %             temp_mn=mean(GND.grands(results.used_chan_ids, ...
-%                 results.used_tpt_ids{w},use_bin),2);
-%             temp_mn=temp_mn-results.null_mean; % Deals with possible non-zero null hypothesis mean
-%             grands_t(:,ids)=repmat(temp_mn,1,length(ids));
-%         end
-%     end
-%     if max(use_tpts)>1,
-%         if freq_domain,
-%             error('Tested frequency bands overlap. sig_raster.m can''t handle this currently.');
-%         else
-%             error('Tested time windows overlap. sig_raster.m can''t handle this currently.');
-%         end
-%     end
-%     ids=find(use_tpts);
-%     use_tpts=ids;
-%     pval=pval(:,ids);
-%     grands_t=grands_t(:,ids);
+%                 GND.F_tests(3).used_tpt_ids{w},use_bin),2);
+%             Fval(:,ids)=repmat(temp_mn,1,length(ids));
+        end
+    end
+    if max(use_tpts)>1,
+        if freq_domain,
+            error('Tested frequency bands overlap. F_sig_raster.m can''t handle this currently.');
+        else
+            error('Tested time windows overlap. F_sig_raster.m can''t handle this currently.');
+        end
+    end
+    ids=find(use_tpts);
+    use_tpts=ids;
+    pval=pval(:,ids);
+    Fval=Fval(:,ids);
 else
     use_tpts = results.used_tpt_ids;
     if fdr_crct,
@@ -394,49 +394,49 @@ n_right=length(right);
 show_tpts=use_tpts(1):use_tpts(end); %show_tpts differs from use_tpts if multiple non-contiguous time windows were used
 n_show_tpts=length(show_tpts);
 if strcmpi(results.mean_wind,'yes'),
-%     % Test was based on mean voltage in time window(s)/frequency band(s)
-%     xtick=NaN;
-%     n_xtick=0;
-%     for a=1:n_wind,
-%         n_xtick=n_xtick+1;
-%         mn_tpt=mean(results.used_tpt_ids{a});
-%         xtick(n_xtick)=mn_tpt-show_tpts(1)+1;
-%         if freq_domain,
-%             lab_form=['%.' int2str(n_dig_past_dot) 'f-%.' int2str(n_dig_past_dot)  'f'];
-%             xtick_lab{n_xtick}=sprintf(lab_form,results.time_wind(a,1), ...
-%                 results.time_wind(a,2));
-%         else
-%             xtick_lab{n_xtick}=sprintf('%d-%d',results.time_wind(a,1), ...
-%                 results.time_wind(a,2));
-%         end
-%         if a~=n_wind,
-%             skipped_wind=[(results.used_tpt_ids{a}(end)+1): ...
-%                 (results.used_tpt_ids{a+1}(1)-1)];
-%             if ~isempty(skipped_wind),
-%                 n_xtick=n_xtick+1;
-%                 mn_tpt=mean(skipped_wind);
-%                 xtick(n_xtick)=mn_tpt-show_tpts(1)+1;
-%                 if freq_domain,
-%                     if length(skipped_wind)>1,
-%                         lab_form=['%.' int2str(n_dig_past_dot) 'f-%.' int2str(n_dig_past_dot)  'f'];
-%                         xtick_lab{n_xtick}=sprintf(lab_form,GND.time_pts(skipped_wind(1)), ...
-%                             GND.time_pts(skipped_wind(end)));
-%                     else
-%                         lab_form=['%.' int2str(n_dig_past_dot) 'f'];
-%                         xtick_lab{n_xtick}=sprintf(lab_form,GND.time_pts(skipped_wind(1)));
-%                     end
-%                 else
-%                     if length(skipped_wind)>1,
-%                         xtick_lab{n_xtick}=sprintf('%d-%d',GND.time_pts(skipped_wind(1)), ...
-%                             GND.time_pts(skipped_wind(end)));
-%                     else
-%                         xtick_lab{n_xtick}=sprintf('%d',GND.time_pts(skipped_wind(1)), ...
-%                             GND.time_pts(skipped_wind(end)));
-%                     end
-%                 end
-%             end
-%         end
-%     end
+    % Test was based on mean voltage in time window(s)/frequency band(s)
+    xtick=NaN;
+    n_xtick=0;
+    for a=1:n_wind,
+        n_xtick=n_xtick+1;
+        mn_tpt=mean(results.used_tpt_ids{a});
+        xtick(n_xtick)=mn_tpt-show_tpts(1)+1;
+        if freq_domain,
+            lab_form=['%.' int2str(n_dig_past_dot) 'f-%.' int2str(n_dig_past_dot)  'f'];
+            xtick_lab{n_xtick}=sprintf(lab_form,results.time_wind(a,1), ...
+                results.time_wind(a,2));
+        else
+            xtick_lab{n_xtick}=sprintf('%d-%d',results.time_wind(a,1), ...
+                results.time_wind(a,2));
+        end
+        if a~=n_wind,
+            skipped_wind=[(results.used_tpt_ids{a}(end)+1): ...
+                (results.used_tpt_ids{a+1}(1)-1)];
+            if ~isempty(skipped_wind),
+                n_xtick=n_xtick+1;
+                mn_tpt=mean(skipped_wind);
+                xtick(n_xtick)=mn_tpt-show_tpts(1)+1;
+                if freq_domain,
+                    if length(skipped_wind)>1,
+                        lab_form=['%.' int2str(n_dig_past_dot) 'f-%.' int2str(n_dig_past_dot)  'f'];
+                        xtick_lab{n_xtick}=sprintf(lab_form,GND.time_pts(skipped_wind(1)), ...
+                            GND.time_pts(skipped_wind(end)));
+                    else
+                        lab_form=['%.' int2str(n_dig_past_dot) 'f'];
+                        xtick_lab{n_xtick}=sprintf(lab_form,GND.time_pts(skipped_wind(1)));
+                    end
+                else
+                    if length(skipped_wind)>1,
+                        xtick_lab{n_xtick}=sprintf('%d-%d',GND.time_pts(skipped_wind(1)), ...
+                            GND.time_pts(skipped_wind(end)));
+                    else
+                        xtick_lab{n_xtick}=sprintf('%d',GND.time_pts(skipped_wind(1)), ...
+                            GND.time_pts(skipped_wind(end)));
+                    end
+                end
+            end
+        end
+    end
 else
     % Test was based on each time point in time window(s)/frequency band(s)
     if isempty(p.Results.x_ticks),
