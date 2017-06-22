@@ -537,7 +537,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     end
     
     %Prompt user about saving GND
-    if ~strcmpi(p.Results.save_GND, 'no')
+    if ~strcmpi(p.Results.save_GND, 'no') && ~strcmpi(p.Results.save_GND, 'n')
         GND = save_matmk(GND);
     end
     

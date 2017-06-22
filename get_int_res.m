@@ -29,10 +29,8 @@
 
 function int_res = get_int_res(data)
 
-    %Some useful numbers
-    [~, ~, n_conds_A, n_conds_B, ~] = size(data);
-
     if ndims(data) ==5
+        [~, ~, n_conds_A, n_conds_B, ~] = size(data);
         %Subtract main effects within each subject so that the data is 
         %exchangeable under the null hypothesis for the interaction
         int_res = NaN(size(data));
@@ -46,6 +44,7 @@ function int_res = get_int_res(data)
         end
         assert(abs(mean(int_res(:))) < 1e-9);
     elseif ndims(data) == 6
+        [~, ~, n_conds_A, n_conds_B, n_conds_C, ~] = size(data);
         %Subtract main effects then two-way effects within each subject so that 
         %the data is exchangeable under the null hypothesis for the three-way
         %interaction

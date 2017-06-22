@@ -384,6 +384,14 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
     end
+    if p.Results.reproduce_test
+        if ~isfield(GND, 'F_tests')
+            error('You tried to reproduce test %d, but there are not results in GND.F_tests', p.Results.reproduce_test);
+        elseif p.Results.reproduce_test > length(GND.F_tests)
+            error('You tried to reproduce test %d, but there are only %d tests in GND.F_tests', p.Results.reproduce_test, length(GND.F_tests));
+        end
+    end
+
     
     
     %% ~~~~~ SET-UP ~~~~~
@@ -576,7 +584,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     end
     
     %Prompt user about saving GND
-    if ~strcmpi(p.Results.save_GND, 'no')
+    if ~strcmpi(p.Results.save_GND, 'no') && ~strcmpi(p.Results.save_GND, 'n')
         GND = save_matmk(GND);
     end
     

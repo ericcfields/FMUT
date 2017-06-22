@@ -349,6 +349,13 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
     end
+    if p.Results.reproduce_test
+        if ~isfield(GND, 'F_tests')
+            error('You tried to reproduce test %d, but there are not results in GND.F_tests', p.Results.reproduce_test);
+        elseif p.Results.reproduce_test > length(GND.F_tests)
+            error('You tried to reproduce test %d, but there are only %d tests in GND.F_tests', p.Results.reproduce_test, length(GND.F_tests));
+        end
+    end
 
     
     %% ~~~~~ SET-UP ~~~~~
