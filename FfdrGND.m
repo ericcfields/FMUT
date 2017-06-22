@@ -151,8 +151,37 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     warning('You are using a beta version of this function. It needs further testing and should NOT be considered error free.');
 
     %% ~~~~~PARSE INPUT~~~~~
-    
+
     global VERBLEVEL
+    
+    p=inputParser;
+    p.addRequired('GND_or_fname', @(x) ischar(x) || isstruct(x));
+    p.addParameter('bins',          [],       @(x) isnumeric(x));
+    p.addParameter('factor_names',  '',       @(x) (ischar(x) || iscell(x)));
+    p.addParameter('factor_levels', '',       @(x) isnumeric(x));
+    p.addParameter('time_wind',     [],       @(x) (isnumeric(x) && size(x, 2)==2));
+    p.addParameter('include_chans', [],       @(x) iscell(x));
+    p.addParameter('exclude_chans', [],       @(x) iscell(x));
+    p.addParameter('save_GND',      'prompt', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))) || islogical(x));
+    p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
+    p.addParameter('mean_wind',     'no',     @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
+    p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && length(x)==1 && x>=0 && x<=3))
+    p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
+    p.addParameter('q',             0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
+    p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky'})));
+    p.addParameter('time_block_dur', []);
+    p.addParameter('plot_gui',       []);
+    p.addParameter('plot_mn_topo',   []);
+    
+    p.parse(GND_or_fname, varargin{:});
+    
+    if isempty(p.Results.verblevel),
+        if isempty(VERBLEVEL),
+            VERBLEVEL=2;
+        end
+    else
+       VERBLEVEL=p.Results.verblevel; 
+    end
     
     %Assign GND
     if ischar(GND_or_fname)
@@ -163,128 +192,88 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
         error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct');
     end
     
-    %Assign name-value pair inputs to variables
-    for i = 1:length(varargin)
-        input = varargin{i};
-        if ischar(input)
-            switch input
-                case 'bins'
-                    bins = varargin{i+1};
-                case 'factor_names'
-                    factor_names = varargin{i+1};
-                case 'factor_levels'
-                    factor_levels = varargin{i+1};
-                case 'time_wind'
-                    time_wind = varargin{i+1};
-                case 'method'
-                    method = varargin{i+1};
-                case 'q'
-                    q = varargin{i+1};
-                case 'include_chans'
-                    chan_labels = {GND.chanlocs.labels};
-                    include_chans = varargin{i+1};
-                    electrodes = NaN(1, length(include_chans));
-                    for c = 1:length(include_chans)
-                        if find(strcmp(include_chans(c), chan_labels))
-                            electrodes(c) = find(strcmp(include_chans(c), chan_labels));
-                        else
-                            error('Electrode ''%s'' does not exist.', include_chans{c});
-                        end
-                    end
-                case 'exclude_chans'
-                    chan_labels = {GND.chanlocs.labels};
-                    exclude_chans = varargin{i+1};
-                    electrodes = find(~ismember(chan_labels, exclude_chans));
-                case 'save_GND'
-                    save_GND = varargin{i+1};
-                case 'output_file'
-                    output_file = varargin{i+1};
-                case 'mean_wind'
-                    mean_wind = varargin{i+1};
-                case 'verblevel'
-                    VERBLEVEL = varargin{i+1};
-                case 'plot_raster'
-                    plot_raster = varargin{i+1};
-                case 'time_block_dur'
-                    error('The ''time_block_dur'' option is not implemented for FfdrGND. You''ll need to divide time windows manually');
-                case 'plot_gui'
-                    watchit('''plot_gui'' is not implemented for FfdrGND.');
-                case 'plot_mn_topo'
-                    watchit('''plot_mn_topo'' is not implemented for FfdrGND.');
-            end
-        end
+    %Assign some variables for easier reference
+    bins          = p.Results.bins;
+    factor_names  = p.Results.factor_names;
+    factor_levels = p.Results.factor_levels;
+    time_wind     = p.Results.time_wind;
+    q             = p.Results.q;
+    method        = p.Results.method;
+    
+    %Check for required name-value inputs
+    if isempty(bins)
+        error('''bins'' is a required input. See help FmaxGND');
+    end
+    if isempty(factor_names)
+        error('''factor_names'' is a required input. See help FmaxGND');
+    end
+    if isempty(factor_levels)
+        error('''factor_levels'' is a required input. See help FmaxGND');
     end
     
-    %Set defaults for missing arguments
-    if isempty(VERBLEVEL)
-        VERBLEVEL = 2;
-    end
-    if ~exist('time_wind', 'var')
-        time_wind = [0, GND.time_pts(end)];
-    end
-    if ~exist('electrodes', 'var')
+    %Find id numbers for electrodes to use in analysis
+    chan_labels = {GND.chanlocs.labels};
+    if ~isempty(p.Results.include_chans) && ~isempty(p.Results.exclude_chans)
+        error('You cannot use BOTH ''include_chans'' and ''exclude_chans'' options.');
+    elseif ~isempty(p.Results.include_chans)
+        electrodes = NaN(1, length(p.Results.include_chans));
+        for c = 1:length(p.Results.include_chans)
+            if find(strcmp(p.Results.include_chans(c), chan_labels))
+                electrodes(c) = find(strcmp(p.Results.include_chans(c), chan_labels));
+            else
+                error('Electrode ''%s'' does not exist.', p.Results.include_chans{c});
+            end
+        end
+    elseif ~isempty(p.Results.exclude_chans)
+        if ~all(ismember(p.Results.exclude_chans, chan_labels))
+            missing_channels = p.Results.exclude_chans(~ismember(p.Results.exclude_chans, chan_labels));
+            error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
+                   sprintf('%s ', missing_channels{:})])
+        else
+            electrodes = find(~ismember(chan_labels, p.Results.exclude_chans));
+        end
+    else
         electrodes = 1:length(GND.chanlocs);
     end
-    if ~exist('method', 'var')
-        method = 'bh';
+    
+    %MUT features not implemented here              
+    if ~isempty(p.Results.time_block_dur)
+        error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide the time windows manually');
+    end              
+    if ~isempty(p.Results.plot_gui)
+        watchit('''plot_gui'' is not implemented for FmaxGND.');
     end
-    if ~exist('q', 'var')
-        q = .05;
-    end
-    if ~exist('save_GND', 'var')
-        save_GND = 'prompt';
-    end
-    if ~exist('output_file', 'var')
-        output_file = false;
-    end
-    if ~exist('mean_wind', 'var')
-        mean_wind = 'no';
-    end
-    if ~exist('plot_raster', 'var')
-        plot_raster = 'yes';
+    if ~isempty(p.Results.plot_mn_topo)
+        watchit('''plot_mn_topo'' is not implemented for FmaxGND.');
     end
     
     %Standardize formatting
     if ischar(factor_names)
         factor_names = {factor_names};
     end
-    time_wind = sort(time_wind);
+    time_wind = sort(time_wind, 2);
+    time_wind = sort(time_wind, 1);
     
-    %Check for errors and problems in input
-    if ~exist('bins', 'var')
-        error('''bins'' is a required input. See help FclustGND');
+    %Set defaults for missing arguments
+    if isempty(time_wind)
+        time_wind = [0, GND.time_pts(end)];
     end
-    if ~exist('factor_names', 'var')
-        error('''factor_names'' is a required input. See help FclustGND');
-    end
-    if ~exist('factor_levels', 'var')
-        error('''factor_levels'' is a required input. See help FclustGND');
-    end
-    if exist('include_chans', 'var') && exist('exclude_chans', 'var')
-        error('You cannot use BOTH ''include_chans'' and ''exclude_chans'' options.');
-    end
-    if exist('exclude_chans', 'var') && ~all(ismember(exclude_chans, chan_labels))
-        missing_channels = exclude_chans(~ismember(exclude_chans, chan_labels));
-        error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
-               sprintf('%s ', missing_channels{:})])
-    end
+    
+    %Check for errors in input
     if length(factor_names) ~= length(factor_levels)
         error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs');
     end
     if length(factor_levels) > 2
         warning('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
     end
-    if length(factor_levels) > 3 && strcmpi(int_method, 'approx')
-        error('FclustGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
-    end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
     end
-    if ~isequal(size(time_wind), [1, 2])
-        error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
+    if length(factor_levels)>3 && sum(factor_levels>2)>1
+        error('FMUT has limited support for designs with more than three factors.')
     end
-    if ~any(ismember(method, {'bh', 'by', 'bky'}))
-        error('''method'' input must be ''bh'', ''by'', or ''bky''')
+    if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
+        error('When multiple time windows are provided, they cannot overlap.')
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
@@ -300,7 +289,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
 
     %Find time points or mean windows to use and extract the data for
     %analysis
-    if ~strcmpi(mean_wind, 'yes') && ~strcmpi(mean_wind, 'y')
+    if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
         use_time_pts = [];
         for i = 1:size(time_wind, 1)
             [~, start_sample] = min(abs( GND.time_pts - time_wind(i, 1) ));
@@ -400,7 +389,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
 
     %% ~~~~~ ADD RESULTS STRUCT TO GND AND ASSIGN OTHER OUTPUT ~~~~~
     
-    if (strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y'))
+    if (strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y'))
         use_time_pts = {use_time_pts};
     end
     %Create results struct
@@ -409,7 +398,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                      'factor_levels', factor_levels, ...
                      'time_wind', time_wind, ...
                      'used_tpt_ids', use_time_pts, ...
-                     'mean_wind', mean_wind, ...
+                     'mean_wind', p.Results.mean_wind, ...
                      'include_chans', {{GND.chanlocs(electrodes).labels}}, ...
                      'used_chan_ids', electrodes, ...
                      'mult_comp_method', method, ...
@@ -473,7 +462,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                             fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
                     fprintf('Total number of significant differences: %d\n', sum(results.null_test(:)));
                     fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test(:))*q);
-                    if strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y')
+                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
                         for t = 1:size(time_wind, 1)
                             fprintf('Significant electrodes for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
                             fprintf('%s ', results.include_chans{results.null_test(:, t)});
@@ -506,7 +495,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                             fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
                     fprintf('Total number of significant differences: %d\n', sum(results.null_test.(effects_labels{i})(:)));
                     fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test.(effects_labels{i})(:))*q);
-                    if strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y')
+                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
                         for t = 1:size(time_wind, 1)
                             fprintf('Significant electrodes for time windonw %d - %d: ', time_wind(t, 1), time_wind(t, 2));
                             fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
@@ -537,7 +526,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     %% ~~~~~ PLOT & SAVE RESULTS TO DISK ~~~~~
     
     %Plot results
-    if ~strcmpi(plot_raster, 'no') && ~strcmpi(plot_raster, 'n')
+    if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')
         if length(effects_labels) == 1
             F_sig_raster(GND, length(GND.F_tests), 'use_color', 'rgb');
         else
@@ -548,16 +537,16 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     end
     
     %Prompt user about saving GND
-    if ~strcmpi(save_GND, 'no')
+    if ~strcmpi(p.Results.save_GND, 'no')
         GND = save_matmk(GND);
     end
     
     %Output to spreadsheet if requested
-    if output_file
+    if p.Results.output_file
         if VERBLEVEL
-            fprintf('Writing results to spreadsheet . . . ')
+            fprintf('\nWriting results to %s . . . ', p.Results.output_file)
         end
-        Ftest2xls(GND, length(GND.F_tests), output_file);
+        Ftest2xls(GND, length(GND.F_tests), p.Results.output_file);
         if VERBLEVEL
             fprintf('DONE\n\n')
         end

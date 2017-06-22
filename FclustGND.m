@@ -217,9 +217,43 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
 
     warning('You are using a beta version of this function. It needs further testing and should NOT be considered error free.');
 
-    %% ~~~~~PARSE INPUT~~~~~
-    
+%% ~~~~~PARSE INPUT~~~~~
+
     global VERBLEVEL
+    
+    p=inputParser;
+    p.addRequired('GND_or_fname', @(x) ischar(x) || isstruct(x));
+    p.addParameter('bins',          [],       @(x) isnumeric(x));
+    p.addParameter('factor_names',  '',       @(x) (ischar(x) || iscell(x)));
+    p.addParameter('factor_levels', '',       @(x) isnumeric(x));
+    p.addParameter('time_wind',     [],       @(x) (isnumeric(x) && size(x, 2)==2));
+    p.addParameter('include_chans', [],       @(x) iscell(x));
+    p.addParameter('exclude_chans', [],       @(x) iscell(x));
+    p.addParameter('n_perm',        1e4,      @(x) (isnumeric(x) && isscalar(x)));
+    p.addParameter('save_GND',      'prompt', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))) || islogical(x));
+    p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
+    p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && isscalar(x) && x<=1 && x>=0));
+    p.addParameter('reproduce_test',false,    @(x) (isnumeric(x) && isscalar(x)));
+    p.addParameter('int_method',    '',       @(x) (any(strcmpi(x, {'exact', 'approx', 'approximate', 'none'}))));
+    p.addParameter('mean_wind',     'no',     @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
+    p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && isscalar(x) && x>=0 && x<=3))
+    p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
+    p.addParameter('chan_hood',     0.61,     @(x) (isnumeric(x) && (isscalar(x) || (ismatrix(x) && size(x,1)==size(x,2)))));
+    p.addParameter('head_radius',   [],       @(x) (isnumeric(x) && isscalar(x)));
+    p.addParameter('thresh_p',      0.05,     @(x) (isnumeric(x) && isscalar(x) && x>=0 && x<=1));
+    p.addParameter('time_block_dur', []);
+    p.addParameter('plot_gui',       []);
+    p.addParameter('plot_mn_topo',   []);
+    
+    p.parse(GND_or_fname, varargin{:});
+    
+    if isempty(p.Results.verblevel),
+        if isempty(VERBLEVEL),
+            VERBLEVEL=2;
+        end
+    else
+       VERBLEVEL=p.Results.verblevel; 
+    end
     
     %Assign GND
     if ischar(GND_or_fname)
@@ -230,118 +264,61 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct');
     end
     
-    %Assign name-value pair inputs to variables
-    for i = 1:length(varargin)
-        input = varargin{i};
-        if ischar(input)
-            switch input
-                case 'bins'
-                    bins = varargin{i+1};
-                case 'factor_names'
-                    factor_names = varargin{i+1};
-                case 'factor_levels'
-                    factor_levels = varargin{i+1};
-                case 'time_wind'
-                    time_wind = varargin{i+1};
-                case 'include_chans'
-                    chan_labels = {GND.chanlocs.labels};
-                    include_chans = varargin{i+1};
-                    electrodes = NaN(1, length(include_chans));
-                    for c = 1:length(include_chans)
-                        if find(strcmp(include_chans(c), chan_labels))
-                            electrodes(c) = find(strcmp(include_chans(c), chan_labels));
-                        else
-                            error('Electrode ''%s'' does not exist.', include_chans{c});
-                        end
-                    end
-                case 'exclude_chans'
-                    chan_labels = {GND.chanlocs.labels};
-                    exclude_chans = varargin{i+1};
-                    electrodes = find(~ismember(chan_labels, exclude_chans));
-                case 'n_perm'
-                    n_perm = varargin{i+1};
-                case 'save_GND'
-                    save_GND = varargin{i+1};
-                case 'output_file'
-                    output_file = varargin{i+1};
-                case 'alpha'
-                    alpha = varargin{i+1};
-                case 'reproduce_test'
-                    rep_test = varargin{i+1};
-                case 'int_method'
-                    int_method = varargin{i+1};
-                case 'chan_hood'
-                    chan_hood = varargin{i+1};
-                case 'thresh_p'
-                    thresh_p = varargin{i+1};
-                case 'head_radius'
-                    head_radius = varargin{i+1};
-                case 'mean_wind'
-                    mean_wind = varargin{i+1};
-                case 'verblevel'
-                    VERBLEVEL = varargin{i+1};
-                case 'plot_raster'
-                    plot_raster = varargin{i+1};
-                case 'time_block_dur'
-                    error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide time windows manually');
-                case 'plot_gui'
-                    watchit('''plot_gui'' is not implemented for FclustGND.');
-                case 'plot_mn_topo'
-                    watchit('''plot_mn_topo'' is not implemented for FclustGND.');
-            end
-        end
+    %Assign some variables for easier reference
+    bins          = p.Results.bins;
+    factor_names  = p.Results.factor_names;
+    factor_levels = p.Results.factor_levels;
+    time_wind     = p.Results.time_wind;
+    n_perm        = p.Results.n_perm;
+    alpha         = p.Results.alpha;
+    int_method    = p.Results.int_method;
+    chan_hood     = p.Results.chan_hood;
+    
+    %Check for required name-value inputs
+    if isempty(bins)
+        error('''bins'' is a required input. See help FmaxGND');
+    end
+    if isempty(factor_names)
+        error('''factor_names'' is a required input. See help FmaxGND');
+    end
+    if isempty(factor_levels)
+        error('''factor_levels'' is a required input. See help FmaxGND');
     end
     
-    %Set defaults for missing arguments
-    if isempty(VERBLEVEL)
-        VERBLEVEL = 2;
-    end
-    if ~exist('time_wind', 'var')
-        time_wind = [0, GND.time_pts(end)];
-    end
-    if ~exist('electrodes', 'var')
+    %Find id numbers for electrodes to use in analysis
+    chan_labels = {GND.chanlocs.labels};
+    if ~isempty(p.Results.include_chans) && ~isempty(p.Results.exclude_chans)
+        error('You cannot use BOTH ''include_chans'' and ''exclude_chans'' options.');
+    elseif ~isempty(p.Results.include_chans)
+        electrodes = NaN(1, length(p.Results.include_chans));
+        for c = 1:length(p.Results.include_chans)
+            if find(strcmp(p.Results.include_chans(c), chan_labels))
+                electrodes(c) = find(strcmp(p.Results.include_chans(c), chan_labels));
+            else
+                error('Electrode ''%s'' does not exist.', p.Results.include_chans{c});
+            end
+        end
+    elseif ~isempty(p.Results.exclude_chans)
+        if ~all(ismember(p.Results.exclude_chans, chan_labels))
+            missing_channels = p.Results.exclude_chans(~ismember(p.Results.exclude_chans, chan_labels));
+            error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
+                   sprintf('%s ', missing_channels{:})])
+        else
+            electrodes = find(~ismember(chan_labels, p.Results.exclude_chans));
+        end
+    else
         electrodes = 1:length(GND.chanlocs);
     end
-    if ~exist('n_perm', 'var')
-        n_perm = 1e4;
+    
+    %MUT reatures not implemented here              
+    if ~isempty(p.Results.time_block_dur)
+        error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide the time windows manually');
+    end              
+    if ~isempty(p.Results.plot_gui)
+        watchit('''plot_gui'' is not implemented for FmaxGND.');
     end
-    if ~exist('save_GND', 'var')
-        save_GND = 'prompt';
-    end
-    if ~exist('output_file', 'var')
-        output_file = false;
-    end
-    if ~exist('alpha', 'var')
-        alpha = 0.05;
-    end
-    if ~exist('rep_test', 'var')
-        rep_test = false;
-    end
-    if ~exist('int_method', 'var')
-        if length(factor_levels) == 1
-            int_method = 'none';
-        elseif sum(factor_levels > 2) <= 1
-            int_method = 'exact';
-            fprintf('\n\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee help FclustGND for more information.\n\n')
-        else
-            int_method = 'approx';
-            fprintf('\n\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee help FclustGND for more information.\n\n')
-        end
-    end
-    if ~exist('chan_hood', 'var')
-        chan_hood = 0.61;
-    end
-    if ~exist('thresh_p', 'var')
-        thresh_p = 0.05;
-    end
-    if ~exist('head_radius', 'var')
-        head_radius = [];
-    end
-    if ~exist('mean_wind', 'var')
-        mean_wind = 'no';
-    end
-    if ~exist('plot_raster', 'var')
-        plot_raster = 'yes';
+    if ~isempty(p.Results.plot_mn_topo)
+        watchit('''plot_mn_topo'' is not implemented for FmaxGND.');
     end
     
     %Standardize formatting
@@ -351,26 +328,30 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if strcmpi(int_method, 'approximate')
         int_method = 'approx';
     end
-    time_wind = sort(time_wind);
+    time_wind = sort(time_wind, 2);
+    time_wind = sort(time_wind, 1);
     
-    %Check for errors and problems in input
-    if ~exist('bins', 'var')
-        error('''bins'' is a required input. See help FclustGND');
+    %Set defaults for missing arguments
+    if isempty(time_wind)
+        time_wind = [0, GND.time_pts(end)];
     end
-    if ~exist('factor_names', 'var')
-        error('''factor_names'' is a required input. See help FclustGND');
+    if isempty(int_method)
+        if length(factor_levels) == 1
+            int_method = 'none';
+        elseif sum(factor_levels > 2) <= 1
+            int_method = 'exact';
+            if VERBLEVEL
+                fprintf('\n\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee help FmaxGND for more information.\n\n')
+            end
+        else
+            int_method = 'approx';
+            if VERBLEVEL
+                fprintf('\n\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee help FmaxGND for more information.\n\n')
+            end
+        end
     end
-    if ~exist('factor_levels', 'var')
-        error('''factor_levels'' is a required input. See help FclustGND');
-    end
-    if exist('include_chans', 'var') && exist('exclude_chans', 'var')
-        error('You cannot use BOTH ''include_chans'' and ''exclude_chans'' options.');
-    end
-    if exist('exclude_chans', 'var') && ~all(ismember(exclude_chans, chan_labels))
-        missing_channels = exclude_chans(~ismember(exclude_chans, chan_labels));
-        error([sprintf('The following channels appear in ''exclude_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
-               sprintf('%s ', missing_channels{:})])
-    end
+    
+    %Check for errors in input
     if length(factor_names) ~= length(factor_levels)
         error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs');
     end
@@ -378,10 +359,13 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         warning('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
     end
     if length(factor_levels) > 3 && strcmpi(int_method, 'approx')
-        error('FclustGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
+        error('FmaxGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
     end
     if strcmpi(int_method, 'exact') && sum(factor_levels > 2) > 1
-        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See help FclustGND for more information.');
+        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See help FmaxGND for more information.');
+    end
+    if ~isequal(size(time_wind), [1, 2])
+        error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
     end
     if isequal(factor_levels, [2, 2]) && strcmpi(int_method, 'approx')
         button = questdlg('WARNING: The type I error rate is not well-controlled by the approximate method of calculating the interaction for a 2x2 design. Are you sure you want to proceed?', 'WARNING');
@@ -389,14 +373,8 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
             return;
         end
     end
-    if ~strcmpi(int_method, 'approx') && ~strcmpi(int_method, 'exact') && ~strcmpi(int_method, 'none')
-        error('The int_method argument must be either ''approximate'' or ''exact''.')
-    end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
-    end
-    if ~isequal(size(time_wind), [1, 2])
-        error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
     end
     if alpha <= .01 && n_perm < 5000,
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
@@ -406,7 +384,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
     end
-
+    
     
     %% ~~~~~ SET-UP ~~~~~
 
@@ -416,8 +394,8 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     else
         defaultStream=RandStream.getGlobalStream;
     end
-    if rep_test
-        seed_state = GND.F_tests{rep_test}.seed_state;
+    if p.Results.reproduce_test
+        seed_state = GND.F_tests(p.Results.reproduce_test).seed_state;
         defaultStream.State = seed_state;
     else
         seed_state = defaultStream.State;
@@ -429,7 +407,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
 
     %Find time points or mean windows to use and extract the data for
     %analysis
-    if ~strcmpi(mean_wind, 'yes') && ~strcmpi(mean_wind, 'y')
+    if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
         [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
         [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
         time_wind(1) = GND.time_pts(start_sample);
@@ -471,7 +449,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     %Get chan_hood matrix if input was distance scalar
     if isscalar(chan_hood)
         if VERBLEVEL; fprintf('\n'); end;
-        chan_hood = spatial_neighbors(GND.chanlocs(electrodes), chan_hood, head_radius);
+        chan_hood = spatial_neighbors(GND.chanlocs(electrodes), chan_hood, p.Results.head_radius);
     end
         
     
@@ -485,13 +463,13 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
-        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, int_method, chan_hood, thresh_p);
+        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, int_method, chan_hood, p.Results.thresh_p);
     end
    
 
     %% ~~~~~ ADD RESULTS STRUCT TO GND AND ASSIGN OTHER OUTPUT ~~~~~
     
-    if (strcmpi(mean_wind, 'yes') || strcmpi(mean_wind, 'y'))
+    if (strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y'))
         use_time_pts = {{use_time_pts}};
     end
     %Create results struct
@@ -500,7 +478,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                      'factor_levels', factor_levels, ...
                      'time_wind', time_wind, ...
                      'used_tpt_ids', use_time_pts, ...
-                     'mean_wind', mean_wind, ...
+                     'mean_wind', p.Results.mean_wind, ...
                      'include_chans', {{GND.chanlocs(electrodes).labels}}, ...
                      'used_chan_ids', electrodes, ...
                      'mult_comp_method', 'cluster mass perm test', ...
@@ -587,7 +565,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     %% ~~~~~ PLOT & SAVE RESULTS TO DISK ~~~~~
     
     %Plot results
-    if ~strcmpi(plot_raster, 'no') && ~strcmpi(plot_raster, 'n')
+    if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')
         if length(effects_labels) == 1
             F_sig_raster(GND, length(GND.F_tests), 'use_color', 'rgb');
         else
@@ -598,16 +576,16 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     end
     
     %Prompt user about saving GND
-    if ~strcmpi(save_GND, 'no')
+    if ~strcmpi(p.Results.save_GND, 'no')
         GND = save_matmk(GND);
     end
     
     %Output to spreadsheet if requested
-    if output_file
+    if p.Results.output_file
         if VERBLEVEL
-            fprintf('\nWriting results to spreadsheet . . . ')
+            fprintf('\nWriting results to %s . . . ', p.Results.output_file)
         end
-        Ftest2xls(GND, length(GND.F_tests), output_file);
+        Ftest2xls(GND, length(GND.F_tests), p.Results.output_file);
         if VERBLEVEL
             fprintf('DONE\n')
         end

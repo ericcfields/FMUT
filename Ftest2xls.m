@@ -40,7 +40,7 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
     %% Set-up
 
     %Set formatting option if no input
-	if nargin < 4
+	if nargin < 4 %#ok<ALIGN>
         if ispc()
             format_output = true;
         else
