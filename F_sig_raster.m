@@ -137,18 +137,18 @@ function [img, h_ax] = F_sig_raster(GND_GRP_specGND_or_fname,test_id,varargin)
 p=inputParser;
 p.addRequired('GND_GRP_specGND_or_fname',@(x) isstruct(x) || ischar(x)); 
 p.addRequired('test_id',@(x) isnumeric(x) && (length(x)==1));
-p.addParamValue('effect', [], @ischar);
-p.addParamValue('x_ticks',[],@isnumeric);
-p.addParamValue('fig_id',[],@(x) isnumeric(x) && (length(x)==1));
-p.addParamValue('use_color','n',@(x) strcmpi(x,'n') || strcmpi(x,'rb') || strcmpi(x,'rgb'));
-p.addParamValue('units','F',@(x) strcmpi(x,'F'));
-p.addParamValue('plot_vert_lines',1,@(x) isnumeric(x) || ischar(x));
-p.addParamValue('lr_sym',0,@(x) isnumeric(x) || ischar(x));
-p.addParamValue('verblevel',[],@(x) isnumeric(x) && (length(x)==1));
-p.addParamValue('scale_limits',[],@(x) isnumeric(x) && (length(x)==2));
-p.addParamValue('unused_color',[1 1 1]*.7,@(x) isnumeric(x) && (length(x)==3)); % this option isn't all that useful actually
-p.addParamValue('fontsize',12,@(x) isnumeric(x) && (length(x)==1));
-p.addParamValue('mask_opacity',1,@(x) isnumeric(x) && (length(x)==1)); 
+p.addParameter('effect', [], @ischar);
+p.addParameter('x_ticks',[],@isnumeric);
+p.addParameter('fig_id',[],@(x) isnumeric(x) && (length(x)==1));
+p.addParameter('use_color','n',@(x) strcmpi(x,'n') || strcmpi(x,'rb') || strcmpi(x,'rgb'));
+p.addParameter('units','F',@(x) strcmpi(x,'F'));
+p.addParameter('plot_vert_lines',1,@(x) isnumeric(x) || ischar(x));
+p.addParameter('lr_sym',0,@(x) isnumeric(x) || ischar(x));
+p.addParameter('verblevel',[],@(x) isnumeric(x) && (length(x)==1));
+p.addParameter('scale_limits',[],@(x) isnumeric(x) && (length(x)==2));
+p.addParameter('unused_color',[1 1 1]*.7,@(x) isnumeric(x) && (length(x)==3)); % this option isn't all that useful actually
+p.addParameter('fontsize',12,@(x) isnumeric(x) && (length(x)==1));
+p.addParameter('mask_opacity',1,@(x) isnumeric(x) && (length(x)==1)); 
 
 p.parse(GND_GRP_specGND_or_fname,test_id,varargin{:});
 
@@ -210,8 +210,6 @@ else
     end
 end
 
-    
-
 %FDR or permutation test correction for multiple comparisons
 if isnan(results.n_perm)
     fdr_crct=1;
@@ -226,7 +224,7 @@ else
     end
 end
 
-if isfield(GND.F_tests(1),'freq_band')
+if isfield(results,'freq_band')
 %     %create temporary fields to make frequency domain plotting
 %     % easily compatible with time domain plot
 %     results.time_wind=results.freq_band;
@@ -340,7 +338,7 @@ for c=1:n_use_chans,
         midline_dist=[midline_dist -radius];
     end
 end
-[midline_dist id]=sort(midline_dist,2,'descend');
+[midline_dist, id]=sort(midline_dist,2,'descend');
 midline=midline(id);
 n_midline=length(midline);
 
@@ -361,7 +359,7 @@ for c=1:n_use_chans,
         end
     end
 end
-[left_dist id]=sort(left_dist,2,'descend');
+[left_dist, id]=sort(left_dist,2,'descend');
 left=left(id);
 n_left=length(left);
 
@@ -599,7 +597,7 @@ elseif strcmpi(use_color,'rgb')
     if verLessThan('matlab','8.4')
         cmap=colormap('jet');
     else
-        cmap=colormap('parula');
+        cmap=colormap('winter');
     end
     colormap(cmap);
     abs_mx=max(max(abs(img)));
