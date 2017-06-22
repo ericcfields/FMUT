@@ -174,7 +174,7 @@
 %
 %
 %AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-%VERSION DATE: 20 June 2017
+%VERSION DATE: 22 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -485,7 +485,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
-        test_results(i) = calc_F_clust_mass(the_data, effects{i}+2, n_perm, alpha, int_method, chan_hood, thresh_p);
+        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, int_method, chan_hood, thresh_p);
     end
    
 
