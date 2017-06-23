@@ -70,6 +70,7 @@ function test_results = calc_Fclust(data, dims, n_perm, alpha, int_method, chan_
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
     [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
+    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     
     
     %% Find clusters and cluster ditribution
@@ -78,12 +79,11 @@ function test_results = calc_Fclust(data, dims, n_perm, alpha, int_method, chan_
     thresh_F = finv(1-thresh_p, df_effect, df_res); 
     clust_mass_dist = zeros(n_perm, 1);
     for i = 1:n_perm
-        F = reshape(F_dist(i, :, :), n_electrodes, n_time_pts);
+        F = reshape(F_dist(i, :, :), [n_electrodes, n_time_pts]);
         %Find clusters in F
         [clust_ids, n_clust] = find_clusters(F, thresh_F, chan_hood, 1);
         %Save observed data
         if i == 1
-            F_obs = F;
             clust_ids_obs = clust_ids;
             n_clust_obs = n_clust;
         end
