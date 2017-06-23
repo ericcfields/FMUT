@@ -1,6 +1,6 @@
 %Calculate F-observed and the empirical F-distribution for a
 %within-subjects ANOVA with up to three factors. This function calculates a
-%one-way ANOVA, two-way interaction, and three-wa interaction. It is
+%one-way ANOVA, two-way interaction, and three-way interaction. It is
 %assumed data is properly reduced before being sent to this function (see
 %reduce_data.m).
 %
@@ -17,8 +17,8 @@
 % df_res        - denominator degrees of freedom
 %
 %
-%VERSION DATE: 22 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -46,13 +46,7 @@ function [F_dist, df_effect, df_res] = perm_rbANOVA(data, n_perm)
 end
 
 function [F_dist, df_effect, df_res] = oneway(data, n_perm)
-%Permutation one-way ANOVA
-% 1. Randomly permute conditions within each subject across all time
-%    points and electrodes
-% 2. For each permutation, perform one-way ANOVA across time points and
-%    and electrodes and  save the largest F from each permutation (Fmax)
-% 3. Compare Fobs for unpermuted data to distribution of Fmax to reject or 
-%    fail to reject null for each time point an electrode
+%Perform permutation one-way ANOVA. This is an exact test.
 
     global VERBLEVEL
 
@@ -113,15 +107,8 @@ end
 
 
 function [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm)
-%Use permutation of residuals method to calculate an approximate test of
-%an interaction effect in a factorial design
-% 1. Subtract main effects within each subject from all data points to obtain permutation residuals
-% 2. Randomly permute all conditions within each subject across all time
-%    points and electrodes
-% 3. For each permutation, perform factorial ANOVA and save the largest F for the 
-%    interaction effect across all time points and electrodes (Fmax)
-% 4. Compare Fobs for unpermuted data to distribution of Fmax 
-%    to reject or fail to reject null for each time point
+%Use permutation of residuals method to conduct an approximate test of the
+%two-way interaction.
 
     global VERBLEVEL
 
@@ -204,18 +191,8 @@ end
 
 
 function [F_dist, df_effect, df_res] = threeway_approx_int(data, n_perm)
-%Use permutation of residuals method to calculate an approximate test of
-%an interaction effect in a factorial design
-% 1. Subtract main effects within each subject from all data points to obtain 
-%    interaction residuals
-% 2. Subtract two-way interaction effect form residuals calculated above to
-%    obtain three-way interaction residuals
-% 3. Randomly permute all conditions within each subject across all time
-%    points and electrodes
-% 4. For each permutation, perform factorial ANOVA and save the largest F for the 
-%    three-way interaction effect across all time points and electrodes (Fmax)
-% 5. Compare Fobs for the unpermuted data to distribution of Fmax to reject 
-%    or fail to reject null for each time point and electrode
+%Use permutation of residuals method to conduct an approximate test of the
+%three-way interaction.
     
     global VERBLEVEL
 

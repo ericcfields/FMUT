@@ -1,29 +1,30 @@
-function new_py_path = py_addpath(directory, MATLAB_too)
-%py_addpath(directory)
-%
 %Add directory to import search path for the instance of 
 %the Python interpreter currently controlled by MATLAB
 %
-%   This function adds the given directory to sys.path for the current session
-%   of the Python interpreter called by MATLAB. 
-%   Once the directory is added, functions can be used from any module within that
-%   directory just as they are from the Python standard library within MATLAB.
-%   
-%   Optional second argument also adds directory to MATLAB path (1 or true) 
-%   or not (0 or false). The default is false. Example: 
-%       py_addpath(directory,1) %this updates the MATLAB path too
+%REQUIRED INPUTS
+% directory      - Directory to add the Python import search path
+% MATLAB_too     - If true (or 1), directory will also be added to the
+%                  MATLAB path. {default: false}
+% output_fname   - The filename for the spreadsheet that will be saved. If
+%                  you don't want to save in the current working directory, 
+%                  include a full filepath
+%OPTIONAL OUTPUT
+% new_py_path    - a cell array of the directories on the updated
+%                  Python path; to get this output without updating the 
+%                  Python path, use an empty string as the input:
+%                  py_path = py_addpath('')
 %
-%   Optional return value is a cell array of the directories on the updated
-%   Python path. Example: 
-%       new_py_path = py_addpath(directory)
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields
 %
-%   To get this output without updating the Python path, use an empty string 
-%   as the input:
-%       py_path = py_addpath('')
-%   
-%   AUTHOR: Eric Fields
-%   VERSION: 1.1.0
-%   VERSION DATE: 27 April 2017
+%NOTE: This function is provided "as is" and any express or implied warranties 
+%are disclaimed.
+
+%Copyright (c) 2017, Eric Fields
+%All rights reserved.
+%This code is free and open source software made available under the 3-clause BSD license.
+
+function new_py_path = py_addpath(directory, MATLAB_too)
     
     %check input
     if ~ischar(directory)

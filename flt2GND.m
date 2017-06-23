@@ -1,4 +1,4 @@
-% flt2GND() - Create a Mass Univariate ERP Toolbox GND struct from a set
+% flt2GND() - Create a Mass Univariate ERP Toolbox GND struct from a set of
 %             .flt files created by Phil Holcomb's ERP software 
 %
 % EXAMPLE USAGE:
@@ -9,8 +9,7 @@
 %                   names or a string giving the fullpath of a text file
 %                   with an .flt file name on each line. In either case,
 %                   .flt file names should be *filenames only*. The filepath
-%                   for their location is given via the filepath option
-%                   (see below).
+%                   for their location is given via the filepath input
 %  bsln           - The number of milliseconds before 0 in each epoch. This
 %                   is specified in the "Presample" field of your .scp file
 %  sampling_rate  - Sampling rate of the date in Hz
@@ -33,6 +32,17 @@
 %                   function finishes. {default: 'yes'}
 %  n_electrodes   - number of electrodes {default: 32}
 %  n_samples      - number of sample points in each epoch {default: 256}
+%  exp_name       - Name of the study to add to the GND struct. 
+%                   {default: ''}
+%  verblevel      - An integer specifiying the amount of information you want
+%                   this function to provide about what it is doing during runtime.
+%                    Options are:
+%                      0 - quiet, only show errors, warnings, and EEGLAB reports
+%                      1 - stuff anyone should probably know
+%                      2 - stuff you should know the first time you start working
+%                          with a data set {default value}
+%                      3 - stuff that might help you debug (show all
+%                          reports)
 %
 % OUTPUT:
 %  GND            - Mass Univariate Toolbox GND struct
@@ -41,8 +51,8 @@
 % -The GND fields odelay, cals, and condesc are specific to Kutaslab data.
 % Other labs should be able to ignore them.
 %
-% AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-% VERSION DATE: 14 June 2017
+% AUTHOR: Eric Fields
+% VERSION DATE: 23 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -70,6 +80,8 @@
 function GND = flt2GND(infiles, varargin)
 
     warning('You are using a beta version of flt2GND. It needs further testing and should not be considered error free.');
+    
+    global VERBLEVEL
     
     %flt2GND relies on the Windows program AVGDUMP.EXE
     if ~ispc()
@@ -118,6 +130,8 @@ function GND = flt2GND(infiles, varargin)
                     n_electrodes = varargin{i+1};
                 case 'n_samples'
                     n_samples = varargin{i+1};
+                case 'verblevel'
+                    VERBLEVEL = varargin{i+1};
             end
         end
     end
@@ -161,6 +175,9 @@ function GND = flt2GND(infiles, varargin)
     if ~exist('bin_desc', 'var')
         bin_desc = repmat({''}, 1, length(use_bins));
     end
+    if isempty(VERBLEVEL)
+        VERBLEVEL = 2;
+    end
     
     %Formatting and errors
     if length(use_bins) ~= length(bin_desc)
@@ -202,31 +219,31 @@ function GND = flt2GND(infiles, varargin)
 
     %Make GND struct
     GND = struct;
-    GND.exp_desc = exp_name;
-    GND.filename = '';
-    GND.filepath = '';
-    GND.saved = 'no';
-    GND.grands = NaN(n_electrodes, n_samples, n_bins);
-    GND.grands_stder = NaN(n_electrodes, n_samples, n_bins);
-    GND.grands_t = NaN(n_electrodes, n_samples, n_bins);
-    GND.sub_ct = ones(1, n_bins) * n_subs;
-    GND.chanlocs = NaN;
-    GND.bin_info = struct('bindesc', bin_desc, 'condcode', repmat({1}, 1, n_bins));
-    GND.condesc = {'Experiment (not cal pulses)'};
-    GND.time_pts = NaN(1, n_samples);
-    GND.bsln_wind = [-abs(bsln) 1000/srate];
-    GND.odelay = [];
-    GND.srate = srate;
-    GND.indiv_fnames = cell(1, n_subs);
-    GND.indiv_subnames = cell(1, n_subs);
-    GND.indiv_traits = [];
-    GND.indiv_bin_ct = -ones(n_subs, n_bins);
+    GND.exp_desc         = exp_name;
+    GND.filename         = '';
+    GND.filepath         = '';
+    GND.saved            = 'no';
+    GND.grands           = NaN(n_electrodes, n_samples, n_bins);
+    GND.grands_stder     = NaN(n_electrodes, n_samples, n_bins);
+    GND.grands_t         = NaN(n_electrodes, n_samples, n_bins);
+    GND.sub_ct           = ones(1, n_bins) * n_subs;
+    GND.chanlocs         = NaN;
+    GND.bin_info         = struct('bindesc', bin_desc, 'condcode', repmat({1}, 1, n_bins));
+    GND.condesc          = {'Experiment (not cal pulses)'};
+    GND.time_pts         = NaN(1, n_samples);
+    GND.bsln_wind        = [-abs(bsln) 1000/srate];
+    GND.odelay           = [];
+    GND.srate            = srate;
+    GND.indiv_fnames     = cell(1, n_subs);
+    GND.indiv_subnames   = cell(1, n_subs);
+    GND.indiv_traits     = [];
+    GND.indiv_bin_ct     = -ones(n_subs, n_bins);
     GND.indiv_bin_raw_ct = NaN;
-    GND.indiv_erps = NaN(n_electrodes, n_samples, n_bins, n_subs);
-    GND.indiv_art_ics = num2cell(NaN(1, n_subs));
-    GND.cals = [];
-    GND.history = {};
-    GND.t_tests = [];
+    GND.indiv_erps       = NaN(n_electrodes, n_samples, n_bins, n_subs);
+    GND.indiv_art_ics    = num2cell(NaN(1, n_subs));
+    GND.cals             = [];
+    GND.history          = {};
+    GND.t_tests          = [];
 
     %Calculate times (in ms) corresponding to each sampling point for
     %time_pts field of GND
@@ -238,8 +255,10 @@ function GND = flt2GND(infiles, varargin)
     old_dir = cd(filepath);
     for s = 1:n_subs
         flt_file = subs{s};
-        fprintf('Importing data from %s\n', flt_file);
-        GND.indiv_fnames{s} = fullfile(filepath, flt_file);
+        if VERBLEVEL
+            fprintf('Importing data from %s\n', flt_file);
+        end
+        GND.indiv_fnames{s}   = fullfile(filepath, flt_file);
         GND.indiv_subnames{s} = flt_file(1:end-4);
         for b = 1:n_bins
             flt_bin = use_bins(b);
@@ -272,9 +291,9 @@ function GND = flt2GND(infiles, varargin)
     end
 
     %Calculate grands, grands_stder, and grands_t from ERP data
-    GND.grands = mean(GND.indiv_erps, 4);
+    GND.grands       = mean(GND.indiv_erps, 4);
     GND.grands_stder = std(GND.indiv_erps, 0, 4) / sqrt(n_subs);
-    GND.grands_t = GND.grands ./ GND.grands_stder;
+    GND.grands_t     = GND.grands ./ GND.grands_stder;
 
     %Add chanlocs information
     if chanlocs_file

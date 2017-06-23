@@ -1,12 +1,11 @@
-%Function to conduct an ANOVA with FDR correction across electrodes and
-%time points for one-way and factorial ANOVA
+%Function to conduct an ANOVA with FDR correction across electrodes and 
+%time points for one-way and factorial within-subjects ANOVA
 %
 %EXAMPLE USAGE
 %
 % GND = FfdrGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
 %                 'factor_levels', [3, 2], 'time_wind', [300, 900], ...
-%                 'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4, ...
-%                 'method', 'bh', 'q', 0.05) 
+%                 'include_chans', {'Fz', 'Cz', 'Pz'}, 'method', 'bh', 'q', 0.05) 
 %
 %
 %REQUIRED INPUTS
@@ -17,7 +16,8 @@
 % bins           - array with bins to use in ANOVA
 % factor_names   - cell array with names of factors in fastest to slowest
 %                  moving order within the bins provided
-% factor_levels  - number of factors in each level in the same order
+% factor_levels  - number of factors in each level in fastest to slowest
+%                  moving order within the bins provided
 %
 %OPTIONAL INPUTS
 % q              - A number between 0 and 1 specifying the family-wise
@@ -55,14 +55,14 @@
 %                  time_wind's time windows will be tested individually.
 %                  {default: 'no'}
 % exclude_chans  - A cell array of channel labels to exclude from the
-%                  permutation test (e.g., {'A2','VEOG','HEOG'}). This can 
+%                  test (e.g., {'A2','VEOG','HEOG'}). This can 
 %                  be used to exclude non-data channels (e.g. EOG channels) 
 %                  or to increase test power by sacrificing spatial resolution
 %                  (i.e., reducing the number of comparisons). Use headinfo.m 
 %                  to see the channel labels stored in the GND variable. You 
 %                  cannot use both this option and 'include_chans' (below).
 %                  {default: not used, all channels included in test}
-% include_chans  - A cell array of channel labels to use in the permutation
+% include_chans  - A cell array of channel labels to use in the
 %                  test (e.g., {'Fz','Cz','Pz'}). All other channels will
 %                  be ignored. This option sacrifices spatial resolution to 
 %                  increase test power by reducing the number of comparisons.
@@ -76,12 +76,10 @@
 %                  with the function F_sig_raster.m. {default: 'yes'}
 % save_GND       - save GND to disk, 'yes' or 'no' {default: user will be
 %                  prompted}
-% output_file    - Name of .xlsx file to output results. Currently 
-%                  only works on Windows. {default: no output}
+% output_file    - Name of .xlsx file to output results. {default: no output}
 % verblevel      - An integer specifiying the amount of information you want
 %                  the Mass Univariate Toolbox to provide about what it is 
-%                  doing during runtime. Note that little to no output is
-%                  currently provided by this function.
+%                  doing during runtime.
 %                      Options are:
 %                        0 - quiet, only show errors, warnings, and EEGLAB reports
 %                        1 - stuff anyone should probably know
@@ -118,8 +116,8 @@
 % Benjamini, Y., Krieger, A. M., & Yekutieli, D. (2006). Adaptive linear step-up procedures that control the false discovery rate. Biometrika, 93(3), 491-507. 
 % Benjamini, Y., & Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. The Annals of Statistics, 29(4), 1165-1188. 
 %
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-%VERSION DATE: 21 June 2017
+%AUTHOR: Eric Fields
+%VERSION DATE: 23 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -129,7 +127,7 @@
 %Copyright (c) 2017, Eric Fields
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
-%This function incorporates some code from the Mass Univariate Toolbox, 
+%This function may incorporate some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
@@ -202,13 +200,13 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     
     %Check for required name-value inputs
     if isempty(bins)
-        error('''bins'' is a required input. See help FmaxGND');
+        error('''bins'' is a required input. See >>help FmaxGND');
     end
     if isempty(factor_names)
-        error('''factor_names'' is a required input. See help FmaxGND');
+        error('''factor_names'' is a required input. See >>help FmaxGND');
     end
     if isempty(factor_levels)
-        error('''factor_levels'' is a required input. See help FmaxGND');
+        error('''factor_levels'' is a required input. See >>help FmaxGND');
     end
     
     %Find id numbers for electrodes to use in analysis
@@ -264,7 +262,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
         error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs');
     end
     if length(factor_levels) > 2
-        warning('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
+        watchit('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
     end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
@@ -522,6 +520,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
             end
         end
     end
+    
     
     %% ~~~~~ PLOT & SAVE RESULTS TO DISK ~~~~~
     

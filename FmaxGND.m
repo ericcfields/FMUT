@@ -1,13 +1,11 @@
 %Function to conduct an Fmax permutation test for one-way and factorial
-%ANOVA
-%
+%within-subjects ANOVA
 %
 %EXAMPLE USAGE
 % GND = FmaxGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
 %               'factor_levels', [3, 2], 'time_wind', [500, 800], ...
 %               'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4, ...
 %               'alpha', 0.05, 'int_method', 'exact');
-%
 %
 %REQUIRED INPUTS
 % GND_or_fname   - A Mass Univariate Toolbox GND struct or a string
@@ -17,7 +15,8 @@
 % bins           - array with bins to use in ANOVA
 % factor_names   - cell array with names of factors in fastest to slowest
 %                  moving order within the bins provided
-% factor_levels  - number of factors in each level in the same order
+% factor_levels  - number of factors in each level in fastest to slowest
+%                  moving order within the bins provided
 %
 %OPTIONAL INPUTS
 % int_method     - A string that should be either 'exact' or 'approximate'.
@@ -71,9 +70,7 @@
 %                  with the function F_sig_raster.m. {default: 'yes'}
 % save_GND       - save GND to disk, 'yes' or 'no' {default: user will be
 %                  prompted}
-% output_file    - Name of .xlsx file to output results. Currently only works
-%                  on Windows.          
-%                  {default: no output}
+% output_file    - Name of .xlsx file to output results. {default: no output}
 % reproduce_test - [integer] The number of the permutation test stored in
 %                  the GND variable to reproduce.  For example, if 
 %                  'reproduce_test' equals 2, the second F-test 
@@ -81,11 +78,11 @@
 %                  be reproduced. Reproduction is accomplished by setting
 %                  the random number generator used in the permutation test 
 %                  to the same initial state it was in when the permutation 
-%                  test was conducted.
+%                  test was conducted. Obviously other options/inputs must
+%                  also be the same to truly reproduce the test
 % verblevel      - An integer specifiying the amount of information you want
 %                  the Mass Univariate Toolbox to provide about what it is 
-%                  doing during runtime. Note that little to no output is
-%                  currently provided by this function.
+%                  doing during runtime.
 %                      Options are:
 %                        0 - quiet, only show errors, warnings, and EEGLAB reports
 %                        1 - stuff anyone should probably know
@@ -93,7 +90,6 @@
 %                            with a data set {default value}
 %                        3 - stuff that might help you debug (show all
 %                            reports)
-%
 %
 %OUTPUT
 % GND           - GND struct, with results added in the F_tests field.
@@ -133,7 +129,6 @@
 %For designs where an exact test is possible, this function can use a
 %restricted permutation method to conduct an exact test. Optionally you
 %can also use the approximate method for such cases. See below for references.
-%NOTE: It is not recommended to use the approximate method for 2x2 designs.
 %
 %REFERENCES FOR PERMUTATION FACTORIAL ANOVA AND GLM
 %Anderson, M. J. (2001). Permutation tests for univariate or multivariate analysis of variance and regression. Canadian Journal of Fisheries and Aquatic Sciences, 58(3), 626-639.
@@ -142,8 +137,8 @@
 %Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
 %
 %
-%VERSION DATE: 22 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -154,17 +149,16 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 %This function incorporates some code from the Mass Univariate Toolbox, 
-%Copyright (c) 2015, David Groppe: https://github.com/dmgroppe/Mass_Univariate_ERP_Toolbox/blob/master/LICENSE
+%Copyright (c) 2015, David Groppe
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-%
 % 11/28/16       - Moved calculatiosn to sub-function calc_Fmax
 % 12/8/16        - Added abilty to set global variable VERBLEVEL. Added
 %                  ability to specify multiple time windows and'mean_wind' 
 %                  option
 % 3/31/17        - Moved save to spreadsheet to standalone function
 % 4/7/17         - Fixed error in checking interaction method
-% 4/17/17        - Fixed inconcistent in used_tpt_id field with t-tests
+% 4/17/17        - Fixed inconsistency in used_tpt_id field with t-tests
 %                  results; changed desired_alpha to desired_alphaORq
 % 5/9/17         - Added informative error messages for incorrect
 %                  electrode names

@@ -1,23 +1,23 @@
 %Calculate parametric ANOVA at each time point and electrode. Results are
-%not multiple comparison corrected but can be subjected to FDR correction.
+%not multiple comparison corrected.
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many
-%                 factors there are
+%                 factors there are.
 % dims          - Dimensions of the data array involved in the effect to be
 %                 calculated. For example, if data is an electrode x time points
 %                 x Factor A x Factor B x subjects array and you want to
 %                 calculated the main effect of A, dims = 3. If you want to
 %                 calculate the AxB interaciton, dims  = [3, 4].
-% alpha         - Alpha level of the test
+% alpha         - Test-wise alpha level
 %
 %OUTPUT
 % test_results - A struct with results of the mass univariate ANOVA
 %
 %
-%VERSION DATE: 22 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -30,7 +30,7 @@
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
 % 4/9/17  - Added documentation
-% 6/22/17 - Updtaed to eliminate repeated code
+% 6/22/17 - Updated to eliminate repeated code
 
 
 function test_results = calc_param_ANOVA(data, dims, alpha)
@@ -56,6 +56,7 @@ function test_results = calc_param_ANOVA(data, dims, alpha)
     p = 1 - fcdf(F_obs, df_effect, df_res);
     assert(isequal(h, p<=alpha));
     
+    %Create results struct
     test_results.h = h;
     test_results.p = p;
     test_results.F_obs = F_obs;

@@ -4,7 +4,7 @@
 % spreadsheet - name of spreadsheet file to format
 %
 %VERSION DATE: 16 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed.

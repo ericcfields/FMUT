@@ -2,7 +2,7 @@
 %
 %REQUIRED INPUTS
 % factor_names   - A cell array of strings of the names of all factors in
-%                 the design
+%                  the design
 %
 %OUTPUTS
 % effects        - An array with each row specifying the dimensions of the
@@ -10,7 +10,7 @@
 % effects labels - A matching cell array with strings describing each effect
 %
 %VERSION DATE: 28 November 2016
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed.

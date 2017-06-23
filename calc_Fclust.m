@@ -1,6 +1,5 @@
-%Calculate F cluster mass permutation effect.
-%For more information, see:
-%>> help FclustGND
+%Calculate F-test cluster mass permutation effect.
+%For more information, see: >> help FclustGND
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
@@ -11,8 +10,8 @@
 %                 x Factor A x Factor B x subjects array and you want to
 %                 calculated the main effect of A, dims = 3. If you want to
 %                 calculate the AxB interaciton, dims  = [3, 4].
-% n_perm        - Number of permutations to use to calculate null distribution
-% alpha         - Alpha level of the test
+% n_perm        - Number of permutations to use to calculate the null distribution
+% alpha         - Family-wise alpha level of the test
 % int_method    - A string that should be either 'exact' or 'approximate'.
 %                 If 'exact', the method of restricted permutations will
 %                 be used to conduct a test that controls the Type I error
@@ -23,7 +22,7 @@
 %                 subjects increases.
 % chan_hood     - A 2D symmetric binary matrix that indicates
 %                 which channels are considered neighbors of other 
-%                 channels. E.g., if chan_hood(2,10)=1, then Channel 2 
+%                 channels. E.g., if chan_hood(2,10)==1, then Channel 2 
 %                 and Channel 10 are nieghbors. You can produce a 
 %                 chan_hood matrix using the function spatial_neighbors.m. 
 % thresh_p      - The test-wise p-value threshold for cluster inclusion. If
@@ -35,8 +34,8 @@
 % test_results - A struct with results of the cluster mass test
 %
 %
-%VERSION DATE: 22 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 

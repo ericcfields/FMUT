@@ -1,6 +1,5 @@
 %Function to conduct an cluster based permutation test for one-way and
-%factorial ANOVA
-%
+%factorial within-subjects ANOVA
 %
 %EXAMPLE USAGE
 % GND = FclustGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
@@ -18,7 +17,8 @@
 % bins           - array with bins to use in ANOVA
 % factor_names   - cell array with names of factors in fastest to slowest
 %                  moving order within the bins provided
-% factor_levels  - number of factors in each level in the same order
+% factor_levels  - number of factors in each level in fastest to slowest
+%                  moving order within the bins provided
 %
 %OPTIONAL INPUTS
 % int_method     - A string that should be either 'exact' or 'approximate'.
@@ -63,9 +63,7 @@
 %                  {default: 0 ms to the end of the epoch}
 % mean_wind      - ['yes' or 'no'] If 'yes', the permutation test will be
 %                  performed on the mean amplitude within the time window 
-%                  specified by time_wind.  This sacrifices temporal 
-%                  resolution to increase test power by reducing the number
-%                  of comparisons.  If 'no', every single time point within
+%                  specified by time_wind.  If 'no', every single time point within
 %                  time_wind's time windows will be tested individually.
 %                  {default: 'no'}
 % exclude_chans  - A cell array of channel labels to exclude from the
@@ -93,8 +91,7 @@
 %                  with the function F_sig_raster.m. {default: 'yes'}
 % save_GND       - save GND to disk, 'yes' or 'no' {default: user will be
 %                  prompted}
-% output_file    - Name of .xlsx file to output results. Currently 
-%                  only works on Windows. {default: no output}
+% output_file    - Name of .xlsx file to output results. {default: no output}
 % reproduce_test - [integer] The number of the permutation test stored in
 %                  the GND variable to reproduce.  For example, if 
 %                  'reproduce_test' equals 2, the second F-test 
@@ -102,11 +99,11 @@
 %                  be reproduced. Reproduction is accomplished by setting
 %                  the random number generator used in the permutation test 
 %                  to the same initial state it was in when the permutation 
-%                  test was conducted.
+%                  test was conducted. Obviously other options/inputs must
+%                  also be the same to truly reproduce the test.
 % verblevel      - An integer specifiying the amount of information you want
 %                  the Mass Univariate Toolbox to provide about what it is 
-%                  doing during runtime. Note that little to no output is
-%                  currently provided by this function.
+%                  doing during runtime.
 %                      Options are:
 %                        0 - quiet, only show errors, warnings, and EEGLAB reports
 %                        1 - stuff anyone should probably know
@@ -156,7 +153,6 @@
 %For designs where an exact test is possible, this function can use a
 %restricted permutation method to conduct an exact test. Optionally you
 %can also use the approximate method for such cases. See below for references.
-%NOTE: It is not recommended to use the approximate method for 2x2 designs.
 %
 %The statistic used is the cluster mass: i.e., the sum of all the F-values
 %included in a given cluster.
@@ -173,8 +169,8 @@
 %Groppe, D. M., Urbach, T. P., & Kutas, M. (2011). Mass univariate analysis of event-related brain potentials/fields I: A critical tutorial review. Psychophysiology, 48(12), 1711-1725.
 %
 %
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-%VERSION DATE: 22 June 2017
+%AUTHOR: Eric Fields
+%VERSION DATE: 23 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -188,9 +184,6 @@
 %Copyright (c) 2015, David Groppe
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-%
-% 1.0.0        - Initial version modified from Fmax GND 2.5.2
-% 1.1.0        - Added output to spreadsheet
 % 11/28/16     - Moved calculations to sub function calc_F_clust_mass
 % 12/8/16      - Added abilty to set global variable VERBLEVEL. Added
 %                'mean_wind' option.

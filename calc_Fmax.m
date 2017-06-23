@@ -1,6 +1,5 @@
-%Calculate Fmax permutation effect.
-%For more inforamtion see:
-%>> help FmaxGND
+%Calculate Fmax corrected F-test.
+%For more inforamtion see: >> help FmaxGND
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
@@ -11,23 +10,22 @@
 %                 x Factor A x Factor B x subjects array and you want to
 %                 calculated the main effect of A, dims = 3. If you want to
 %                 calculate the AxB interaciton, dims  = [3, 4].
-% n_perm        - Number of permutations to used to calculate null distribution
-% alpha         - Alpha level of the test
+% n_perm        - Number of permutations to use to calculate the null distribution
+% alpha         - Family-wise alpha level of the test
 % int_method    - A string that should be either 'exact' or 'approximate'.
 %                 If 'exact', the method of restricted permutations will
 %                 be used to conduct a test that controls the Type I error
-%                 rate at alpha (assuming enough permutations). 
-%                 If 'approximate', the method of permutation of residuals 
-%                 will be used to conduct a test with Type I error rate 
-%                 asymptotic to alpha as noise decreases and/or number of 
-%                 subjects increases.
+%                 rate at alpha. If 'approximate', the method of permutation 
+%                 of residuals will be used to conduct a test with Type I 
+%                 error rate asymptotic to alpha as noise decreases and/or 
+%                 number of subjects increases.
 %
 %OUTPUT
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 12 June 2016
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%VERSION DATE: 23 June 2016
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -44,7 +42,6 @@
 % 6/12/17   - Added estimated alpha; added verblevel reports
 
 
-
 function test_results = calc_Fmax(data, dims, n_perm, alpha, int_method)
     
     global VERBLEVEL
@@ -52,6 +49,7 @@ function test_results = calc_Fmax(data, dims, n_perm, alpha, int_method)
     %Some useful numbers
     n_electrodes = size(data, 1);
     n_time_pts   = size(data, 2);
+    
     
     %% Calculate ANOVA
     
@@ -61,11 +59,12 @@ function test_results = calc_Fmax(data, dims, n_perm, alpha, int_method)
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
     [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
+    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
+    
     
     %% Calculate Fmax correction
     
-    %Calculate Fobs, Fmax distribution, and Fmax critical value
-    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
+    %Calculate Fmax distribution and Fmax critical value
     Fmax_dist = max(max(F_dist, [], 2), [], 3);
     Fmax_dist = sort(Fmax_dist);
     Fmax_crit = Fmax_dist(ceil((1-alpha) * length(Fmax_dist)));
@@ -85,6 +84,7 @@ function test_results = calc_Fmax(data, dims, n_perm, alpha, int_method)
         end
     end
     assert(isequal(h, p<=alpha));
+    
     
     %% Output
     

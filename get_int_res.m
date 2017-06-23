@@ -1,4 +1,4 @@
-%Calculate the interaction residuals for thei highest order interaction in
+%Calculate the interaction residuals for the highest order interaction in
 %the data. If the data has two factors, the  main effects will be
 %subtracted. If the data has three factors, the main effects and two-way
 %interactions will be subtracted.
@@ -13,7 +13,7 @@
 %
 %
 %VERSION DATE: 22 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 

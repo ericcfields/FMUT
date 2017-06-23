@@ -1,4 +1,4 @@
-%Performs two computations:
+%reduce_data performs two computations:
 %1. Average across any factors not included in an effect to be calculated. 
 %   For example, in a two-way design, the main effect of factor A can be 
 %   calculated by averaging across factor B and calculating a one-way ANOVA.
@@ -16,24 +16,18 @@
 %                 calculated the main effect of A, dims = 3. If you want to
 %                 calculate the AxB interaciton, dims  = [3, 4].
 % int_method    - A string that should be either 'exact' or 'approximate'.
-%                 If 'exact', the method of restricted permutations will
-%                 be used to conduct a test that controls the Type I error
-%                 rate at alpha (assuming enough permutations). 
-%                 If 'approximate', the method of permutation of residuals 
-%                 will be used to conduct a test with Type I error rate 
-%                 asymptotic to alpha as noise decreases and/or number of 
-%                 subjects increases.
+%                 If 'exact', the function will attempt to reduce to a 
+%                 one-way design by subtraction 
+%
 %OUTPUT
 % reduced_data  - data reduced for analysis
 %
 %
-%VERSION DATE: 22 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
-%This is a beta version of this software. It needs additional testing 
-%and SHOULD NOT be considered error free.
 
 %Copyright (c) 2017, Eric Fields
 %All rights reserved.

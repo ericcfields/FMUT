@@ -8,11 +8,11 @@
 %                  you don't want to save in the current working directory, 
 %                  include a full filepath
 %OPTIONAL INPUT
-% format_output     - A boolean specifying whether to apply formatting to the 
+% format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
 %VERSION DATE: 20 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
+%AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed.
@@ -183,7 +183,7 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         writexls(output_fname, clust_sum, 'cluster summary');
     end
     
-    %% Results: Cluster IDs, F obs, p-values
+    %% Cluster IDs, F obs, p-values for each effect
     
     %Create headers
     chan_header = [' '; results.include_chans'];

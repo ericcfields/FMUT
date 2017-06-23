@@ -7,12 +7,11 @@
 % Required Inputs:
 %  GND_GRP_specGND_or_fname  - A GND/GRP/specGND structure variable or the filename of 
 %                      such a variable that has been saved to disk.   
-%                      To create a GND variable from Kutaslab ERP files (e.g.,
-%                      *.nrm files) use avgs2GND.m.  To do the same from 
-%                      EEGLAB *.set files use sets2GND.m.  To create a
-%                      a GRP structure use GNDs2GRP.m. See Mass Univariate ERP  
-%                      Toolbox documentation for detailed information about the 
-%                      format of GND and GRP variables. If you specifiy a filename 
+%                      To create a GND variable from EEGLAB *.set files use 
+%                      sets2GND.m.  To create a GRP structure use GNDs2GRP.m. 
+%                      See Mass Univariate ERP Toolbox documentation for 
+%                      detailed information about the format of GND and GRP 
+%                      variables. If you specifiy a filename 
 %                      be sure to include the file's path, unless the file is
 %                      in the current working directory.              
 %  test_id           - [integer] The index # of the F-test results 
@@ -38,9 +37,8 @@
 %                     the diagram will be produced.  Useful for overwriting
 %                     old figures. {default: lowest unused index}
 %  use_color        - ['n','rb','rgb'] If 'n', raster will be black, white,
-%                     and grey.  If 'rb', raster will be red (significantly
-%                     positive), blue (significantly negative), and white
-%                     (nonsignificant). If 'rgb', raster will use a 
+%                     and grey.  If 'rb', raster will be red (significant) 
+%                     and white(nonsignificant). If 'rgb', raster will use a 
 %                     temperature scale to indicate graded values of 
 %                     significance. {default: 'n'} 
 %  plot_vert_lines  - [integer] If non-zero, vertical lines separating all
@@ -112,9 +110,8 @@
 % electrodes is based on the GND.chanlocs(x).theta coordinate.  Anterior to
 % posterior organization of electrodes is based on GND.chanlocs(x).radius.
 %
-%VERSION DATE: 20 June 2017
-%AUTHOR: Eric Fields, Tufts University (Eric.Fields@tufts.edu)
-%Modified from sig_raster.m by David Groppe
+%VERSION DATE: 23 June 2017
+%AUTHOR: Eric Fields (modified from sig_raster.m by David Groppe)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -130,6 +127,7 @@
 %%%%%%%%%%%%%%%% REVISION LOG %%%%%%%%%%%%%%%%%
 % 6/13/17      - Initial version in progress
 % 6/14/17      - Corrected problems with titles for one-way ANOVA
+% 6/22/17      - Changed color scale to differentiate from sig_raster
 
 
 function [img, h_ax] = F_sig_raster(GND_GRP_specGND_or_fname,test_id,varargin)
