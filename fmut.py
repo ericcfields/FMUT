@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-#AUTHOR: Eric Fields
-#VERSION DATE: 16 June 2017
 #Written in Python 3.6
 #Python 2 compliant as of 6/16/17 
 #Written in openpyxl 2.4, should work for any previous 2.x release
 #Compiled version uses Python 3.4
 
 """
-Python functions for FMUT
+Python functions for the Factorial Extenstion
+to the Mass Univariate Toolbox
+
+AUTHOR: Eric Fields
+VERSION DATE: 16 June 2017
 """
 
 import sys
