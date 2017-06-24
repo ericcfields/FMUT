@@ -94,7 +94,8 @@ function test_results = calc_param_ANOVA(data, dims, alphaORq, correction)
         else
             F_crit = finv(1-crit_p, df_effect, df_res);
         end
-    else
+    end
+    if ~strcmpi(correction ,'bky')
         assert(isequal(h, p<=alphaORq));
     end
 
