@@ -143,10 +143,11 @@
 % 6/21/17         - time_wind field of results struct is now accurate;
 %                   changed used_tpt_ids field to cell array for mean window
 %                   analyses
+% 6/23/17         - Moved corrections to sub-function
 
 function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargin)
 
-    warning('You are using a beta version of this function. It needs further testing and should NOT be considered error free.');
+    warning('You are using a beta version of FfdrGND. It needs further testing and should NOT be considered error free.');
 
     %% ~~~~~PARSE INPUT~~~~~
 
@@ -297,7 +298,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
             use_time_pts = [use_time_pts start_sample:end_sample]; %#ok<AGROW>
             if VERBLEVEL
                 if i == 1
-                    fprintf('\nConducting Fmax permutation test from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
+                    fprintf('\nConducting Ftest from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 else
                     fprintf(', %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 end
@@ -321,7 +322,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
             the_data(:, i, :, :) = mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2);
             if VERBLEVEL
                 if i == 1
-                    fprintf('\nConducting Fmax permutation test in mean time windows %d-%d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
+                    fprintf('\nConducting test in mean time windows %d-%d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 else
                     fprintf(', %d-%d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 end
@@ -362,26 +363,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                                  'F_obs', NaN(n_electrodes, n_time_pts), 'F_crit', NaN, 'df', NaN(1, 2)), ...
                                  length(effects), 1);
     for i = 1:length(effects)
-        if VERBLEVEL
-            fprintf('\nCalculating %s effect\n', effects_labels{i});
-        end
-        test_results(i) = calc_param_ANOVA(the_data, effects{i}+2, .05);
-        switch method
-            case 'bh'
-                [h, crit_p, ~, adj_p] = fdr_bh(test_results(i).p, q, 'pdep', 'no');
-            case 'by'
-                [h, crit_p, ~, adj_p] = fdr_bh(test_results(i).p, q, 'dep', 'no');
-            case 'bky'
-                [h, crit_p] = fdr_bky(test_results(i).p, q, 'no');
-                adj_p = NaN;
-        end
-        test_results(i).p = adj_p;
-        test_results(i).h = h;
-        if crit_p == 0
-            test_results(i).F_crit = NaN;
-        else
-            test_results(i).F_crit = finv(1-crit_p, test_results(i).df(1), test_results(i).df(2));
-        end
+        test_results(i) = calc_param_ANOVA(the_data, effects{i}+2, q, method);
     end
    
 

@@ -88,9 +88,9 @@ function [F_dist, df_effect, df_res] = oneway(data, n_perm)
         F_dist(i, :, :) = (SSA/dfA) ./ (SSRES/dfRES);
         
         if VERBLEVEL
-            if i == 1
+            if i == 1 && n_perm > 1
                 fprintf('Permutations completed: ')
-            elseif i == n_perm
+            elseif i == n_perm && n_perm > 1
                 fprintf('%d\n', i)
             elseif ~mod(i, 1000)
                 fprintf('%d, ', i)
@@ -172,9 +172,9 @@ function [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm)
         F_dist(i, :, :) = (SSAxB/dfAxB) ./ (SSAxBxBL/dfAxBerr);
         
         if VERBLEVEL
-            if i == 1
+            if i == 1 && n_perm > 1
                 fprintf('Permutations completed: ')
-            elseif i == n_perm
+            elseif i == n_perm && n_perm > 1
                 fprintf('%d\n', i)
             elseif ~mod(i, 1000)
                 fprintf('%d, ', i)
@@ -274,9 +274,9 @@ function [F_dist, df_effect, df_res] = threeway_approx_int(data, n_perm)
         F_dist(i, :, :) = (SSAxBxC/dfAxBxC) ./ (SSAxBxCxBL/dfAxBxCerr);
         
         if VERBLEVEL
-            if i == 1
+            if i == 1 && n_perm > 1
                 fprintf('Permutations completed: ')
-            elseif i == n_perm
+            elseif i == n_perm && n_perm > 1
                 fprintf('%d\n', i)
             elseif ~mod(i, 1000)
                 fprintf('%d, ', i)
