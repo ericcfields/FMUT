@@ -17,7 +17,7 @@
 %OPTIONAL INPUTS
 % correction    - A string indicating a multiple comparisons correction.
 %                 Options are 'none', 'bonferroni', 'sidak', 'bh' (classic 
-%                 Benjamini & Hochberg (1995) procedure, 'by' (Benjamini & 
+%                 Benjamini & Hochberg 1995) procedure, 'by' (Benjamini & 
 %                 Yekutieli, 2001), or 'bky' (Benjamini, Krieger, &
 %                 Yekutieli, 2006). {default: 'none'}.
 %
