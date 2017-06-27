@@ -170,7 +170,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 27 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -205,6 +205,7 @@
 % 6/21/17      - time_wind field of results struct is now accurate;
 %                changed used_tpt_ids field to cell array for mean window
 %                analyses
+% 6/27/17      - More information in command window output
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -334,12 +335,12 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         elseif sum(factor_levels > 2) <= 1
             int_method = 'exact';
             if VERBLEVEL
-                fprintf('\n\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee help FmaxGND for more information.\n\n')
+                fprintf('\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee help FmaxGND for more information.\n')
             end
         else
             int_method = 'approx';
             if VERBLEVEL
-                fprintf('\n\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee help FmaxGND for more information.\n\n')
+                fprintf('\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee help FmaxGND for more information.\n')
             end
         end
     end
@@ -540,9 +541,27 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                 fprintf('# of clusters found: %d\n', length(results.clust_info.null_test));
                 fprintf('# of significant clusters found: %d\n', sum(results.clust_info.null_test));
                 if sum(results.clust_info.null_test)
-                    fprintf('Significant cluster p-values range from %f to %f\n\n', ...
+                    fprintf('Significant cluster p-values range from %f to %f\n', ...
                             max(results.clust_info.pval(results.clust_info.null_test)), ...
                             min(results.clust_info.pval(results.clust_info.null_test)));
+                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
+                        for t = 1:size(time_wind, 1)
+                            fprintf('Electrodes in a significant cluster for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
+                            fprintf('%s ', results.include_chans{results.null_test(:, t)});
+                            fprintf('\n');
+                        end
+                        fprintf('\n');
+                    else
+                        fprintf('Electrodes and time points included in a significant cluster:\n');
+                        for t = 1:length(results.used_tpt_ids)
+                            if any(results.null_test(:, t))
+                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                                fprintf('%s ', results.include_chans{results.null_test(:, t)});
+                                fprintf('\n');
+                            end
+                        end
+                        fprintf('\n');
+                    end
                 else
                     fprintf('All p-values >= %f\n\n', min(results.clust_info.pval));
                 end
@@ -552,9 +571,27 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                 fprintf('# of clusters found: %d\n', length(results.clust_info.(effects_labels{i}).null_test));
                 fprintf('# of significant clusters found: %d\n', sum(results.clust_info.(effects_labels{i}).null_test));
                 if sum(results.clust_info.(effects_labels{i}).null_test)
-                    fprintf('Significant cluster p-values range from %f to %f\n\n', ...
+                    fprintf('Significant cluster p-values range from %f to %f\n', ...
                             max(results.clust_info.(effects_labels{i}).pval(results.clust_info.(effects_labels{i}).null_test)), ...
                             min(results.clust_info.(effects_labels{i}).pval(results.clust_info.(effects_labels{i}).null_test)));
+                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
+                        for t = 1:size(time_wind, 1)
+                            fprintf('Electrodes in a significant cluster for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
+                            fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
+                            fprintf('\n');
+                        end
+                        fprintf('\n');
+                    else
+                        fprintf('Electrodes and time points included in a significant cluster:\n');
+                        for t = 1:length(results.used_tpt_ids)
+                            if any(results.null_test.(effects_labels{i})(:, t))
+                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
+                                fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
+                                fprintf('\n');
+                            end
+                        end
+                        fprintf('\n');
+                    end
                 else
                     fprintf('All p-values >= %f\n\n', min(results.clust_info.(effects_labels{i}).pval));
                 end

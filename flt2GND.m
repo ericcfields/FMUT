@@ -24,8 +24,9 @@
 %                   {default: 'C:\BIN\AVGDUMP.EXE'}
 %  chanlocs_file  - full path for chanlocs file
 %                   {default: no chanlocs information}
-%  save_GND       - 'yes' or 'no'. If 'yes', a gui will appear prompting
-%                   the user to give a name and location to save the GND variable
+%  save_GND       - 'yes' or 'no' or filename. If 'yes', a gui will appear prompting
+%                   the user to give a name and location to save the GND
+%                   variable. If a filename, it will save automatically.
 %                   {default: 'yes'}
 %  plot_gui       - 'yes' or 'no'. If 'yes', a gui for exploring the data
 %                   in the newly created GND variable will pop up when the 
@@ -52,7 +53,7 @@
 % Other labs should be able to ignore them.
 %
 % AUTHOR: Eric Fields
-% VERSION DATE: 23 June 2017
+% VERSION DATE: 27 June 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -76,6 +77,7 @@
 %6/1/17   - Fixed bug when using bins that don't start at 1
 %6/13/17  - GND.indiv_bin_ct now filled with -1
 %6/14/17  - bsln_wind field now spelled correctly
+%6/27/17  - Can now auto-save
 
 function GND = flt2GND(infiles, varargin)
 
@@ -209,6 +211,9 @@ function GND = flt2GND(infiles, varargin)
             error('%s does not exist. Please check the ''infiles'' or ''filepath'' input.', fullfile(filepath, subs{i}))
         end
     end
+    if ~strcmpi(save_GND, 'yes') && ~strcmpi(save_GND, 'y')&& ~strcmpi(save_GND, 'no') && ~strcmpi(save_GND, 'n') && ~strcmpi(save_GND(end-3:end), '.GND')
+        error('''save_GND'' input must be ''yes'', ''no'', or a valid GND filename')
+    end
 
     
     %% Make GND
@@ -309,7 +314,19 @@ function GND = flt2GND(infiles, varargin)
     
     %Save GND
     if ~strcmpi(save_GND, 'no') && ~strcmpi(save_GND, 'n')
-        GND = save_matmk(GND, 'gui');
+        if strcmpi(save_GND(end-3:end), '.GND')
+            if isempty(fileparts(save_GND))
+                GNDpath = pwd;
+                GNDname = save_GND;
+            else
+                GNDpath = fileparts(save_GND);
+                [~, GNDname] = fileparts(save_GND);
+                GNDname = [GNDname '.GND'];
+            end
+            GND = save_matmk(GND, GNDname, GNDpath, 1);
+        else
+            GND = save_matmk(GND, 'gui');
+        end
     end
     
     %Visually inspect GND

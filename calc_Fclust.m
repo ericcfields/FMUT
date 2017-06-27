@@ -34,7 +34,7 @@
 % test_results - A struct with results of the cluster mass test
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 27 June 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -74,6 +74,10 @@ function test_results = calc_Fclust(data, dims, n_perm, alpha, int_method, chan_
     
     
     %% Find clusters and cluster ditribution
+    
+    if VERBLEVEL
+        fprintf('Calculating clusters . . . ')
+    end
     
     %Find clusters and cluster mass distribution
     thresh_F = finv(1-thresh_p, df_effect, df_res); 
@@ -117,6 +121,7 @@ function test_results = calc_Fclust(data, dims, n_perm, alpha, int_method, chan_
     h = (p <= alpha);
     est_alpha = mean(clust_mass_dist>clust_mass_crit);
     if VERBLEVEL
+        fprintf('DONE\n');
         fprintf('Estimated alpha level is %f\n', est_alpha);
     end
     
