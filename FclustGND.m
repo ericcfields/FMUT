@@ -255,7 +255,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     elseif isstruct(GND_or_fname)
         GND = GND_or_fname;
     else
-        error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct');
+        error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct.');
     end
     
     %Assign some variables for easier reference
@@ -270,13 +270,13 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %Check for required name-value inputs
     if isempty(bins)
-        error('''bins'' is a required input. See help FmaxGND');
+        error('''bins'' is a required input. See >>help FclustGND.');
     end
     if isempty(factor_names)
-        error('''factor_names'' is a required input. See help FmaxGND');
+        error('''factor_names'' is a required input. See >>help FclustGND.');
     end
     if isempty(factor_levels)
-        error('''factor_levels'' is a required input. See help FmaxGND');
+        error('''factor_levels'' is a required input. See >>help FclustGND.');
     end
     
     %Find id numbers for electrodes to use in analysis
@@ -306,13 +306,13 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %MUT reatures not implemented here              
     if ~isempty(p.Results.time_block_dur)
-        error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide the time windows manually');
+        error('The ''time_block_dur'' option is not implemented for FclustGND. You''ll need to divide the time windows manually.');
     end              
     if ~isempty(p.Results.plot_gui)
-        watchit('''plot_gui'' is not implemented for FmaxGND.');
+        watchit('''plot_gui'' is not implemented for FclustGND.');
     end
     if ~isempty(p.Results.plot_mn_topo)
-        watchit('''plot_mn_topo'' is not implemented for FmaxGND.');
+        watchit('''plot_mn_topo'' is not implemented for FclustGND.');
     end
     
     %Standardize formatting
@@ -335,28 +335,28 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         elseif sum(factor_levels > 2) <= 1
             int_method = 'exact';
             if VERBLEVEL
-                fprintf('\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee help FmaxGND for more information.\n')
+                fprintf('\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee >>help FclustGND for more information.\n')
             end
         else
             int_method = 'approx';
             if VERBLEVEL
-                fprintf('\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee help FmaxGND for more information.\n')
+                fprintf('\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee >>help FclustGND for more information.\n')
             end
         end
     end
     
     %Check for errors in input
     if length(factor_names) ~= length(factor_levels)
-        error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs');
+        error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs.');
     end
     if length(factor_levels) > 2
         warning('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
     end
     if length(factor_levels) > 3 && strcmpi(int_method, 'approx')
-        error('FmaxGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
+        error('FclustGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
     end
     if strcmpi(int_method, 'exact') && sum(factor_levels > 2) > 1
-        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See help FmaxGND for more information.');
+        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See >>help FclustGND for more information.');
     end
     if ~isequal(size(time_wind), [1, 2])
         error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
@@ -376,13 +376,13 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
-        watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
+        watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct.'));
     end
     if p.Results.reproduce_test
         if ~isfield(GND, 'F_tests')
-            error('You tried to reproduce test %d, but there are not results in GND.F_tests', p.Results.reproduce_test);
+            error('You tried to reproduce test %d, but there are not results in GND.F_tests.', p.Results.reproduce_test);
         elseif p.Results.reproduce_test > length(GND.F_tests)
-            error('You tried to reproduce test %d, but there are only %d tests in GND.F_tests', p.Results.reproduce_test, length(GND.F_tests));
+            error('You tried to reproduce test %d, but there are only %d tests in GND.F_tests.', p.Results.reproduce_test, length(GND.F_tests));
         end
     end
 
@@ -418,7 +418,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         n_time_pts = length(use_time_pts);
         the_data = GND.indiv_erps(electrodes, use_time_pts, bins, :);
         if VERBLEVEL
-            fprintf('\nConducting cluster mass permutation test from %d ms to %d ms\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
+            fprintf('\nConducting cluster mass permutation test from %d ms to %d ms.\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
         end
     else
         n_time_pts = 1;
@@ -428,7 +428,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         time_wind(2) = GND.time_pts(end_sample);
         the_data = mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2);
         if VERBLEVEL
-            fprintf('\nConducting cluster mass permutation test in the mean time window from %d ms to %d ms\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
+            fprintf('\nConducting cluster mass permutation test in the mean time window from %d ms to %d ms.\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
         end
     end
     use_time_pts = start_sample:end_sample;
@@ -541,7 +541,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                 fprintf('# of clusters found: %d\n', length(results.clust_info.null_test));
                 fprintf('# of significant clusters found: %d\n', sum(results.clust_info.null_test));
                 if sum(results.clust_info.null_test)
-                    fprintf('Significant cluster p-values range from %f to %f\n', ...
+                    fprintf('Significant cluster p-values range from %f to %f.\n', ...
                             max(results.clust_info.pval(results.clust_info.null_test)), ...
                             min(results.clust_info.pval(results.clust_info.null_test)));
                     if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
@@ -571,7 +571,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                 fprintf('# of clusters found: %d\n', length(results.clust_info.(effects_labels{i}).null_test));
                 fprintf('# of significant clusters found: %d\n', sum(results.clust_info.(effects_labels{i}).null_test));
                 if sum(results.clust_info.(effects_labels{i}).null_test)
-                    fprintf('Significant cluster p-values range from %f to %f\n', ...
+                    fprintf('Significant cluster p-values range from %f to %f.\n', ...
                             max(results.clust_info.(effects_labels{i}).pval(results.clust_info.(effects_labels{i}).null_test)), ...
                             min(results.clust_info.(effects_labels{i}).pval(results.clust_info.(effects_labels{i}).null_test)));
                     if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
@@ -593,7 +593,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                         fprintf('\n');
                     end
                 else
-                    fprintf('All p-values >= %f\n\n', min(results.clust_info.(effects_labels{i}).pval));
+                    fprintf('All p-values >= %f.\n\n', min(results.clust_info.(effects_labels{i}).pval));
                 end
             end
         end
@@ -604,6 +604,9 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %Plot results
     if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')
+        if VERBLEVEL
+            fprintf('Generating raster plot:\n');
+        end
         if length(effects_labels) == 1
             F_sig_raster(GND, length(GND.F_tests), 'use_color', 'rgb');
         else
@@ -625,7 +628,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         end
         Ftest2xls(GND, length(GND.F_tests), p.Results.output_file);
         if VERBLEVEL
-            fprintf('DONE\n')
+            fprintf('DONE.\n')
         end
     end
     

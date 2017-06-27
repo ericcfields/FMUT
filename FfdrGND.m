@@ -188,7 +188,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     elseif isstruct(GND_or_fname)
         GND = GND_or_fname;
     else
-        error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct');
+        error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct.');
     end
     
     %Assign some variables for easier reference
@@ -201,13 +201,13 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     
     %Check for required name-value inputs
     if isempty(bins)
-        error('''bins'' is a required input. See >>help FmaxGND');
+        error('''bins'' is a required input. See >>help FfdrGND.');
     end
     if isempty(factor_names)
-        error('''factor_names'' is a required input. See >>help FmaxGND');
+        error('''factor_names'' is a required input. See >>help FfdrGND.');
     end
     if isempty(factor_levels)
-        error('''factor_levels'' is a required input. See >>help FmaxGND');
+        error('''factor_levels'' is a required input. See >>help FfdrGND.');
     end
     
     %Find id numbers for electrodes to use in analysis
@@ -237,13 +237,13 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     
     %MUT features not implemented here              
     if ~isempty(p.Results.time_block_dur)
-        error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide the time windows manually');
+        error('The ''time_block_dur'' option is not implemented for FfdrGND. You''ll need to divide the time windows manually.');
     end              
     if ~isempty(p.Results.plot_gui)
-        watchit('''plot_gui'' is not implemented for FmaxGND.');
+        watchit('''plot_gui'' is not implemented for FfdrGND.');
     end
     if ~isempty(p.Results.plot_mn_topo)
-        watchit('''plot_mn_topo'' is not implemented for FmaxGND.');
+        watchit('''plot_mn_topo'' is not implemented for FfdrGND.');
     end
     
     %Standardize formatting
@@ -260,7 +260,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     
     %Check for errors in input
     if length(factor_names) ~= length(factor_levels)
-        error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs');
+        error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs.');
     end
     if length(factor_levels) > 2
         watchit('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
@@ -275,7 +275,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
         error('When multiple time windows are provided, they cannot overlap.')
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
-        watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
+        watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct.'));
     end
 
     
@@ -298,7 +298,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
             use_time_pts = [use_time_pts start_sample:end_sample]; %#ok<AGROW>
             if VERBLEVEL
                 if i == 1
-                    fprintf('\nConducting Ftest from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
+                    fprintf('\nConducting test from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 else
                     fprintf(', %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 end
@@ -438,10 +438,10 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                 fprintf('\n%s effect\n', effects_labels{1});
                 if any(results.null_test(:))
                     fprintf('Critical F-value: %.3f\n', results.F_crit);
-                    fprintf('That corresponds to a test-wise alpha level of %.3f\n', ...
+                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
                             fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
                     fprintf('Total number of significant differences: %d\n', sum(results.null_test(:)));
-                    fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test(:))*q);
+                    fprintf('Estimated upper bound on expected number of false discoveries: %.1f.\n', sum(results.null_test(:))*q);
                     if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
                         for t = 1:size(time_wind, 1)
                             fprintf('Significant electrodes for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
@@ -459,7 +459,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                         end
                     end
                     if ~strcmpi(method, 'bky')
-                        fprintf('All significant corrected p-values are between %f and %f\n', ...
+                        fprintf('All significant corrected p-values are between %f and %f.\n', ...
                                 max(results.adj_pval(results.adj_pval <= .05)), ... 
                                 min(results.adj_pval(:)));
                     end
@@ -471,7 +471,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                 fprintf('\n%s effect\n', effects_labels{i});
                 if any(results.null_test.(effects_labels{i})(:))
                     fprintf('Critical F-value: %.3f\n', results.F_crit.(effects_labels{i}));
-                    fprintf('That corresponds to a test-wise alpha level of %.3f\n', ...
+                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
                             fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
                     fprintf('Total number of significant differences: %d\n', sum(results.null_test.(effects_labels{i})(:)));
                     fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test.(effects_labels{i})(:))*q);
@@ -492,7 +492,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                         end
                     end
                     if ~strcmpi(method, 'bky')
-                        fprintf('All significant corrected p-values are between %f and %f\n', ...
+                        fprintf('All significant corrected p-values are between %f and %f.\n', ...
                                 max(results.adj_pval.(effects_labels{i})(results.adj_pval.(effects_labels{i}) <= .05)), ... 
                                 min(results.adj_pval.(effects_labels{i})(:)));
                     end
@@ -508,6 +508,9 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     
     %Plot results
     if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')
+        if VERBLEVEL
+            fprintf('Generating raster plot:\n');
+        end
         if length(effects_labels) == 1
             F_sig_raster(GND, length(GND.F_tests), 'use_color', 'rgb');
         else
@@ -529,7 +532,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
         end
         Ftest2xls(GND, length(GND.F_tests), p.Results.output_file);
         if VERBLEVEL
-            fprintf('DONE\n\n')
+            fprintf('DONE.\n\n')
         end
     end
 

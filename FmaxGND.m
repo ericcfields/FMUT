@@ -235,13 +235,13 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     %Check for required name-value inputs
     if isempty(bins)
-        error('''bins'' is a required input. See help FmaxGND');
+        error('''bins'' is a required input. See >>help FmaxGND.');
     end
     if isempty(factor_names)
-        error('''factor_names'' is a required input. See help FmaxGND');
+        error('''factor_names'' is a required input. See >>help FmaxGND.');
     end
     if isempty(factor_levels)
-        error('''factor_levels'' is a required input. See help FmaxGND');
+        error('''factor_levels'' is a required input. See >>help FmaxGND.');
     end
     
     %Find id numbers for electrodes to use in analysis
@@ -271,7 +271,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     %MUT reatures not implemented here              
     if ~isempty(p.Results.time_block_dur)
-        error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide the time windows manually');
+        error('The ''time_block_dur'' option is not implemented for FmaxGND. You''ll need to divide the time windows manually.');
     end              
     if ~isempty(p.Results.plot_gui)
         watchit('''plot_gui'' is not implemented for FmaxGND.');
@@ -300,12 +300,12 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         elseif sum(factor_levels > 2) <= 1
             int_method = 'exact';
             if VERBLEVEL
-                fprintf('\n\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee help FmaxGND for more information.\n\n')
+                fprintf('\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee >>help FmaxGND for more information.\n')
             end
         else
             int_method = 'approx';
             if VERBLEVEL
-                fprintf('\n\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee help FmaxGND for more information.\n\n')
+                fprintf('\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee >>help FmaxGND for more information.\n')
             end
         end
     end
@@ -321,7 +321,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         error('FmaxGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
     end
     if strcmpi(int_method, 'exact') && sum(factor_levels > 2) > 1
-        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See help FmaxGND for more information.');
+        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See >>help FmaxGND for more information.');
     end
     if isequal(factor_levels, [2, 2]) && strcmpi(int_method, 'approx')
         button = questdlg('WARNING: The type I error rate is not well-controlled by the approximate method of calculating the interaction for a 2x2 design. Are you sure you want to proceed?', 'WARNING');
@@ -341,13 +341,13 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
-        watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct'));
+        watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct.'));
     end
     if p.Results.reproduce_test
         if ~isfield(GND, 'F_tests')
-            error('You tried to reproduce test %d, but there are not results in GND.F_tests', p.Results.reproduce_test);
+            error('You tried to reproduce test %d, but there are not results in GND.F_tests.', p.Results.reproduce_test);
         elseif p.Results.reproduce_test > length(GND.F_tests)
-            error('You tried to reproduce test %d, but there are only %d tests in GND.F_tests', p.Results.reproduce_test, length(GND.F_tests));
+            error('You tried to reproduce test %d, but there are only %d tests in GND.F_tests.', p.Results.reproduce_test, length(GND.F_tests));
         end
     end
 
@@ -386,7 +386,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                 if i == 1
                     fprintf('\nConducting Fmax permutation test from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 else
-                    fprintf(', %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
+                    fprintf(', %d ms to %d ms.', GND.time_pts(start_sample), GND.time_pts(end_sample));
                 end
                 if i == size(time_wind, 1)
                     fprintf('\n');
@@ -522,7 +522,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
             if length(effects) == 1
                 if any(results.null_test(:))
                     fprintf('Critical F-value: %.3f\n', results.F_crit);
-                    fprintf('That corresponds to a test-wise alpha level of %.3f\n', ...
+                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
                             fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
                     if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
                         for t = 1:size(time_wind, 1)
@@ -540,7 +540,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                             end
                         end
                     end
-                    fprintf('All significant corrected p-values are between %f and %f\n', ... 
+                    fprintf('All significant corrected p-values are between %f and %f.\n', ... 
                              max(results.adj_pval(results.adj_pval <= .05)), ... 
                              min(results.adj_pval(:)));
                 else
@@ -549,7 +549,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
             else
                 if any(results.null_test.(effects_labels{i})(:))
                     fprintf('Critical F-value: %.3f\n', results.F_crit.(effects_labels{i}));
-                    fprintf('That corresponds to a test-wise alpha level of %.3f\n', ...
+                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
                             fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
                     if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
                         for t = 1:size(time_wind, 1)
@@ -567,7 +567,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                             end
                         end
                     end
-                    fprintf('All significant corrected p-values are between %f and %f\n', ... 
+                    fprintf('All significant corrected p-values are between %f and %f.\n', ... 
                              max(results.adj_pval.(effects_labels{i})(results.adj_pval.(effects_labels{i}) <= .05)), ... 
                              min(results.adj_pval.(effects_labels{i})(:)));
                 else
@@ -583,6 +583,9 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     %Plot results
     if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')
+        if VERBLEVEL
+            fprintf('Generating raster plot:\n');
+        end
         if length(effects_labels) == 1
             F_sig_raster(GND, length(GND.F_tests), 'use_color', 'rgb');
         else
@@ -604,7 +607,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         end
         Ftest2xls(GND, length(GND.F_tests), p.Results.output_file);
         if VERBLEVEL
-            fprintf('DONE\n\n')
+            fprintf('DONE.\n\n')
         end
     end
     
