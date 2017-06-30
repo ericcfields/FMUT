@@ -2,6 +2,7 @@
 Factorial Mass Univariate Toolbox (FMUT)
 ============================================================
 
+| VERSION: 0.1.0-beta
 | AUTHOR:  Eric Fields
 | CONTACT: Eric.Fields@tufts.edu
 
