@@ -268,7 +268,7 @@ function GND = flt2GND(infiles, varargin)
         for b = 1:n_bins
             flt_bin = use_bins(b);
             try
-                [~, avgdump_output] = system(sprintf('%s %s %d -t -fm %d', avgdump_exe, flt_file, flt_bin, n_electrodes));
+                [~, avgdump_output] = system(sprintf('"%s" "%s" %d -t -fm %d', avgdump_exe, flt_file, flt_bin, n_electrodes));
                 GND.indiv_erps(:, :, b, s) = str2num(avgdump_output)'; %#ok<ST2NM>
             catch ME
             %If the data returned by AVGDUMP is not the expected size, give
