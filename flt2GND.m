@@ -53,7 +53,7 @@
 % Other labs should be able to ignore them.
 %
 % AUTHOR: Eric Fields
-% VERSION DATE: 27 June 2017
+% VERSION DATE: 3 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -78,6 +78,7 @@
 %6/13/17  - GND.indiv_bin_ct now filled with -1
 %6/14/17  - bsln_wind field now spelled correctly
 %6/27/17  - Can now auto-save
+%7/3/17   - Filnames can now have spaces
 
 function GND = flt2GND(infiles, varargin)
 
