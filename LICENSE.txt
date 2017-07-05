@@ -1,4 +1,4 @@
-Factorial Extension to the Mass Univariate ERP toolbox
+Factorial Mass Univariate ERP toolbox
 
 Copyright (c) 2017, Eric C. Fields
 All rights reserved
