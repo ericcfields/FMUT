@@ -12,4 +12,4 @@ The Factorial Mass Univariate Toolbox (FMUT) is an extension to David Groppe's M
 For information on the Mass Univariate Toolbox, see:
 http://www.openwetware.org/wiki/Mass_Univariate_ERP_Toolbox
 
-For more information on the FMUT, see FMUT_documentation.pdf
+The FMUT documentation is available at: https://github.com/ericcfields/FMUT/wiki

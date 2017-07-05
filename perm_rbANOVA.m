@@ -149,7 +149,6 @@ function [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm)
             end
             perm_data = reshape(flat_perm_data, n_electrodes, n_time_pts, n_conds_A, n_conds_B, n_subs);
         end
-        %Calculate F at each time point and electrode combination
         
         %Calculate sums of squares
         SSyint   = (sum(sum(sum(perm_data, 3), 4), 5).^2)/(n_conds_A*n_conds_B*n_subs);
