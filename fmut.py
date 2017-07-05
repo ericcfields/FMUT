@@ -5,8 +5,7 @@
 #Compiled version uses Python 3.4
 
 """
-Python functions for the Factorial Extenstion
-to the Mass Univariate Toolbox
+Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
 VERSION DATE: 16 June 2017
