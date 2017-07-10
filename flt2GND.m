@@ -53,7 +53,7 @@
 % Other labs should be able to ignore them.
 %
 % AUTHOR: Eric Fields
-% VERSION DATE: 3 July 2017
+% VERSION DATE: 10 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -78,7 +78,8 @@
 %6/13/17  - GND.indiv_bin_ct now filled with -1
 %6/14/17  - bsln_wind field now spelled correctly
 %6/27/17  - Can now auto-save
-%7/3/17   - Filnames can now have spaces
+%7/3/17   - Filenames can now have spaces
+%7/10/17  - Fixed bug with saving GND
 
 function GND = flt2GND(infiles, varargin)
 
@@ -212,7 +213,7 @@ function GND = flt2GND(infiles, varargin)
             error('%s does not exist. Please check the ''infiles'' or ''filepath'' input.', fullfile(filepath, subs{i}))
         end
     end
-    if ~strcmpi(save_GND, 'yes') && ~strcmpi(save_GND, 'y')&& ~strcmpi(save_GND, 'no') && ~strcmpi(save_GND, 'n') && ~strcmpi(save_GND(end-3:end), '.GND')
+    if ~any(strcmpi(save_GND, {'yes', 'y', 'no', 'n'})) && ~(length(save_GND)>4 && strcmpi(save_GND(end-3:end), '.GND'))
         error('''save_GND'' input must be ''yes'', ''no'', or a valid GND filename')
     end
 
@@ -315,7 +316,9 @@ function GND = flt2GND(infiles, varargin)
     
     %Save GND
     if ~strcmpi(save_GND, 'no') && ~strcmpi(save_GND, 'n')
-        if strcmpi(save_GND(end-3:end), '.GND')
+        if strcmpi(save_GND, 'yes') || strcmpi(save_GND, 'y')
+            GND = save_matmk(GND, 'gui');
+        elseif length(save_GND) > 4 &&  strcmpi(save_GND(end-3:end), '.GND')
             if isempty(fileparts(save_GND))
                 GNDpath = pwd;
                 GNDname = save_GND;
@@ -325,8 +328,6 @@ function GND = flt2GND(infiles, varargin)
                 GNDname = [GNDname '.GND'];
             end
             GND = save_matmk(GND, GNDname, GNDpath, 1);
-        else
-            GND = save_matmk(GND, 'gui');
         end
     end
     
