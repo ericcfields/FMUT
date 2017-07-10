@@ -1,7 +1,35 @@
-%Permutation one-way completely randomized (between subjects) ANOVA
+%Calculate F-observed and the empirical F-distribution for a one-way
+%between subjects ANOVA
 %
-%VERSION DATE: 3 July 2017
+%REQUIRED INPUTS
+% data          - An electrode x time points x conditions x subjects array of ERP
+%                 data. Array will vary in number of dimensions based on how many
+%                 factors there are
+% cond_subs     - Array giving the number of subjects in each condition of
+%                 the between subjects factor. For example, if cond_subs is
+%                 [8, 9], then there should be 17 subjects with first 8
+%                 being in condition A and the next 9 being in condition B
+% n_perm        - Number of permutations to conduct
+%
+%OUTPUT
+% F_dist        - F-values at each time point and electrode for each
+%                 permutation. The first permutation is F-observed.
+% df_effect     - numerator degrees of freedom
+% df_res        - denominator degrees of freedom
+%
+%
+%VERSION DATE: 10 July 2017
 %AUTHOR: Eric Fields
+%
+%NOTE: This function is provided "as is" and any express or implied warranties 
+%are disclaimed. 
+%This is a beta version of this software. It needs additional testing 
+%and SHOULD NOT be considered error free.
+
+%Copyright (c) 2017, Eric Fields
+%All rights reserved.
+%This code is free and open source software made available under the 3-clause BSD license.
+
 
 function [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm)
 

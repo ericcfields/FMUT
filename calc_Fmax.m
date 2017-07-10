@@ -5,6 +5,11 @@
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many
 %                 factors there are
+% cond_subs     - Array giving the number of subjects in each condition of
+%                 the between subjects factor. For example, if cond_subs is
+%                 [8, 9], then there should be 17 subjects with first 8
+%                 being in condition A and the next 9 being in condition B.
+%                 For fully within-subjects designs cond_subs == []
 % dims          - Dimensions of the data array involved in the effect to be
 %                 calculated. For example, if data is an electrode x time points
 %                 x Factor A x Factor B x subjects array and you want to
@@ -24,7 +29,7 @@
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 23 June 2016
+%VERSION DATE: 10 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -40,9 +45,10 @@
 % 11/28/16  - Moved from FmaxGND. See FmaxGND revision log for information
 %             on earlier versions
 % 6/12/17   - Added estimated alpha; added verblevel reports
+% 7/10/17   - Now supports between subjects factors
 
 
-function test_results = calc_Fmax(data, dims, n_perm, alpha, int_method)
+function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, int_method)
     
     global VERBLEVEL
 
@@ -55,10 +61,18 @@ function test_results = calc_Fmax(data, dims, n_perm, alpha, int_method)
     
     %Eliminate factors not involved in this effect by averaging or
     %reduce exact interaction to one-way via subtraction
-    reduced_data = reduce_data(data, dims, int_method);
+    [reduced_data, new_dims] = reduce_data(data, dims, int_method);
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
-    [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
+    if cond_subs && length(cond_subs) > 1
+        if ndims(reduced_data) == 3
+            [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm);
+        else
+            [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, new_dims, n_perm);
+        end
+    else
+        [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
+    end
     F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     
     

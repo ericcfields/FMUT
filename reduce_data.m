@@ -21,9 +21,11 @@
 %
 %OUTPUT
 % reduced_data  - data reduced for analysis
+% new_dims      - the dimensions of reduced_data that are involved in the
+%                 effect
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 10 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -35,20 +37,25 @@
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
 % 6/22/17   - First version. Code re-organized from other functions.
+% 7/10/17   - Ignore between-subjects factor; return updated dims variable
 
-function reduced_data = reduce_data(data, dims, int_method)
+function [reduced_data, new_dims] = reduce_data(data, dims, int_method)
 
+    %Can't reduce across betwee-subjects factors, so extract just the
+    %within-subject factors
+    wdims = dims(dims ~= ndims(data));
+    
     %% Average across factors not involved in this effect
     
-    if length(dims) < ndims(data) - 3
+    if length(wdims) < ndims(data) - 3
         %Put the factors to average across as the initial dimensions
         num_dims = ndims(data);
         all_dims = 1:ndims(data);
-        reorder = [all_dims(~ismember(all_dims, [1,2,dims,num_dims])), all_dims(ismember(all_dims, [1,2,dims,num_dims]))];
+        reorder = [all_dims(~ismember(all_dims, [1,2,wdims,num_dims])), all_dims(ismember(all_dims, [1,2,wdims,num_dims]))];
         reduced_data = permute(data, reorder);
         %Reduce all the factors to average across to a single dimension
         dim_sizes = size(reduced_data);
-        num_dims_to_avg = ndims(data) - length(dims) - 3;
+        num_dims_to_avg = ndims(data) - length(wdims) - 3;
         reduced_data = reshape(reduced_data, [prod(dim_sizes(1:num_dims_to_avg)), dim_sizes((num_dims_to_avg+1):end)]);
         %Take the mean across that dimension
         reduced_data = mean(reduced_data, 1);
@@ -58,9 +65,10 @@ function reduced_data = reduce_data(data, dims, int_method)
         reduced_data = data;
     end
     
+    
     %% For exact interactions, reduce data to one-way design via subtraction
     
-    if length(dims) > 1 && strcmpi(int_method, 'exact')
+    if length(wdims) > 1 && strcmpi(int_method, 'exact')
         %Get/check design structure
         dim_sizes = size(reduced_data);
         factor_levels = dim_sizes(3:(ndims(reduced_data)-1));
@@ -76,6 +84,13 @@ function reduced_data = reduce_data(data, dims, int_method)
         end
         %Put back in regular format
         reduced_data = reshape(reduced_data, [size(data,1), size(data,2), max(factor_levels), size(data,ndims(data))]);
+    end
+    
+    %% Dimensions of reduced_data involved in effect
+    
+    new_dims = (3:ndims(reduced_data)-1);
+    if any(dims == ndims(data)) && ndims(reduced_data) > 3
+        new_dims = [new_dims ndims(reduced_data)];
     end
     
 end

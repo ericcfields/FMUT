@@ -22,7 +22,7 @@
 % df_res        - denominator degrees of freedom
 %
 %
-%VERSION DATE: 5 July 2017
+%VERSION DATE: 10 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -40,8 +40,8 @@ function [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, n_per
         [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm);
     elseif ndims(data) == 4
         [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm);
-    elseif ndims(data) == 5
-        watchtit('Three-way split plot ANOVA is not implemented yet.');
+    elseif ndims(data) > 4
+        watchit('Split plot ANOVA with more than two factors is not implemented.');
     end
     
 end
