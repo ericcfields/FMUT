@@ -120,8 +120,8 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
         %Calculate F
         if length(dims) == 1
             if dims == 3
-                SSAxB(SSAxB < 1e-12) = 0; %Eliminates large F values that result from floating point error 
-                F_dist(i, :, :) = (SSAxB/dfAxB) ./ (SSBxBL/dfBxBL);
+                SSB(SSB < 1e-12) = 0; %Eliminates large F values that result from floating point error 
+                F_dist(i, :, :) = (SSB/dfB) ./ (SSBxBL/dfBxBL);
             elseif dims == 4
                 SSA(SSA < 1e-12) = 0; %Eliminates large F values that result from floating point error 
                 F_dist(i, :, :) = (SSA/dfA) ./ (SSBL/dfBL);

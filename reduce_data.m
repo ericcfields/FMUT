@@ -47,7 +47,7 @@ function [reduced_data, new_dims] = reduce_data(data, dims, int_method)
     
     %% Average across factors not involved in this effect
     
-    if length(wdims) < ndims(data) - 3
+    if (length(wdims) < ndims(data) - 3) || isempty(wdims)
         %Put the factors to average across as the initial dimensions
         num_dims = ndims(data);
         all_dims = 1:ndims(data);

@@ -64,11 +64,11 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, int_meth
     [reduced_data, new_dims] = reduce_data(data, dims, int_method);
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
-    if cond_subs && length(cond_subs) > 1
+    if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
         if ndims(reduced_data) == 3
-            [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm);
+            [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
         else
-            [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, new_dims, n_perm);
+            [F_dist, df_effect, df_res] = perm_spANOVA(reduced_data, cond_subs, new_dims, n_perm);
         end
     else
         [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
