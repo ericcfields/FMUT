@@ -29,7 +29,7 @@
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 10 July 2017
+%VERSION DATE: 11 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 

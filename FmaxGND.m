@@ -137,7 +137,7 @@
 %Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 11 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -174,6 +174,7 @@
 %                  changed used_tpt_ids field to cell array for mean window
 %                  analyses
 % 6/22/17        - Now using MATLAB input parsing system
+% 7/11/17        - Works with updated calc_Fmax
 
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
