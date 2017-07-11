@@ -7,7 +7,7 @@
 %                 factors there are
 % cond_subs     - Array giving the number of subjects in each condition of
 %                 the between subjects factor. For example, if cond_subs is
-%                 [8, 9], then there should be 17 subjects with first 8
+%                 [8, 9], then there should be 17 subjects with the first 8
 %                 being in condition A and the next 9 being in condition B.
 %                 For fully within-subjects designs cond_subs == []
 % dims          - Dimensions of the data array involved in the effect to be

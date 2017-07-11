@@ -1,7 +1,7 @@
 %Output results of F-test to a spreadsheet.
 %
 %REQUIRED INPUTS
-% GND            - A GND variable with F-test results
+% GND            - A GND or GRP variable with F-test results
 % test_id        - The test number within the F_tests field of the GND
 %                  struct
 % output_fname   - The filename for the spreadsheet that will be saved. If
@@ -11,7 +11,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 20 June 2017
+%VERSION DATE: 11 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -34,6 +34,7 @@
 %             to specify whether to format or not
 % 6/15/17   - Updated to use xlwrite and better output of critical values
 % 6/20/17   - Output for mean window analyses
+% 7/11/17   - Now works with GRP variables
 
 function Ftest2xls(GND, test_id, output_fname, format_output)
     
