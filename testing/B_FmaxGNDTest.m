@@ -1,12 +1,12 @@
 %Test FmaxGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 22 June 2017
+%VERSION DATE: 11 July 2017
 
 %Load a GND for testing
 if ispc()
-    load('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\EmProb_13subs_Test.GND', '-mat');
+    load('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\data\EmProb_13subs_Test.GND', '-mat');
 elseif ismac()
-    load('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/EmProb_13subs_Test.GND', '-mat');
+    load('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/data/EmProb_13subs_Test.GND', '-mat');
 end
 
 %Define some general variables
