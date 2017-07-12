@@ -62,7 +62,7 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
     
     %Interaction residuals
     if length(dims) == 2
-        int_res = get_int_res_sp2(data, cond_subs);
+        int_res = get_int_res_sp(data, cond_subs);
     end
 
     %Calculate degrees of freedom
@@ -160,25 +160,106 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
     
 end
 
-function int_res = get_int_res_sp2(data, cond_subs)
+function [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
 
-    n_conds_B = size(data, 3);
+    global VERBLEVEL
+
+    %Check array structure
+    assert(ndims(data) == 5);
+
+    %Some useful numbers
+    [n_electrodes, n_time_pts, n_conds_B, n_conds_C n_subs] = size(data);
     n_conds_A = length(cond_subs);
-
-    int_res = NaN(size(data));
-    for p = 1:n_conds_A
-        first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
-        for q = 1:n_conds_B
-            for n = 1:cond_subs(p)
-                sub = first+n-1;
-                int_res(:,:,q,sub) = data(:,:,q,sub) ...
-                                   - mean(data(:,:,q, :), 4) ...
-                                   - mean(data(:, :, :, sub), 3) ...
-                                   + mean(mean(data, 3), 4);
-            end
-        end
+    if sum(cond_subs) ~= n_subs
+        error('The number of subjects in the ''cond_subs'' input doesn''t match the number of subjects in the data');
     end
     
-    assert(abs(mean(int_res(:))) < 1e-9);
+    %Interaction residuals
+    int_res = get_int_res_sp(data, cond_subs);
+
+    %Calculate degrees of freedom
+    %(Always the same, so no point calculating in the loop)
+    dfA      = n_conds_A - 1;
+    dfB      = n_conds_B - 1;
+    dfC      = n_conds_C - 1;
+    dfBL     = n_subs - n_conds_A;
+    dfAxB    = dfA * dfB;
+    dfAxC    = dfA * dfC;
+    dfBxC    = dfB * dfC;
+    dfAxBxC  = dfA * dfB * dfC;
+    dfBxBL   = dfB * dfBL;
+    dfCxBL   = dfC * dfBL;
+    dfBxCxBL = dfB * dfC * dfBL;
+
+end
+
+function int_res = get_int_res_sp(data, cond_subs, dims)
+    
+    n_conds_A = length(cond_subs);
+
+    if ndims(data) == 4
+        n_conds_B = size(data, 3);
+        int_res = NaN(size(data));
+        for p = 1:n_conds_A
+            first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
+            for q = 1:n_conds_B
+                for n = 1:cond_subs(p)
+                    sub = first+n-1;
+                    int_res(:,:,q,sub) = data(:,:,q,sub) ...
+                                         - mean(data(:,:,q, :), 4) ...
+                                         - mean(data(:, :, :, sub), 3) ...
+                                         + mean(mean(data, 3), 4);
+                end
+            end
+        end
+    
+    elseif ndims(data) == 5
+  
+        [~, ~, n_conds_B, n_conds_C, ~] = size(data);
+        int_res = NaN(size(data));
+        if isequal(dims, [3, 4])
+            int_res = get_int_res(data);
+        elseif isequal(dims, [3, 4, 5])
+            int_res1 = NaN(size(data));
+            int_res  = NaN(size(data));
+            %Subtract main effects
+            for p = 1:n_conds_A
+                first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
+                for q = 1:n_conds_B
+                    for r = 1:n_conds_C
+                        for n = 1:cond_subs(p)
+                            sub = first+n-1;
+                            int_res1(:, :, q, r, sub) = data(:, :, q, r, sub) ...
+                                                        - mean(mean(data(:, :, q, :, :), 4), 5) ...
+                                                        - mean(mean(data(:, :, :, r, :), 3), 5) ...
+                                                        - mean(mean(data(:, :, :, :, sub), 3), 4) ...
+                                                        + 2*mean(mean(mean(data, 3), 4), 5);
+                        end
+                    end
+                end
+            end
+            %Subtract two-way interactions
+            for p = 1:n_conds_A
+                first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
+                for q = 1:n_conds_B
+                    for r = 1:n_conds_C
+                        for n = 1:cond_subs(p)
+                            sub = first+n-1;
+                            int_res(:, :, q, r, sub) = int_res1(:, :, q, r, sub) ...
+                                                       - mean(int_res1(:, :, q, r, :), 5) ...
+                                                       - mean(int_res1(:, :, q, :, sub), 4) ...
+                                                       - mean(int_res1(:, :, :, r, sub), 3) ...
+                                                       + 2 * mean(mean(mean(int_res1, 3), 4), 5);
+                        end
+                    end
+                end
+            end
+                                                   
+            
+        end
+        
+    end
+    
+    assert(abs(mean(int_res(:))) < 1e-9)
 
 end
