@@ -2,7 +2,7 @@
 Factorial Mass Univariate ERP Toolbox (FMUT)
 ============================================================
 
-| VERSION: 0.1.1-alpha
+| VERSION: 0.1.1-beta
 | AUTHOR:  Eric Fields
 | CONTACT: Eric.Fields@tufts.edu
 
