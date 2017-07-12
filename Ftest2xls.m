@@ -11,7 +11,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 11 July 2017
+%VERSION DATE: 12 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -35,6 +35,7 @@
 % 6/15/17   - Updated to use xlwrite and better output of critical values
 % 6/20/17   - Output for mean window analyses
 % 7/11/17   - Now works with GRP variables
+% 7/12/17   - Fixed error with long effect names
 
 function Ftest2xls(GND, test_id, output_fname, format_output)
     
@@ -202,24 +203,26 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         
         %Sheet names are limited to 31 characters
         if length(effects_labels{1}) > 19
-            effects_labels{1} = effects_labels{1}(1:19);
+            sheet_label = effects_labels{1}(1:19);
+        else
+            sheet_label = effects_labels{1};
         end
         
         %Cluster_ids
         if strcmpi(results.mult_comp_method, 'cluster mass perm test')
             %cluster ids
             clust_ids = [chan_header, [time_header; num2cell(results.clust_info.clust_ids)]];
-            writexls(output_fname, clust_ids, sprintf('%s_clust_IDs', effects_labels{1}));
+            writexls(output_fname, clust_ids, sprintf('%s_clust_IDs', sheet_label));
         end
 
         %F_obs
         F_obs_table = [chan_header, [time_header; num2cell(results.F_obs)]];
-        writexls(output_fname, F_obs_table, sprintf('%s_F_obs', effects_labels{1}));
+        writexls(output_fname, F_obs_table, sprintf('%s_F_obs', sheet_label));
 
         %p-values
         if ~strcmpi(results.mult_comp_method, 'bky')
             adj_pvals = [chan_header, [time_header; num2cell(results.adj_pval)]];
-            writexls(output_fname, adj_pvals, sprintf('%s_adj_pvals', effects_labels{1}));
+            writexls(output_fname, adj_pvals, sprintf('%s_adj_pvals', sheet_label));
         end
         
     else
@@ -227,23 +230,25 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
             
             %Sheet names are limited to 31 characters
             if length(effects_labels{i}) > 19
-                effects_labels{i} = effects_labels{i}(1:19);
+                sheet_label = effects_labels{i}(1:19);
+            else
+                sheet_label = effects_labels{i};
             end
 
             %Cluster_ids
             if strcmpi(results.mult_comp_method, 'cluster mass perm test')
                 clust_ids = [chan_header, [time_header; num2cell(results.clust_info.(effects_labels{i}).clust_ids)]];
-                writexls(output_fname, clust_ids, sprintf('%s_clust_IDs', effects_labels{i}));
+                writexls(output_fname, clust_ids, sprintf('%s_clust_IDs', sheet_label));
             end
 
             %F_obs
             F_obs_table = [chan_header, [time_header; num2cell(results.F_obs.(effects_labels{i}))]];
-            writexls(output_fname, F_obs_table, sprintf('%s_F_obs', effects_labels{i}));
+            writexls(output_fname, F_obs_table, sprintf('%s_F_obs', sheet_label));
 
             %p-values
             if ~strcmpi(results.mult_comp_method, 'bky')
                 adj_pvals = [chan_header, [time_header; num2cell(results.adj_pval.(effects_labels{i}))]];
-                writexls(output_fname, adj_pvals, sprintf('%s_adj_pvals', effects_labels{i}));
+                writexls(output_fname, adj_pvals, sprintf('%s_adj_pvals', sheet_label));
             end
 
         end

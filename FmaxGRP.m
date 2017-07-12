@@ -140,7 +140,7 @@
 %Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
 %
 %
-%VERSION DATE: 11 July 2017
+%VERSION DATE: 12 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -372,7 +372,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
                 time_wind(i, 1) = GND.time_pts(start_sample);
                 time_wind(i, 2) = GND.time_pts(end_sample);
                 use_time_pts = [use_time_pts start_sample:end_sample]; %#ok<AGROW>
-                if VERBLEVEL
+                if VERBLEVEL && g == 1
                     if i == 1
                         fprintf('\nConducting Fmax permutation test from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                     else
@@ -398,7 +398,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
                 time_wind(i, 2) = GND.time_pts(end_sample);
                 use_time_pts{i} = start_sample:end_sample;
                 new_data(:, i, :, :) = mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2);
-                if VERBLEVEL
+                if VERBLEVEL && g == 1
                     if i == 1
                         fprintf('\nConducting Fmax permutation test in mean time windows %d-%d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
                     else
@@ -456,8 +456,8 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     end
     %Create results struct with basic parameters
     results = struct('bins', bins, ...
-                     'factors', {wg_factor_names}, ...
-                     'factor_levels', wg_factor_levels, ...
+                     'factors', {factor_names}, ...
+                     'factor_levels', factor_levels, ...
                      'time_wind', time_wind, ...
                      'used_tpt_ids', use_time_pts, ...
                      'mean_wind', p.Results.mean_wind, ...
