@@ -41,7 +41,7 @@ function [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, n_per
     elseif ndims(data) == 4
         [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm);
     elseif ndims(data) > 4
-        watchit('Split plot ANOVA with more than two factors is not implemented.');
+        [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm);
     end
     
 end
@@ -62,7 +62,7 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
     
     %Interaction residuals
     if length(dims) == 2
-        int_res = get_int_res_sp(data, cond_subs);
+        int_res = get_int_res(data, cond_subs, dims);
     end
 
     %Calculate degrees of freedom
@@ -168,14 +168,14 @@ function [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
     assert(ndims(data) == 5);
 
     %Some useful numbers
-    [n_electrodes, n_time_pts, n_conds_B, n_conds_C n_subs] = size(data);
+    [n_electrodes, n_time_pts, n_conds_B, n_conds_C, n_subs] = size(data);
     n_conds_A = length(cond_subs);
     if sum(cond_subs) ~= n_subs
         error('The number of subjects in the ''cond_subs'' input doesn''t match the number of subjects in the data');
     end
     
     %Interaction residuals
-    int_res = get_int_res_sp(data, cond_subs);
+    int_res = get_int_res(data, cond_subs, dims);
 
     %Calculate degrees of freedom
     %(Always the same, so no point calculating in the loop)
@@ -190,76 +190,28 @@ function [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
     dfBxBL   = dfB * dfBL;
     dfCxBL   = dfC * dfBL;
     dfBxCxBL = dfB * dfC * dfBL;
-
-end
-
-function int_res = get_int_res_sp(data, cond_subs, dims)
     
-    n_conds_A = length(cond_subs);
-
-    if ndims(data) == 4
-        n_conds_B = size(data, 3);
-        int_res = NaN(size(data));
-        for p = 1:n_conds_A
-            first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
-            for q = 1:n_conds_B
-                for n = 1:cond_subs(p)
-                    sub = first+n-1;
-                    int_res(:,:,q,sub) = data(:,:,q,sub) ...
-                                         - mean(data(:,:,q, :), 4) ...
-                                         - mean(data(:, :, :, sub), 3) ...
-                                         + mean(mean(data, 3), 4);
-                end
+    F_dist = NaN(n_perm, n_electrodes, n_time_pts);
+    for i = 1:n_perm
+        %Report permutations completed to command window
+        if VERBLEVEL
+            if i == 1 && n_perm > 1
+                fprintf('Permutations completed: ')
+            elseif i == n_perm && n_perm > 1
+                fprintf('%d\n', i)
+            elseif ~mod(i, 1000)
+                fprintf('%d, ', i)
             end
         end
-    
-    elseif ndims(data) == 5
-  
-        [~, ~, n_conds_B, n_conds_C, ~] = size(data);
-        int_res = NaN(size(data));
-        if isequal(dims, [3, 4])
-            int_res = get_int_res(data);
-        elseif isequal(dims, [3, 4, 5])
-            int_res1 = NaN(size(data));
-            int_res  = NaN(size(data));
-            %Subtract main effects
-            for p = 1:n_conds_A
-                first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
-                for q = 1:n_conds_B
-                    for r = 1:n_conds_C
-                        for n = 1:cond_subs(p)
-                            sub = first+n-1;
-                            int_res1(:, :, q, r, sub) = data(:, :, q, r, sub) ...
-                                                        - mean(mean(data(:, :, q, :, :), 4), 5) ...
-                                                        - mean(mean(data(:, :, :, r, :), 3), 5) ...
-                                                        - mean(mean(data(:, :, :, :, sub), 3), 4) ...
-                                                        + 2*mean(mean(mean(data, 3), 4), 5);
-                        end
-                    end
-                end
-            end
-            %Subtract two-way interactions
-            for p = 1:n_conds_A
-                first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
-                for q = 1:n_conds_B
-                    for r = 1:n_conds_C
-                        for n = 1:cond_subs(p)
-                            sub = first+n-1;
-                            int_res(:, :, q, r, sub) = int_res1(:, :, q, r, sub) ...
-                                                       - mean(int_res1(:, :, q, r, :), 5) ...
-                                                       - mean(int_res1(:, :, q, :, sub), 4) ...
-                                                       - mean(int_res1(:, :, :, r, sub), 3) ...
-                                                       + 2 * mean(mean(mean(int_res1, 3), 4), 5);
-                        end
-                    end
-                end
-            end
-                                                   
-            
-        end
-        
     end
     
-    assert(abs(mean(int_res(:))) < 1e-9)
+    %degrees of freedom
+    if isequal(dims, [3, 4])
+        df_effect = dfBxC;
+    elseif isequal(dims, [3, 4, 5])
+        df_effect = dfAxBxC;
+    end
+    df_res = dfBxCxBL;
 
 end
+

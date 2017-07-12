@@ -17,7 +17,7 @@
 % df_res        - denominator degrees of freedom
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 12 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -31,6 +31,7 @@
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
 % 6/22/17   - First version. Code re-organized from other functions.
+% 7/12/17   - Updated to work with BG-compliant get_int_res
 
 function [F_dist, df_effect, df_res] = perm_rbANOVA(data, n_perm)
 
@@ -120,7 +121,7 @@ function [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm)
 
     %Subtract main effects within each subject so that the data is 
     %exchangeable under the null hypothesis for the interaction
-    int_res = get_int_res(data);
+    int_res = get_int_res(data, [], [3, 4]);
     
     %Calculate degrees of freedom
     %(Always the same, so no point calculating in the loop)
@@ -204,7 +205,7 @@ function [F_dist, df_effect, df_res] = threeway_approx_int(data, n_perm)
     %Subtract main effects then two-way effects within each subject so that 
     %the data is exchangeable under the null hypothesis for the three-way
     %interaction
-    int_res = get_int_res(data);
+    int_res = get_int_res(data, [], [3, 4, 5]);
     
     %Calculate degrees of freedom
     %(Always the same, so no point calculating in the loop)
