@@ -12,7 +12,7 @@
 %                 effects subtracted out
 %
 %
-%VERSION DATE: 22 June 2017
+%VERSION DATE: 12 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -42,7 +42,6 @@ function int_res = get_int_res(data)
                                          + mean(mean(data, 3), 4);
             end
         end
-        assert(abs(mean(int_res(:))) < 1e-9);
     elseif ndims(data) == 6
         [~, ~, n_conds_A, n_conds_B, n_conds_C, ~] = size(data);
         %Subtract main effects then two-way effects within each subject so that 
@@ -74,7 +73,8 @@ function int_res = get_int_res(data)
                 end
             end
         end
-        assert(abs(mean(int_res(:))) < 1e-9)
     end
+    
+    assert(abs(mean(int_res(:))) < 1e-9)
     
 end
