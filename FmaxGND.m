@@ -403,8 +403,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
         %Calculate test
-        test_results(i) = calc_Fmax(the_data, [], effects{i}+2, n_perm, alpha);       
-        test_results(i) = calc_Fmax(the_data, effects{i}+2, n_perm, alpha);       
+        test_results(i) = calc_Fmax(the_data, [], effects{i}+2, n_perm, alpha);             
     end
     
 

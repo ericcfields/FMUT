@@ -5,6 +5,11 @@
 
 clearvars;
 
+%% Set-up
+
+global VERBLEVEL
+VERBLEVEL = 0;
+
 %Design
 n_electrodes = 1;
 n_time_pts = 1;
@@ -31,12 +36,15 @@ test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
                              'F_obs', NaN(n_electrodes, n_time_pts), ...
                              'Fmax_crit', NaN, ...
                              'df', [NaN, NaN], ...
-                             'estimated_alpha', NaN), ...
+                             'estimated_alpha', NaN, ...
+                             'exact_test', NaN), ...
                        n_exp, 1);
 
-%Simulat experiments
+                   
+%% Simulate experiments
+
 tic
-for i = 1:n_exp
+parfor i = 1:n_exp
     
     %Simulate null data
     data = normrnd(0, 1, [n_electrodes, n_time_pts, wg_design, n_subs]);
@@ -67,7 +75,9 @@ for i = 1:n_exp
 end
 toc
 
-%Report results
+
+%% Report results
+
 fprintf('\nRejection rate = %f\n', mean(mean([test_results(:).h])))
 fprintf('Mean p = %f\n', mean(mean([test_results(:).p])))
 fprintf('Mean F_obs = %f\n', mean(mean([test_results(:).F_obs])))
