@@ -110,7 +110,7 @@
 % electrodes is based on the GND.chanlocs(x).theta coordinate.  Anterior to
 % posterior organization of electrodes is based on GND.chanlocs(x).radius.
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields (modified from sig_raster.m by David Groppe)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -128,6 +128,7 @@
 % 6/13/17      - Initial version in progress
 % 6/14/17      - Corrected problems with titles for one-way ANOVA
 % 6/22/17      - Changed color scale to differentiate from sig_raster
+% 7/13/17      - Updated for changes to estimated_alpha
 
 
 function [img, h_ax] = F_sig_raster(GND_GRP_specGND_or_fname,test_id,varargin)
