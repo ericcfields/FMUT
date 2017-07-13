@@ -183,7 +183,8 @@
 %                changed used_tpt_ids field to cell array for mean window
 %                analyses
 % 6/27/17      - More information in command window output
-% 7/13/17      - int_method input eliminated
+% 7/13/17      - int_method input eliminated; fixed spacing in command
+%                window output
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -486,9 +487,9 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
     
     if VERBLEVEL
-        fprintf('\n##### RESULTS #####\n');
+        fprintf('\n##### RESULTS #####\n\n');
         if length(effects) == 1
-                fprintf('\n%s effect\n', effects_labels{1});
+                fprintf('%s effect\n', effects_labels{1});
                 fprintf('# of clusters found: %d\n', length(results.clust_info.null_test));
                 fprintf('# of significant clusters found: %d\n', sum(results.clust_info.null_test));
                 if sum(results.clust_info.null_test)
@@ -518,7 +519,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                 end
         else
             for i = 1:length(effects)
-                fprintf('\n%s effect\n', effects_labels{i});
+                fprintf('%s effect\n', effects_labels{i});
                 fprintf('# of clusters found: %d\n', length(results.clust_info.(effects_labels{i}).null_test));
                 fprintf('# of significant clusters found: %d\n', sum(results.clust_info.(effects_labels{i}).null_test));
                 if sum(results.clust_info.(effects_labels{i}).null_test)
