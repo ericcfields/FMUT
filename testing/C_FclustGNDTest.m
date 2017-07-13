@@ -1,6 +1,6 @@
 %Test FclustGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 11 July 2017
+%VERSION DATE: 13 July 2017
 
 %Load a GND for testing
 if ispc()
@@ -65,44 +65,6 @@ GND = FclustGND(GND, ...
               'chan_hood',     75, ...
               'thresh_p',      .05, ...
               'plot_raster',   'yes');
-
-          
-%% Check F-values calculated by approximate int code
-
-%%% Two-way %%%
-
-data = normrnd(0, 1, [32, 167, 2, 2, 16]);
-
-%F-test
-F_dist = perm_rbANOVA(data, 10);
-F_obs = squeeze(F_dist(1, :, :));
-
-%t-test
-data = squeeze(data(:, :, 1, :, :) - data(:, :, 2, :, :));
-data = squeeze(data(:, :, 1, :) - data(:, :, 2, :));
-mn = mean(data, 3);
-stderr = std(data, [], 3) / sqrt(size(data, 3));
-t_vals = mn ./ stderr;
-
-assert(all(F_obs(:) - t_vals(:).^2 < 1e-9))
-
-%%% Three-way %%%
-
-data = normrnd(0, 1, [32, 167, 2, 2, 2, 16]);
-
-%F-test
-F_dist = perm_rbANOVA(data, 10);
-F_obs = squeeze(F_dist(1, :, :));
-
-%t-test
-data = squeeze(data(:, :, 1, :, :, :) - data(:, :, 2, :, :, :));
-data = squeeze(data(:, :, 1, :, :) - data(:, :, 2, :, :));
-data = squeeze(data(:, :, 1, :) - data(:, :, 2, :));
-mn = mean(data, 3);
-stderr = std(data, [], 3) / sqrt(size(data, 3));
-t_vals = mn ./ stderr;
-
-assert(all(F_obs(:) - t_vals(:).^2 < 1e-9))
 
 
 %% Mean window

@@ -1,6 +1,6 @@
 %Test FmaxGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 11 July 2017
+%VERSION DATE: 13 July 2017
 
 %Load a GND for testing
 if ispc()

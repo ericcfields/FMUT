@@ -87,7 +87,13 @@ function test_results = calc_Fmax(data, dims, n_perm, alpha)
     test_results.F_obs = F_obs;
     test_results.Fmax_crit = Fmax_crit;
     test_results.df = [df_effect, df_res];
-    test_results.estimated_alpha = est_alpha;
+    if ndims(reduced_data) == 4
+        test_results.estimated_alpha = est_alpha;
+        test_results.exact_test = true;
+    else
+        test_results.estimated_alpha = NaN;
+        test_results.exact_test = false;
+    end
 
 end
 

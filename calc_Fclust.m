@@ -131,5 +131,12 @@ function test_results = calc_Fclust(data, dims, n_perm, alpha, chan_hood, thresh
     test_results.df = [df_effect, df_res];
     test_results.clust_info = clust_info;
     test_results.estimated_alpha = est_alpha;
+    if ndims(reduced_data) == 4
+        test_results.estimated_alpha = est_alpha;
+        test_results.exact_test = true;
+    else
+        test_results.estimated_alpha = NaN;
+        test_results.exact_test = false;
+    end
 
 end

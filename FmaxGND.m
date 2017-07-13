@@ -398,7 +398,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
                                  'F_obs', NaN(n_electrodes, n_time_pts),  'Fmax_crit', NaN, ... 
-                                 'df', NaN(1, 2), 'estimated_alpha', NaN), length(effects), 1);
+                                 'df', NaN(1, 2), 'estimated_alpha', NaN, 'exact_test', NaN), length(effects), 1);
     for i = 1:length(effects)
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
@@ -427,6 +427,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                      'desired_alphaORq', alpha, ...
                      'estimated_alpha', [], ...
                      'seed_state', seed_state, ...
+                     'exact_test', [], ...
                      'null_test', [], ...
                      'adj_pval', [], ...
                      'F_obs', [], ...
@@ -445,6 +446,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         results.F_crit    = test_results.Fmax_crit;
         results.df        = test_results.df;
         results.estimated_alpha = test_results.estimated_alpha;
+        results.exact_test = test_results.exact_test;
     else
         for i = 1:length(effects)
             results.null_test.(effects_labels{i}) = test_results(i).h;
@@ -452,8 +454,9 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
             results.F_obs.(effects_labels{i})     = test_results(i).F_obs;
             results.F_crit.(effects_labels{i})    = test_results(i).Fmax_crit;
             results.df.(effects_labels{i})        = test_results(i).df;
+            results.estimated_alpha.(effects_labels{i}) = test_results(i).estimated_alpha;
+            results.exact_test.(effects_labels{i}) = test_results(i).exact_test;
         end
-        results.estimated_alpha = test_results(1).estimated_alpha;
     end
                  
     %Add results struct to GND
