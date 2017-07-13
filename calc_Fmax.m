@@ -17,19 +17,12 @@
 %                 calculate the AxB interaciton, dims  = [3, 4].
 % n_perm        - Number of permutations to use to calculate the null distribution
 % alpha         - Family-wise alpha level of the test
-% int_method    - A string that should be either 'exact' or 'approximate'.
-%                 If 'exact', the method of restricted permutations will
-%                 be used to conduct a test that controls the Type I error
-%                 rate at alpha. If 'approximate', the method of permutation 
-%                 of residuals will be used to conduct a test with Type I 
-%                 error rate asymptotic to alpha as noise decreases and/or 
-%                 number of subjects increases.
 %
 %OUTPUT
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 11 July 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -46,9 +39,10 @@
 %             on earlier versions
 % 6/12/17   - Added estimated alpha; added verblevel reports
 % 7/10/17   - Now supports between subjects factors
+% 7/13/17   - Updated for elimination of int_method input
 
 
-function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, int_method)
+function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
     
     global VERBLEVEL
 
@@ -61,7 +55,7 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, int_meth
     
     %Eliminate factors not involved in this effect by averaging or
     %reduce exact interaction to one-way via subtraction
-    [reduced_data, new_dims] = reduce_data(data, dims, int_method);
+    [reduced_data, new_dims] = reduce_data(data, dims);
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
@@ -107,7 +101,13 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, int_meth
     test_results.F_obs = F_obs;
     test_results.Fmax_crit = Fmax_crit;
     test_results.df = [df_effect, df_res];
-    test_results.estimated_alpha = est_alpha;
+    if ndims(reduced_data) == 4
+        test_results.estimated_alpha = est_alpha;
+        test_results.exact_test = true;
+    else
+        test_results.estimated_alpha = NaN;
+        test_results.exact_test = false;
+    end
 
 end
 
