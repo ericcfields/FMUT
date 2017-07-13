@@ -110,7 +110,7 @@
 % electrodes is based on the GND.chanlocs(x).theta coordinate.  Anterior to
 % posterior organization of electrodes is based on GND.chanlocs(x).radius.
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields (modified from sig_raster.m by David Groppe)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -128,6 +128,7 @@
 % 6/13/17      - Initial version in progress
 % 6/14/17      - Corrected problems with titles for one-way ANOVA
 % 6/22/17      - Changed color scale to differentiate from sig_raster
+% 7/13/17      - Updated for changes to estimated_alpha
 
 
 function [img, h_ax] = F_sig_raster(GND_GRP_specGND_or_fname,test_id,varargin)
@@ -196,6 +197,7 @@ if isempty(p.Results.effect)
         Fval        = results.F_obs;
         pval        = results.adj_pval;
         effect_name = results.factors{1};
+        estimated_alpha = results.estimated_alpha;
     end
 else
     if ~isfield(results.F_obs, p.Results.effect)
@@ -205,6 +207,11 @@ else
         Fval        = results.F_obs.(p.Results.effect);
         pval        = results.adj_pval.(p.Results.effect);
         effect_name = p.Results.effect;
+        if isnan(results.n_perm)
+            estimated_alpha = results.estimated_alpha;
+        else
+            estimated_alpha = results.estimated_alpha.(p.Results.effect);
+        end
     end
 end
 
@@ -463,7 +470,7 @@ if VERBLEVEL,
     if fdr_crct,
         fprintf('q level of critical F-scores: %f.\n',results.desired_alphaORq);
     else
-        fprintf('Estimated alpha level of critical F-scores: %f.\n',results.estimated_alpha);
+        fprintf('Estimated alpha level of critical F-scores: %f.\n',estimated_alpha);
     end
 end
 
@@ -507,10 +514,10 @@ for a=left,
         end
     else
         if strcmpi(use_color,'rgb')
-            mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.estimated_alpha);
+            mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq);
             img(ct,used_tpt_ids)=Fval(elec_id,:);
         else
-            img(ct,used_tpt_ids)=(pval(elec_id,:)<results.estimated_alpha).*sign(Fval(elec_id,:));
+            img(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORqa).*sign(Fval(elec_id,:));
         end
     end
     chan_lab{ct}=GND.chanlocs(use_chans(elec_id)).labels;
@@ -535,10 +542,10 @@ if ~isempty(midline),
             end
         else
             if strcmpi(use_color,'rgb')
-                mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.estimated_alpha);
+                mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq);
                 img(ct,used_tpt_ids)=Fval(elec_id,:);
             else
-                img(ct,used_tpt_ids)=(pval(elec_id,:)<results.estimated_alpha).*sign(Fval(elec_id,:));
+                img(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq).*sign(Fval(elec_id,:));
             end
         end
         chan_lab{ct-length(skipped)}=GND.chanlocs(use_chans(elec_id)).labels;
@@ -564,10 +571,10 @@ if ~isempty(right),
             end
         else
             if strcmpi(use_color,'rgb')
-                mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.estimated_alpha);
+                mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq);
                 img(ct,used_tpt_ids)=Fval(elec_id,:);
             else
-                img(ct,used_tpt_ids)=(pval(elec_id,:)<results.estimated_alpha).*sign(Fval(elec_id,:));
+                img(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq).*sign(Fval(elec_id,:));
             end
         end
         chan_lab{ct-length(skipped)}=GND.chanlocs(use_chans(elec_id)).labels;

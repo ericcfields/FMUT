@@ -11,7 +11,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 12 July 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -36,6 +36,7 @@
 % 6/20/17   - Output for mean window analyses
 % 7/11/17   - Now works with GRP variables
 % 7/12/17   - Fixed error with long effect names
+% 7/13/17   - Compatible with removal of int_method
 
 function Ftest2xls(GND, test_id, output_fname, format_output)
     
@@ -101,7 +102,6 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
                'Mean window', results.mean_wind; ...
                'Electrodes', [sprintf('%s, ', results.include_chans{1:end-1}), results.include_chans{end}]; ...
                'Multiple comparisons correction method', results.mult_comp_method; ...
-               'Interaction method', results.interaction_method; ...
                'Number of permutations', results.n_perm; ...
                'Alpha or q(FDR)', results.desired_alphaORq; ...
                '# subjects', n_subs};

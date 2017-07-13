@@ -5,8 +5,7 @@
 % GND = FclustGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
 %                 'factor_levels', [3, 2], 'time_wind', [500, 800], ...
 %                 'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4, ...
-%                 'chan_hood', 0.61, 'thresh_p', 0.05, 'alpha', 0.05, 
-%                 'int_method', 'exact');
+%                 'chan_hood', 0.61, 'thresh_p', 0.05, 'alpha', 0.05);
 %
 %
 %REQUIRED INPUTS
@@ -21,16 +20,6 @@
 %                  moving order within the bins provided
 %
 %OPTIONAL INPUTS
-% int_method     - A string that should be either 'exact' or 'approximate'.
-%                  If 'exact', the method of restricted permutations will
-%                  be used to conduct a test that controls the Type I error
-%                  rate at alpha (assuming enough permutations). 
-%                  If 'approximate', the method of permutation of residuals 
-%                  will be used to conduct a test with Type I error rate 
-%                  asymptotic to alpha as noise decreases and/or number of 
-%                  subjects increases. 
-%                  See explanation and references below. {default:
-%                  'exact' where possible, otherwise 'approximate'}
 % chan_hood      - A scalar or a 2D symmetric binary matrix that indicates
 %                  which channels are considered neighbors of other 
 %                  channels. E.g., if chan_hood(2,10)=1, then Channel 2 
@@ -139,10 +128,8 @@
 %
 %DESCRIPTION
 %Main effects are calculated by permuting within each condition of the other
-%factor(s). For a factor with two levels, this is similar to the cluster t-test 
-%of the clustGND function. However, because F-values are always positive and are
-%in squared units, the clusters and their relative sizes will not necessarily be 
-%the same.
+%factor(s). For a factor with two levels, this is equivalent to the tmaxGND 
+%function (but will of course give results as an F-test).
 %
 %For interaction effects where more than one factor has more than two levels, 
 %it is not possible to conduct a test that controls the Type I error exactly 
@@ -150,27 +137,17 @@
 %of residuals method first described by Still & White (1981) and Freedman & Lane (1983). 
 %The Type I error rate of this test is asymptotic to the nominal alpha as 
 %sample size and/or signal to noise ratio increase.
-%For designs where an exact test is possible, this function can use a
-%restricted permutation method to conduct an exact test. Optionally you
-%can also use the approximate method for such cases. See below for references.
+%For designs where an exact test is possible, this function uses a
+%restricted permutation method to conduct an exact test.
 %
 %The statistic used is the cluster mass: i.e., the sum of all the F-values
 %included in a given cluster.
 %
-%REFERENCES FOR PERMUTATION FACTORIAL ANOVA AND GLM
-%Anderson, M. J. (2001). Permutation tests for univariate or multivariate analysis of variance and regression. Canadian Journal of Fisheries and Aquatic Sciences, 58(3), 626-639.
-%Anderson, M., & Braak, C. T. (2003). Permutation tests for multi-factorial analysis of variance. Journal of statistical computation and simulation, 73(2), 85-113.
-%Wheldon, M. C., Anderson, M. J., & Johnson, B. W. (2007). Identifying treatment effects in multi-channel measurements in electroencephalographic studies: Multivariate permutation tests and multiple comparisons. Australian & New Zealand Journal of Statistics, 49(4), 397-413. 
-%Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
-%
-%REFERENCES FOR CLUSTER MASS METHOD
-%Bullmore, E. T., Suckling, J., Overmeyer, S., Rabe-Hesketh, S., Taylor, E., & Brammer, M. J. (1999). Global, voxel, and cluster tests, by theory and permutation, for a difference between two groups of structural MR images of the brain. IEEE Transactions on Medical Imaging, 18(1), 32-42. 
-%Maris, E., & Oostenveld, R. (2007). Nonparametric statistical testing of EEG- and MEG-data. Journal of Neuroscience Methods, 164(1), 177-190.
-%Groppe, D. M., Urbach, T. P., & Kutas, M. (2011). Mass univariate analysis of event-related brain potentials/fields I: A critical tutorial review. Psychophysiology, 48(12), 1711-1725.
-%
+%See the FMUT documentation for more information:
+%https://github.com/ericcfields/FMUT/wiki
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 27 June 2017
+%VERSION DATE: 13 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -206,6 +183,7 @@
 %                changed used_tpt_ids field to cell array for mean window
 %                analyses
 % 6/27/17      - More information in command window output
+% 7/13/17      - int_method input eliminated
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -228,7 +206,6 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
     p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && isscalar(x) && x<=1 && x>=0));
     p.addParameter('reproduce_test',false,    @(x) (isnumeric(x) && isscalar(x)));
-    p.addParameter('int_method',    '',       @(x) (any(strcmpi(x, {'exact', 'approx', 'approximate', 'none'}))));
     p.addParameter('mean_wind',     'no',     @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && isscalar(x) && x>=0 && x<=3))
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
@@ -265,7 +242,6 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     time_wind     = p.Results.time_wind;
     n_perm        = p.Results.n_perm;
     alpha         = p.Results.alpha;
-    int_method    = p.Results.int_method;
     chan_hood     = p.Results.chan_hood;
     
     %Check for required name-value inputs
@@ -319,9 +295,6 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if ischar(factor_names)
         factor_names = {factor_names};
     end
-    if strcmpi(int_method, 'approximate')
-        int_method = 'approx';
-    end
     time_wind = sort(time_wind, 2);
     time_wind = sort(time_wind, 1);
     
@@ -329,22 +302,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if isempty(time_wind)
         time_wind = [0, GND.time_pts(end)];
     end
-    if isempty(int_method)
-        if length(factor_levels) == 1
-            int_method = 'none';
-        elseif sum(factor_levels > 2) <= 1
-            int_method = 'exact';
-            if VERBLEVEL
-                fprintf('\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee >>help FclustGND for more information.\n')
-            end
-        else
-            int_method = 'approx';
-            if VERBLEVEL
-                fprintf('\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee >>help FclustGND for more information.\n')
-            end
-        end
-    end
-    
+
     %Check for errors in input
     if length(factor_names) ~= length(factor_levels)
         error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs.');
@@ -352,20 +310,11 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if length(factor_levels) > 2
         warning('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
     end
-    if length(factor_levels) > 3 && strcmpi(int_method, 'approx')
-        error('FclustGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
-    end
-    if strcmpi(int_method, 'exact') && sum(factor_levels > 2) > 1
-        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See >>help FclustGND for more information.');
+    if sum(factor_levels>2) > 3
+        error('Designs with more than three factors with more than two levels are not supported by FclustGND.')
     end
     if ~isequal(size(time_wind), [1, 2])
         error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
-    end
-    if isequal(factor_levels, [2, 2]) && strcmpi(int_method, 'approx')
-        button = questdlg('WARNING: The type I error rate is not well-controlled by the approximate method of calculating the interaction for a 2x2 design. Are you sure you want to proceed?', 'WARNING');
-        if ~strcmp(button, 'Yes')
-            return;
-        end
     end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
@@ -459,13 +408,13 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
                                  'F_obs', NaN(n_electrodes, n_time_pts), 'df', NaN(1, 2), 'clust_info', struct, ...
-                                 'estimated_alpha', NaN), ...
+                                 'estimated_alpha', NaN, 'exact_test', NaN), ...
                                  length(effects), 1);
     for i = 1:length(effects)
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
-        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, int_method, chan_hood, p.Results.thresh_p);
+        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, chan_hood, p.Results.thresh_p);
     end
    
 
@@ -484,11 +433,11 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
                      'include_chans', {{GND.chanlocs(electrodes).labels}}, ...
                      'used_chan_ids', electrodes, ...
                      'mult_comp_method', 'cluster mass perm test', ...
-                     'interaction_method', int_method, ...
                      'n_perm', n_perm, ...
                      'desired_alphaORq', alpha, ...
                      'estimated_alpha', [], ...
                      'seed_state', seed_state, ...
+                     'exact_test', [], ...
                      'null_test', [], ...
                      'adj_pval', [], ...
                      'F_obs', [], ...
@@ -507,6 +456,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         results.df              = test_results.df;
         results.clust_info      = test_results.clust_info;
         results.estimated_alpha = test_results.estimated_alpha;
+        results.exact_test = test_results.exact_test;
     else
         for i = 1:length(effects)
             results.null_test.(effects_labels{i})       = test_results(i).h;
@@ -514,8 +464,9 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
             results.F_obs.(effects_labels{i})           = test_results(i).F_obs;
             results.df.(effects_labels{i})              = test_results(i).df;
             results.clust_info.(effects_labels{i})      = test_results(i).clust_info;
+            results.estimated_alpha.(effects_labels{i}) = test_results(i).estimated_alpha;
+            results.exact_test.(effects_labels{i}) = test_results(i).exact_test;
         end
-        results.estimated_alpha = test_results(1).estimated_alpha;
     end
                  
     %Add results struct to GND
