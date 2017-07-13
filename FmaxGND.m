@@ -5,7 +5,7 @@
 % GND = FmaxGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
 %               'factor_levels', [3, 2], 'time_wind', [500, 800], ...
 %               'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4, ...
-%               'alpha', 0.05, 'int_method', 'exact');
+%               'alpha', 0.05);
 %
 %REQUIRED INPUTS
 % GND_or_fname   - A Mass Univariate Toolbox GND struct or a string
@@ -19,16 +19,6 @@
 %                  moving order within the bins provided
 %
 %OPTIONAL INPUTS
-% int_method     - A string that should be either 'exact' or 'approximate'.
-%                  If 'exact', the method of restricted permutations will
-%                  be used to conduct a test that controls the Type I error
-%                  rate at alpha (assuming enough permutations). 
-%                  If 'approximate', the method of permutation of residuals 
-%                  will be used to conduct a test with Type I error rate 
-%                  asymptotic to alpha as noise decreases and/or number of 
-%                  subjects increases. See explanation and references 
-%                  below. {default:'exact' where possible, otherwise 
-%                  'approximate'}
 % time_wind      - 2D matrix of pairs of time values specifying the beginning 
 %                  and end of the time windows in ms (e.g., 
 %                  [200 400; 500, 800]). Every single time point in 
@@ -126,18 +116,14 @@
 %of residuals method first described by Still & White (1981) and Freedman & Lane (1983). 
 %The Type I error rate of this test is asymptotic to the nominal alpha as 
 %sample size and/or signal to noise ratio increase.
-%For designs where an exact test is possible, this function can use a
-%restricted permutation method to conduct an exact test. Optionally you
-%can also use the approximate method for such cases. See below for references.
+%For designs where an exact test is possible, this function uses a
+%restricted permutation method to conduct an exact test.
 %
-%REFERENCES FOR PERMUTATION FACTORIAL ANOVA AND GLM
-%Anderson, M. J. (2001). Permutation tests for univariate or multivariate analysis of variance and regression. Canadian Journal of Fisheries and Aquatic Sciences, 58(3), 626-639.
-%Anderson, M., & Braak, C. T. (2003). Permutation tests for multi-factorial analysis of variance. Journal of statistical computation and simulation, 73(2), 85-113.
-%Wheldon, M. C., Anderson, M. J., & Johnson, B. W. (2007). Identifying treatment effects in multi-channel measurements in electroencephalographic studies: Multivariate permutation tests and multiple comparisons. Australian & New Zealand Journal of Statistics, 49(4), 397-413. 
-%Winkler, A. M., Ridgway, G. R., Webster, M. A., Smith, S. M., & Nichols, T. E. (2014). Permutation inference for the general linear model. NeuroImage, 92, 381-397.
+%See the FMUT documentation for more information:
+%https://github.com/ericcfields/FMUT/wiki
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -174,6 +160,7 @@
 %                  changed used_tpt_ids field to cell array for mean window
 %                  analyses
 % 6/22/17        - Now using MATLAB input parsing system
+% 7/13/17        - int_method input eliminated
 
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
@@ -197,7 +184,6 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
     p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
     p.addParameter('reproduce_test',false,    @(x) isnumeric(x));
-    p.addParameter('int_method',    '',       @(x) (any(strcmpi(x, {'exact', 'approx', 'approximate', 'none'}))));
     p.addParameter('mean_wind',     'no',     @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && length(x)==1 && x>=0 && x<=3))
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
@@ -231,7 +217,6 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     time_wind     = p.Results.time_wind;
     n_perm        = p.Results.n_perm;
     alpha         = p.Results.alpha;
-    int_method    = p.Results.int_method;
     
     %Check for required name-value inputs
     if isempty(bins)
@@ -284,30 +269,12 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     if ischar(factor_names)
         factor_names = {factor_names};
     end
-    if strcmpi(int_method, 'approximate')
-        int_method = 'approx';
-    end
     time_wind = sort(time_wind, 2);
     time_wind = sort(time_wind, 1);
     
     %Set defaults for missing arguments
     if isempty(time_wind)
         time_wind = [0, GND.time_pts(end)];
-    end
-    if isempty(int_method)
-        if length(factor_levels) == 1
-            int_method = 'none';
-        elseif sum(factor_levels > 2) <= 1
-            int_method = 'exact';
-            if VERBLEVEL
-                fprintf('\nUsing restricted permutations to conduct an exact test of the interaction effect.\nSee >>help FmaxGND for more information.\n')
-            end
-        else
-            int_method = 'approx';
-            if VERBLEVEL
-                fprintf('\nAn exact test of the interaction is not possible for this design.\nUsing permutation of residuals method to conduct an approximate test.\nSee >>help FmaxGND for more information.\n')
-            end
-        end
     end
     
     %Check for errors in input
@@ -317,17 +284,8 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     if length(factor_levels) > 2
         warning('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
     end
-    if length(factor_levels) > 3 && strcmpi(int_method, 'approx')
-        error('FmaxGND does not currently support designs with more than three factors using the approximate method of calculating interaction effects.');
-    end
-    if strcmpi(int_method, 'exact') && sum(factor_levels > 2) > 1
-        error('An exact test of the interaction is not possible if more than one factor has more than two levels. See >>help FmaxGND for more information.');
-    end
-    if isequal(factor_levels, [2, 2]) && strcmpi(int_method, 'approx')
-        button = questdlg('WARNING: The type I error rate is not well-controlled by the approximate method of calculating the interaction for a 2x2 design. Are you sure you want to proceed?', 'WARNING');
-        if ~strcmp(button, 'Yes')
-            return;
-        end
+    if sum(factor_levels>2) > 3
+        error('Designs with more than three factors with more than two levels are not supported by FmaxGND.')
     end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
@@ -446,7 +404,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
         %Calculate test
-        test_results(i) = calc_Fmax(the_data, effects{i}+2, n_perm, alpha, int_method);       
+        test_results(i) = calc_Fmax(the_data, effects{i}+2, n_perm, alpha);       
     end
     
 
@@ -465,7 +423,6 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                      'include_chans', {{GND.chanlocs(electrodes).labels}}, ...
                      'used_chan_ids', electrodes, ...
                      'mult_comp_method', 'Fmax perm test', ...
-                     'interaction_method', int_method, ...
                      'n_perm', n_perm, ...
                      'desired_alphaORq', alpha, ...
                      'estimated_alpha', [], ...

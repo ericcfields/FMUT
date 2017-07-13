@@ -25,7 +25,7 @@
 % test_results - A struct with results of the mass univariate ANOVA
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -41,6 +41,8 @@
 % 4/9/17  - Added documentation
 % 6/22/17 - Updated to eliminate repeated code
 % 6/23/17 - Added multiple comparisons corrections
+% 7/13/17 - Updated to reflect that ANOVA sub-functions no longer require
+%           int_method input
 
 
 function test_results = calc_param_ANOVA(data, dims, alphaORq, correction)
@@ -56,7 +58,7 @@ function test_results = calc_param_ANOVA(data, dims, alphaORq, correction)
     n_time_pts   = size(data, 2);
 
     %Average across factors not involved in this effect
-    reduced_data = reduce_data(data, dims, 'none');
+    reduced_data = reduce_data(data, dims);
     
     %Calculate ANOVA with single permutation to get F-obs
     [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, 1);

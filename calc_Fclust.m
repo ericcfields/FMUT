@@ -12,14 +12,6 @@
 %                 calculate the AxB interaciton, dims  = [3, 4].
 % n_perm        - Number of permutations to use to calculate the null distribution
 % alpha         - Family-wise alpha level of the test
-% int_method    - A string that should be either 'exact' or 'approximate'.
-%                 If 'exact', the method of restricted permutations will
-%                 be used to conduct a test that controls the Type I error
-%                 rate at alpha (assuming enough permutations). 
-%                 If 'approximate', the method of permutation of residuals 
-%                 will be used to conduct a test with Type I error rate 
-%                 asymptotic to alpha as noise decreases and/or number of 
-%                 subjects increases.
 % chan_hood     - A 2D symmetric binary matrix that indicates
 %                 which channels are considered neighbors of other 
 %                 channels. E.g., if chan_hood(2,10)==1, then Channel 2 
@@ -34,7 +26,7 @@
 % test_results - A struct with results of the cluster mass test
 %
 %
-%VERSION DATE: 27 June 2017
+%VERSION DATE: 13 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -53,8 +45,9 @@
 % 6/12/17   - Added verblevel reports
 % 6/13/17   - null test for clusters are now logicals
 % 6/22/17   - major re-organization of code to reduce repeated code
+% 7/13/17   - Updated for elimination of int_method input
 
-function test_results = calc_Fclust(data, dims, n_perm, alpha, int_method, chan_hood, thresh_p)
+function test_results = calc_Fclust(data, dims, n_perm, alpha, chan_hood, thresh_p)
 
     global VERBLEVEL
 
@@ -66,7 +59,7 @@ function test_results = calc_Fclust(data, dims, n_perm, alpha, int_method, chan_
     
     %Eliminate factors not involved in this effect by averaging or
     %reduce exact interaction to one-way via subtraction
-    reduced_data = reduce_data(data, dims, int_method);
+    reduced_data = reduce_data(data, dims);
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
     [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
