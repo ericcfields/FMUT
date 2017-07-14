@@ -14,10 +14,10 @@ VERBLEVEL = 0;
 n_electrodes = 1;
 n_time_pts = 1;
 n_subs = 16;
-wg_design = [2, 2];
+wg_design = [3, 3, 3];
 
 %Effect
-dims = 3;
+dims = [3 4 5];
 
 %Parameters
 n_exp = 1e3;
@@ -26,7 +26,7 @@ alpha = 0.05;
 
 %Add effects
 main_effect = 0;
-int_effect = 20;
+int_effect = 5;
 
 %Pre-allocate results struct
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
@@ -42,7 +42,7 @@ test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
 %% Simulate experiments
 
 tic
-for i = 1:n_exp
+parfor i = 1:n_exp
     
     %Simulate null data
     data = normrnd(0, 1, [n_electrodes, n_time_pts, wg_design, n_subs]);
@@ -57,6 +57,11 @@ for i = 1:n_exp
             data(:, :, 1, 2, :) = data(:, :, 1, 2, :) - int_effect;
             data(:, :, 2, 1, :) = data(:, :, 2, 1, :) - int_effect;
             data(:, :, 2, 2, :) = data(:, :, 2, 2, :) + int_effect;
+        elseif ndims(data) == 6
+            data(:, :, 1, 1, 1, :) = data(:, :, 1, 1, 1, :) + int_effect;
+            data(:, :, 1, 2, 1, :) = data(:, :, 1, 2, 1, :) - int_effect;
+            data(:, :, 2, 1, 1, :) = data(:, :, 2, 1, 1, :) - int_effect;
+            data(:, :, 2, 2, 1, :) = data(:, :, 2, 2, 1, :) + int_effect;
         end
     end
     
@@ -69,8 +74,8 @@ toc
 
 %% Report results
 
-fprintf('\nRejection rate = %f\n', mean(mean([test_results(:).h])))
-fprintf('Mean p = %f\n', mean(mean([test_results(:).p])))
-fprintf('Mean F_obs = %f\n', mean(mean([test_results(:).F_obs])))
-fprintf('Mean F_crit = %f\n', mean(mean([test_results(:).Fmax_crit])))
-fprintf('Parametric F_crit = %f\n\n', finv(.95, test_results(1).df(1), test_results(1).df(2)))
+fprintf('\nRejection rate = %.3f\n', mean(mean([test_results(:).h])))
+fprintf('Mean p = %.3f\n', mean(mean([test_results(:).p])))
+fprintf('Mean F_obs = %.2f\n', mean(mean([test_results(:).F_obs])))
+fprintf('Mean F_crit = %.2f\n', mean(mean([test_results(:).Fmax_crit])))
+fprintf('Parametric F_crit = %.2f\n\n', finv(.95, test_results(1).df(1), test_results(1).df(2)))
