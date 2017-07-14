@@ -1,4 +1,4 @@
-%Function to conduct an Fmax permutation test for designs with a between
+%Function to conduct an Fmax permutation test for ANOVA designs with a between
 %subjects factor
 %
 %EXAMPLE USAGE
@@ -14,10 +14,10 @@
 %                     has been saved to disk (with full path if not in current
 %                     working directory)
 % bins              - Array with bins to use in ANOVA
-% wg_factor_names   - cell array with names of within-subjectfactors in fastest 
+% wg_factor_names   - cell array with names of within-subject factors in fastest 
 %                     to slowest moving order within the bins provided
-% wg_factor_levels  - number of factors in each level in fastest to slowest
-%                     moving order within the bins provided
+% wg_factor_levels  - number of levels in each within subject factorin fastest 
+%                     to slowest moving order within the bins provided
 %
 %OPTIONAL INPUTS
 % bg_factor_name - A string specifying the name of the between-subjects
@@ -125,7 +125,7 @@
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
 %
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 14 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -142,6 +142,7 @@
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
 % 7/11/17 - First version modified from FmaxGND
 % 7/13/17 - updated to eliminated int_method
+% 7/14/17 - Command window output moved to separate function
 
 
 function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargin)
@@ -189,7 +190,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     elseif isstruct(GRP_or_fname)
         GRP = GRP_or_fname;
     else
-        error('The GRP variable provided does not seem to be a valid GRP struct or filepath to a GRP struct');
+        error('The GRP variable provided does not seem to be a valid GRP struct or filepath to a GRP struct.');
     end
     
     %Assign some variables for easier reference
@@ -261,13 +262,13 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     %Check for errors in input
     if length(wg_factor_names) ~= length(wg_factor_levels)
-        error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs');
+        error('The number of factors does not match in the ''wg_factor_names'' and ''wg_factor_levels'' inputs');
     end
     if sum(wg_factor_levels>2) > 2
         error('FmaxGRP cannot handle split plot designs with more than two within-subjects factors with more than two levels')
     end
     if prod(wg_factor_levels) ~= length(bins)
-        error('Number of bins does not match design.')
+        error('Number of bins does not match the design specified by thte ''wg_factor_levels'' input.')
     end
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
@@ -279,7 +280,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     end
     if p.Results.reproduce_test
         if ~isfield(GRP, 'F_tests')
-            error('You tried to reproduce test %d, but there are not results in GRP.F_tests.', p.Results.reproduce_test);
+            error('You tried to reproduce test %d, but there are no results in GRP.F_tests.', p.Results.reproduce_test);
         elseif p.Results.reproduce_test > length(GRP.F_tests)
             error('You tried to reproduce test %d, but there are only %d tests in GRP.F_tests.', p.Results.reproduce_test, length(GRP.F_tests));
         end
@@ -366,9 +367,10 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
             the_data = cat(4, the_data, new_data);
         end
         
-        clear GND new_data;
-        
+        clear GND
+    
     end
+    clear new_data
     
     %Report test information
     if VERBLEVEL
@@ -380,12 +382,12 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     %Divide the factors into separate dimensions for factorial ANOVA
     if length(wg_factor_levels) > 1
-        the_data = reshape(the_data,[n_electrodes, n_time_pts, wg_factor_levels, sum(cond_subs)]);
+        the_data = reshape(the_data, [n_electrodes, n_time_pts, wg_factor_levels, sum(cond_subs)]);
     end
     
     %Figure out the effects we need to calculate
-    factor_names     = [wg_factor_names p.Results.bg_factor_name];
-    factor_levels    = [wg_factor_levels length(cond_subs)];
+    factor_names  = [wg_factor_names p.Results.bg_factor_name];
+    factor_levels = [wg_factor_levels length(cond_subs)];
     [effects, effects_labels] = get_effects(factor_names);
     
     
@@ -469,73 +471,13 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         F_crit   = results.F_crit;
     end
     
-    %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
-    
-    if VERBLEVEL
-        fprintf('\n##### RESULTS #####\n');
-        for i = 1:length(effects)
-            fprintf('\n%s effect\n', effects_labels{i});
-            if length(effects) == 1
-                if any(results.null_test(:))
-                    fprintf('Critical F-value: %.3f\n', results.F_crit);
-                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
-                            fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
-                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
-                        for t = 1:size(time_wind, 1)
-                            fprintf('Significant electrodes for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
-                            fprintf('%s ', results.include_chans{results.null_test(:, t)});
-                            fprintf('\n');
-                        end
-                    else
-                        fprintf('Electrodes and time points with significant effects:\n');
-                        for t = 1:length(results.used_tpt_ids)
-                            if any(results.null_test(:, t))
-                                fprintf('%d ms, electrode(s): ', GRP.time_pts(results.used_tpt_ids(t)));
-                                fprintf('%s ', results.include_chans{results.null_test(:, t)});
-                                fprintf('\n');
-                            end
-                        end
-                    end
-                    fprintf('All significant corrected p-values are between %f and %f.\n', ... 
-                             max(results.adj_pval(results.adj_pval <= .05)), ... 
-                             min(results.adj_pval(:)));
-                else
-                    fprintf('NO significant time points or electrodes.\n');
-                end
-            else
-                if any(results.null_test.(effects_labels{i})(:))
-                    fprintf('Critical F-value: %.3f\n', results.F_crit.(effects_labels{i}));
-                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
-                            fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
-                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
-                        for t = 1:size(time_wind, 1)
-                            fprintf('Significant electrodes for time windonw %d - %d: ', time_wind(t, 1), time_wind(t, 2));
-                            fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
-                            fprintf('\n');
-                        end
-                    else
-                        fprintf('Electrodes and time points with significant effects:\n');
-                        for t = 1:length(results.used_tpt_ids)
-                            if any(results.null_test.(effects_labels{i})(:, t))
-                                fprintf('%d ms, electrode(s): ', GRP.time_pts(results.used_tpt_ids(t)));
-                                fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
-                                fprintf('\n');
-                            end
-                        end
-                    end
-                    fprintf('All significant corrected p-values are between %f and %f.\n', ... 
-                             max(results.adj_pval.(effects_labels{i})(results.adj_pval.(effects_labels{i}) <= .05)), ... 
-                             min(results.adj_pval.(effects_labels{i})(:)));
-                else
-                    fprintf('NO significant time points or electrodes.\n');
-                end
-            end
-        end
 
-    end
- 
+    %% ~~~~~ OUTPUT RESULTS ~~~~~
     
-    %% ~~~~~ SAVE RESULTS TO DISK ~~~~~
+    %Output results to command window
+    if VERBLEVEL
+        report_Fmax(results, effects, effects_labels)
+    end
     
     %Plot results
     if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')
