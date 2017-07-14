@@ -64,11 +64,12 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
         if ndims(reduced_data) == 3
             [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
+            exact_test = true;
         else
-            [F_dist, df_effect, df_res] = perm_spANOVA(reduced_data, cond_subs, new_dims, n_perm);
+            [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(reduced_data, cond_subs, new_dims, n_perm);
         end
     else
-        [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, n_perm);
+        [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(reduced_data, n_perm);
     end
     F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     
@@ -104,7 +105,7 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
     test_results.F_obs = F_obs;
     test_results.Fmax_crit = Fmax_crit;
     test_results.df = [df_effect, df_res];
-    if ndims(reduced_data) == 4
+    if exact_test
         test_results.estimated_alpha = est_alpha;
         test_results.exact_test = true;
     else

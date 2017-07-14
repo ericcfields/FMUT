@@ -20,6 +20,7 @@
 %                 permutation. The first permutation is F-observed.
 % df_effect     - numerator degrees of freedom
 % df_res        - denominator degrees of freedom
+% exact_test    - Boolean specifying whether the test was an exact test
 %
 %
 %VERSION DATE: 14 July 2017
@@ -34,20 +35,22 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, n_perm)
+function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm)
 
     if ndims(data) == 3 && dims == 3
         [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm);
+        exact_test = true;
     elseif ndims(data) == 4
-        [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm);
+        [F_dist, df_effect, df_res, exact_test] = twoway(data, cond_subs, dims, n_perm);
     elseif ndims(data) > 4
         [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm);
+        exact_test = false;
     end
     
 end
 
 
-function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
+function [F_dist, df_effect, df_res, exact_test] = twoway(data, cond_subs, dims, n_perm)
 
     global VERBLEVEL
 
@@ -64,6 +67,9 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
     %Interaction residuals
     if length(dims) == 2
         int_res = get_int_res(data, cond_subs, dims);
+        exact_test = false;
+    else
+        exact_test = true;
     end
 
     %Calculate degrees of freedom
@@ -145,7 +151,7 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
 
     end
 
-    %degrees of freedom
+    %degrees of freedom and exact test
     if length(dims) == 1
         if dims == 3
             df_effect = dfB;

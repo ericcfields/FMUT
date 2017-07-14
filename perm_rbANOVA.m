@@ -15,6 +15,7 @@
 %                 permutation. The first permutation is F-observed.
 % df_effect     - numerator degrees of freedom
 % df_res        - denominator degrees of freedom
+% exact_test    - Boolean specifying whether the test was an exact test
 %
 %
 %VERSION DATE: 12 July 2017
@@ -33,15 +34,18 @@
 % 6/22/17   - First version. Code re-organized from other functions.
 % 7/12/17   - Updated to work with BG-compliant get_int_res
 
-function [F_dist, df_effect, df_res] = perm_rbANOVA(data, n_perm)
+function [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, n_perm)
 
     %Calculate appropriate ANOVA
     if ndims(data) == 4
         [F_dist, df_effect, df_res] = oneway(data, n_perm);
+        exact_test = true;
     elseif ndims(data) == 5
         [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm);
+        exact_test = false;
     elseif ndims(data) == 6
         [F_dist, df_effect, df_res] = threeway_approx_int(data, n_perm);
+        exact_test = false;
     end
 
 end

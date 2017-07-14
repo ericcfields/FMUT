@@ -14,14 +14,16 @@
 %                     has been saved to disk (with full path if not in current
 %                     working directory)
 % bins              - Array with bins to use in ANOVA
-% wg_factor_names   - cell array with names of within-subject factors in fastest 
-%                     to slowest moving order within the bins provided
-% wg_factor_levels  - number of levels in each within subject factorin fastest 
-%                     to slowest moving order within the bins provided
 %
 %OPTIONAL INPUTS
-% bg_factor_name - A string specifying the name of the between-subjects
-%                  factor {default: 'Group'}.
+% wg_factor_names   - cell array with names of within-subject factors in fastest 
+%                     to slowest moving order within the bins provided
+%                     {default: no within-subjects factors}
+% wg_factor_levels  - number of levels in each within subject factorin fastest 
+%                     to slowest moving order within the bins provided
+%                     {default: no within-subjects factors}
+% bg_factor_name    - A string specifying the name of the between-subjects
+%                     factor {default: 'Group'}.
 % time_wind      - 2D matrix of pairs of time values specifying the beginning 
 %                  and end of the time windows in ms (e.g., 
 %                  [200 400; 500, 800]). Every single time point in 
@@ -157,7 +159,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     p.addRequired('GRP_or_fname', @(x) ischar(x) || isstruct(x));
     p.addParameter('bins',          [],       @(x) isnumeric(x));
     p.addParameter('wg_factor_names',  '',       @(x) (ischar(x) || iscell(x)));
-    p.addParameter('wg_factor_levels', '',       @(x) isnumeric(x));
+    p.addParameter('wg_factor_levels', [],       @(x) isnumeric(x));
     p.addParameter('bg_factor_name',   'Group',  @(x) ischar(x));
     p.addParameter('time_wind',     [],       @(x) (isnumeric(x) && size(x, 2)==2));
     p.addParameter('include_chans', [],       @(x) iscell(x));
@@ -204,12 +206,6 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     %Check for required name-value inputs
     if isempty(bins)
         error('''bins'' is a required input. See >>help FmaxGRP.');
-    end
-    if isempty(wg_factor_names)
-        error('''wg_factor_names'' is a required input. See >>help FmaxGRP.');
-    end
-    if isempty(wg_factor_levels)
-        error('''wg_factor_levels'' is a required input. See >>help FmaxGRP.');
     end
     
     %Find id numbers for electrodes to use in analysis
@@ -261,8 +257,15 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     end
     
     %Check for errors in input
-    if length(wg_factor_names) ~= length(wg_factor_levels)
-        error('The number of factors does not match in the ''wg_factor_names'' and ''wg_factor_levels'' inputs');
+    if ~isempty(wg_factor_levels)
+        if length(wg_factor_names) ~= length(wg_factor_levels)
+            error('The number of factors does not match in the ''wg_factor_names'' and ''wg_factor_levels'' inputs');
+        end
+        if isempty(wg_factor_names{1})
+            error('''wg_factor_levels'' indicates a within-subjects factor, but no ''wg_factor_names'' input was given.')
+        end
+    elseif ~isempty(wg_factor_names{1})
+        error('''wg_factor_names'' indicates a within-subjects factor, but no ''wg_factor_levels'' input was given.')
     end
     if sum(wg_factor_levels>2) > 2
         error('FmaxGRP cannot handle split plot designs with more than two within-subjects factors with more than two levels')
@@ -383,11 +386,18 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     %Divide the factors into separate dimensions for factorial ANOVA
     if length(wg_factor_levels) > 1
         the_data = reshape(the_data, [n_electrodes, n_time_pts, wg_factor_levels, sum(cond_subs)]);
+    elseif isempty(wg_factor_levels)
+        the_data = reshape(the_data, [n_electrodes, n_time_pts, sum(cond_subs)]);
     end
     
     %Figure out the effects we need to calculate
-    factor_names  = [wg_factor_names p.Results.bg_factor_name];
-    factor_levels = [wg_factor_levels length(cond_subs)];
+    if wg_factor_levels
+        factor_names  = [wg_factor_names p.Results.bg_factor_name];
+        factor_levels = [wg_factor_levels length(cond_subs)];
+    else
+        factor_names = {p.Results.bg_factor_name};
+        factor_levels = length(cond_subs);
+    end
     [effects, effects_labels] = get_effects(factor_names);
     
     
