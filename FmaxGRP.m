@@ -318,6 +318,9 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         elseif ~exist('GND', 'var')
             error('%s does not appear to contain a .GND variable', GRP.GND_fnames{g})
         end
+        if ~all(all(GND.indiv_bin_ct(:, bins)))
+            watchit(sprintf('Some subjects in\n%s\nappear to be missing data from bins used in this test!\nSee: GRP.indiv_bins_ct.', GRP.GND_fnames{g}));
+        end
         
         cond_subs(1, g) = size(GND.indiv_erps, 4); %#ok<AGROW>
         

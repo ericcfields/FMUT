@@ -17,7 +17,7 @@ end
 
 %Clear everything before testing
 close all;
-clearvars;
+clear all; %#ok<CLSCR>
 
 global test_xls_output;
 test_xls_output = true;
