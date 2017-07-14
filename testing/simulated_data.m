@@ -55,8 +55,8 @@ for i = 1:n_exp
         if ndims(data) == 5
             data(:, :, 1, 1, :) = data(:, :, 1, 1, :) + int_effect;
             data(:, :, 1, 2, :) = data(:, :, 1, 2, :) - int_effect;
-            data(:, :, 2, 1, :) = data(:, :, 1, 2, :) - int_effect;
-            data(:, :, 2, 2, :) = data(:, :, 1, 1, :) + int_effect;
+            data(:, :, 2, 1, :) = data(:, :, 2, 1, :) - int_effect;
+            data(:, :, 2, 2, :) = data(:, :, 2, 2, :) + int_effect;
         end
     end
     
