@@ -4,7 +4,7 @@
 
 global test_xls_output
 if isempty(test_xls_output)
-    test_xls_output = false;
+    test_xls_output = true;
 end
 
 %Load GRP

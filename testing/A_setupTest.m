@@ -4,7 +4,7 @@
 %VERSION DATE: 14 July 2017
 
 global test_xls_output;
-test_xls_output = false;
+test_xls_output = true;
 
 if ispc()
 
