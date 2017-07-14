@@ -1,7 +1,7 @@
 %Run simulated normal data to check Type I error rate and power
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 14 July 2017
 
 clearvars;
 
@@ -57,15 +57,18 @@ parfor i = 1:n_exp
         data(1:numel(data)/size(data,ndims(data))*cond_subs(1)) = data(1:numel(data)/size(data,ndims(data))*cond_subs(1)) + bg_effect;
     end
     if int_effect
+        Asubs = 1:cond_subs(1);
+        Bsubs = cond_subs(1)+1:cond_subs(1)+cond_subs(2);
         if ndims(data) == 4 && isequal(dims, [3, 4])
-            Asubs = 1:cond_subs(1);
-            Bsubs = cond_subs(1)+1:cond_subs(1)+cond_subs(2);
             data(:, :, 1, Asubs)  =  data(:, :, 1, Asubs) + int_effect;
             data(:, :, 1, Bsubs) =  data(:, :, 1, Bsubs) - int_effect;
             data(:, :, 3, Asubs)  =  data(:, :, 3, Asubs) - int_effect;
             data(:, :, 3, Bsubs) =  data(:, :, 3, Bsubs) + int_effect;
-        else
-            watchit('Can''t add interaction effect for this design');
+        elseif ndims(data) == 5
+            data(:, :, 1, 1, Asubs) = data(:, :, 1, 1, Asubs) + int_effect;
+            data(:, :, 1, 2, Asubs) = data(:, :, 1, 2, Asubs) - int_effect;
+            data(:, :, 2, 1, Asubs) = data(:, :, 1, 1, Asubs) - int_effect;
+            data(:, :, 2, 2, Asubs) = data(:, :, 2, 2, Asubs) + int_effect;
         end
     end
     
@@ -78,8 +81,8 @@ toc
 
 %% Report results
 
-fprintf('\nRejection rate = %f\n', mean(mean([test_results(:).h])))
-fprintf('Mean p = %f\n', mean(mean([test_results(:).p])))
-fprintf('Mean F_obs = %f\n', mean(mean([test_results(:).F_obs])))
-fprintf('Mean F_crit = %f\n', mean(mean([test_results(:).Fmax_crit])))
-fprintf('Parametric F_crit = %f\n\n', finv(.95, test_results(1).df(1), test_results(1).df(2)))
+fprintf('\nRejection rate = %.3f\n', mean(mean([test_results(:).h])))
+fprintf('Mean p = %.3f\n', mean(mean([test_results(:).p])))
+fprintf('Mean F_obs = %.3f\n', mean(mean([test_results(:).F_obs])))
+fprintf('Mean F_crit = %.3f\n', mean(mean([test_results(:).Fmax_crit])))
+fprintf('Parametric F_crit = %.3f\n\n', finv(.95, test_results(1).df(1), test_results(1).df(2)))

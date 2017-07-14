@@ -14,7 +14,7 @@ VERBLEVEL = 0;
 n_electrodes = 1;
 n_time_pts = 1;
 n_subs = 16;
-wg_design = [3, 2];
+wg_design = [2, 2];
 
 %Effect
 dims = 3;
@@ -25,8 +25,8 @@ n_perm = 1e3;
 alpha = 0.05;
 
 %Add effects
-main_effect = 5;
-int_effect = 0;
+main_effect = 0;
+int_effect = 20;
 
 %Pre-allocate results struct
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
@@ -42,7 +42,7 @@ test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
 %% Simulate experiments
 
 tic
-parfor i = 1:n_exp
+for i = 1:n_exp
     
     %Simulate null data
     data = normrnd(0, 1, [n_electrodes, n_time_pts, wg_design, n_subs]);
@@ -52,7 +52,7 @@ parfor i = 1:n_exp
         data(:, :, 1, :) = data(:, :, 1, :) + main_effect;
     end
     if int_effect
-        if isequal(dims, [3, 4])
+        if ndims(data) == 5
             data(:, :, 1, 1, :) = data(:, :, 1, 1, :) + int_effect;
             data(:, :, 1, 2, :) = data(:, :, 1, 2, :) - int_effect;
             data(:, :, 2, 1, :) = data(:, :, 1, 2, :) - int_effect;
@@ -61,7 +61,7 @@ parfor i = 1:n_exp
     end
     
     %Calculate ANOVA
-    test_results(i) = calc_Fmax(data, dims, n_perm, alpha);
+    test_results(i) = calc_Fmax(data, [], dims, n_perm, alpha);
     
 end
 toc

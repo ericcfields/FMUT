@@ -3,6 +3,9 @@
 %AUTHOR: Eric Fields
 %VERSION DATE: 14 July 2017
 
+
+A_setupTest
+
 global test_xls_output
 user_resp = input('Test spreadsheet output?(y/n) ', 's');
 if strcmpi(user_resp, 'n')
@@ -12,7 +15,6 @@ else
 end
 
 tic
-A_setupTest
 B_FmaxGNDTest
 C_FclustGNDTest
 D_FfdrGNDTest
