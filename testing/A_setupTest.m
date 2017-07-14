@@ -20,17 +20,17 @@ close all;
 clearvars;
 
 global test_xls_output;
-test_xls_output = false;
+test_xls_output = true;
 
 %Clear spreadsheet outputs folder
-    if test_xls_output
-        if ispc()
-            cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\outputs')
-            delete *.xlsx
-            cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\')
-        elseif ismac()
-            cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/outputs')
-            delete *.xlsx
-            cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/')
-        end
+if test_xls_output
+    if ispc()
+        cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\outputs')
+        delete *.xlsx
+        cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\')
+    elseif ismac()
+        cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/outputs')
+        delete *.xlsx
+        cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/')
     end
+end

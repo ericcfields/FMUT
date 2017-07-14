@@ -416,7 +416,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
-        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, chan_hood, p.Results.thresh_p);
+        test_results(i) = calc_Fclust(the_data, [], effects{i}+2, n_perm, alpha, chan_hood, p.Results.thresh_p);
     end
    
 

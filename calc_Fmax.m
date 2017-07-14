@@ -1,5 +1,8 @@
 %Calculate Fmax corrected F-test.
-%For more inforamtion see: >> help FmaxGND
+%For more inforamtion see: 
+%>> help FmaxGND
+%and
+%>> help FmaxGRP
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
@@ -9,7 +12,7 @@
 %                 the between subjects factor. For example, if cond_subs is
 %                 [8, 9], then there should be 17 subjects with the first 8
 %                 being in condition A and the next 9 being in condition B.
-%                 For fully within-subjects designs cond_subs == []
+%                 For fully within-subjects designs cond_subs = []
 % dims          - Dimensions of the data array involved in the effect to be
 %                 calculated. For example, if data is an electrode x time points
 %                 x Factor A x Factor B x subjects array and you want to
@@ -22,7 +25,7 @@
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 14 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -53,8 +56,8 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
     
     %% Calculate ANOVA
     
-    %Eliminate factors not involved in this effect by averaging or
-    %reduce exact interaction to one-way via subtraction
+    %Eliminate factors not involved in this effect and reduce interactions
+    %via subtraction
     [reduced_data, new_dims] = reduce_data(data, dims);
     
     %Calculate the ANOVA (F-obs and the permutation distribution)

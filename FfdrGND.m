@@ -364,7 +364,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                                  'F_obs', NaN(n_electrodes, n_time_pts), 'F_crit', NaN, 'df', NaN(1, 2)), ...
                                  length(effects), 1);
     for i = 1:length(effects)
-        test_results(i) = calc_param_ANOVA(the_data, effects{i}+2, q, method);
+        test_results(i) = calc_param_ANOVA(the_data, [], effects{i}+2, q, method);
     end
    
 

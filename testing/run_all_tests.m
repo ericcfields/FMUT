@@ -22,6 +22,6 @@ E_VariousTest
 F_FmaxGRPTest
 
 fprintf('\n\n')
-fprintf('All tests done.!\n')
+fprintf('All tests done!\n')
 toc
 fprintf('\n\n')
