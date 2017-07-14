@@ -476,7 +476,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     %Output results to command window
     if VERBLEVEL
-        report_Fmax(results, effects, effects_labels)
+        report_results(GRP, length(GRP.F_tests))
     end
     
     %Plot results

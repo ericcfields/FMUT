@@ -1,7 +1,10 @@
 %FMUT unit testing
 %General setup
 %AUTHOR: Eric Fields
-%VERSION DATE: 11 July 2017
+%VERSION DATE: 14 July 2017
+
+global test_xls_output;
+test_xls_output = false;
 
 if ispc()
 
@@ -9,9 +12,11 @@ if ispc()
     %addpath('R:\Public\GK_lab\Eric\FMUT_development\FMUT\dev');
 
     %Clear spreadsheet outputs folder
-    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\outputs')
-    delete *.xlsx
-    cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\')
+    if test_xls_output
+        cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\outputs')
+        delete *.xlsx
+        cd('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\')
+    end
 
     %Add EEGLAB and MUT to path
     [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
@@ -27,9 +32,11 @@ elseif ismac()
     %addpath('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/dev');
 
     %Clear spreadsheet outputs folder
-    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/outputs')
-    delete *.xlsx
-    cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/')
+    if test_xls_output
+        cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/outputs')
+        delete *.xlsx
+        cd('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/')
+    end
 
     %Add EEGLAB and MUT to path
     [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;

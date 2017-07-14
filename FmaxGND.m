@@ -478,7 +478,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     %Output results to command window
     if VERBLEVEL
-        report_Fmax(results, effects, effects_labels)
+        report_results(GND, length(GND.F_tests))
     end
     
     %Plot results
