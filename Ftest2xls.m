@@ -11,7 +11,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 15 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -37,7 +37,7 @@
 % 7/11/17   - Now works with GRP variables
 % 7/12/17   - Fixed error with long effect names
 % 7/13/17   - Compatible with removal of int_method
-
+% 7/15/17   - Reports groups used in between-subjects factor
 function Ftest2xls(GND, test_id, output_fname, format_output)
     
     %% Set-up
@@ -49,9 +49,6 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         else
             format_output = false;
         end
-    end
-    if format_output && ~ispc()
-        watchit(sprintf('Spreadsheet formatting on non-Windows systems is buggy.\nSee the FMUT documentation for an explanation and possible workaround.'))
     end
     
     %Define function for writing to spreadsheet
@@ -93,8 +90,16 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
     
     fact_levels = sprintf('%d X ', results.factor_levels);
     fact_levels = fact_levels(1:end-2);
+    if iscell(results.use_groups)
+        use_groups = [sprintf('%s, ', results.use_groups{1:end-1}), results.use_groups{end}];
+    elseif isnan(results.use_groups)
+        use_groups = 'N/A (no between-subjects factor)';
+    else
+        error('Cannot interpret F_tests.use_groups');
+    end
     summary = {'Study', GND.exp_desc; ...
                'GND', [GND.filepath GND.filename]; ...
+               'Groups', use_groups; ...
                'Bins', sprintf('%d ', results.bins); ...
                'Factors', [sprintf('%s X ', results.factors{1:end-1}), results.factors{end}]; ...
                'Factor_levels', fact_levels; ...

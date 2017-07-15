@@ -5,25 +5,32 @@
 % GRP = FmaxGRP(GRP, 'bins', 1:6, 'bg_factor_name', 'mood', ...
 %               'wg_factor_names', {'probability', 'emotion'}, ...
 %               'wg_factor_levels', [3, 2], 'time_wind', [500, 800], ...
-%               'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4, ...
-%               'alpha', 0.05);
+%               'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4);
 %
 %REQUIRED INPUTS
 % GRP_or_fname      - A Mass Univariate Toolbox GRP struct or a string
 %                     containing a filename of a GRP structure that 
 %                     has been saved to disk (with full path if not in current
-%                     working directory)
-% bins              - Array with bins to use in ANOVA
+%                     working directory). A GRP variable 
+%                     is based on GND variables. To create a GRP variable from 
+%                     GND variables use GNDs2GRP.m.  See Mass Univariate ERP 
+%                     Toolbox documentation for detailed information about the 
+%                     format of a GRP variable.
 %
 %OPTIONAL INPUTS
 % wg_factor_names   - cell array with names of within-subject factors in fastest 
-%                     to slowest moving order within the bins provided
+%                     to slowest moving order within the bins provided;
+%                     required for designs with within-subjects factor(s)
 %                     {default: no within-subjects factors}
 % wg_factor_levels  - number of levels in each within subject factorin fastest 
-%                     to slowest moving order within the bins provided
+%                     to slowest moving order within the bins provided;
+%                     required for designs with within-subjects factor(s)
 %                     {default: no within-subjects factors}
 % bg_factor_name    - A string specifying the name of the between-subjects
 %                     factor {default: 'Group'}.
+% use_groups     - A cell array of the groups to use in the test. Names must
+%                  match those in GRP.group_desc. {default: all groups
+%                  included}
 % time_wind      - 2D matrix of pairs of time values specifying the beginning 
 %                  and end of the time windows in ms (e.g., 
 %                  [200 400; 500, 800]). Every single time point in 
@@ -127,7 +134,7 @@
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
 %
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 15 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -145,6 +152,7 @@
 % 7/11/17 - First version modified from FmaxGND
 % 7/13/17 - updated to eliminated int_method
 % 7/14/17 - Command window output moved to separate function
+% 7/15/17 - Added use_groups option
 
 
 function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargin)
@@ -161,6 +169,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     p.addParameter('wg_factor_names',  '',       @(x) (ischar(x) || iscell(x)));
     p.addParameter('wg_factor_levels', [],       @(x) isnumeric(x));
     p.addParameter('bg_factor_name',   'Group',  @(x) ischar(x));
+    p.addParameter('use_groups',    [],       @(x) (ischar(x) || iscell(x)));
     p.addParameter('time_wind',     [],       @(x) (isnumeric(x) && size(x, 2)==2));
     p.addParameter('include_chans', [],       @(x) iscell(x));
     p.addParameter('exclude_chans', [],       @(x) iscell(x));
@@ -168,9 +177,9 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     p.addParameter('save_GRP',      'prompt', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))) || islogical(x));
     p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
     p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
-    p.addParameter('reproduce_test',false,    @(x) isnumeric(x));
+    p.addParameter('reproduce_test',false,    @(x) (isnumeric(x) || (islogical(x) && ~x)));
     p.addParameter('mean_wind',     'no',     @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
-    p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && length(x)==1 && x>=0 && x<=3))
+    p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && length(x)==1 && x>=0 && x<=3));
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
@@ -178,8 +187,8 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     p.parse(GRP_or_fname, varargin{:});
     
-    if isempty(p.Results.verblevel),
-        if isempty(VERBLEVEL),
+    if isempty(p.Results.verblevel)
+        if isempty(VERBLEVEL)
             VERBLEVEL=2;
         end
     else
@@ -202,6 +211,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     time_wind        = p.Results.time_wind;
     n_perm           = p.Results.n_perm;
     alpha            = p.Results.alpha;
+    use_groups       = p.Results.use_groups;
     
     %Check for required name-value inputs
     if isempty(bins)
@@ -233,7 +243,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         electrodes = 1:length(GRP.chanlocs);
     end
     
-    %MUT reatures not implemented here              
+    %MUT features not implemented here              
     if ~isempty(p.Results.time_block_dur)
         error('The ''time_block_dur'' option is not implemented for FmaxGRP. You''ll need to divide the time windows manually.');
     end              
@@ -244,19 +254,32 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         watchit('''plot_mn_topo'' is not implemented for FmaxGRP.');
     end
     
-    %Standardize formatting
-    if ischar(wg_factor_names)
-        wg_factor_names = {wg_factor_names};
-    end
-    time_wind = sort(time_wind, 2);
-    time_wind = sort(time_wind, 1);
-    
     %Set defaults for missing arguments
     if isempty(time_wind)
         time_wind = [0, GRP.time_pts(end)];
     end
+    if isempty(use_groups)
+        use_groups = GRP.group_desc;
+    end
+    
+    %Standardize formatting
+    if ischar(wg_factor_names)
+        wg_factor_names = {wg_factor_names};
+    end
+    if ischar(use_groups)
+        use_groups = {use_groups};
+    end
+    time_wind = sort(time_wind, 2);
+    time_wind = sort(time_wind, 1);
+    
     
     %Check for errors in input
+    if ~all(ismember(use_groups, GRP.group_desc))
+        error('One or more ''use_groups'' inputs do not match groups found in GRP.group_desc.');
+    end
+    if length(use_groups) == 1
+        error('You must have more than one group to use FmaxGRP. For a fully within-subjects design, use FmaxGND.');
+    end
     if ~isempty(wg_factor_levels)
         if length(wg_factor_names) ~= length(wg_factor_levels)
             error('The number of factors does not match in the ''wg_factor_names'' and ''wg_factor_levels'' inputs');
@@ -309,7 +332,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     %analysis
     the_data = [];
     n_electrodes = length(electrodes);
-    for g = 1:length(GRP.GND_fnames)
+    for g = find(ismember(GRP.group_desc, use_groups))
         
         %Load GND and check for errors
         load(GRP.GND_fnames{g}, '-mat')
@@ -384,6 +407,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         fprintf('Number of time points: %d\n', size(the_data, 2));
         fprintf('Total comparisons: %d\n', numel(the_data(:, :, 1, 1)));
         fprintf('Number of subjects: %d\n', size(the_data, 4));
+        fprintf('Groups: '); fprintf('%s ', use_groups{:}); fprintf('\n');
     end
     
     %Divide the factors into separate dimensions for factorial ANOVA
@@ -426,6 +450,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     end
     %Create results struct with basic parameters
     results = struct('bins', bins, ...
+                     'use_groups', {use_groups}, ...
                      'factors', {factor_names}, ...
                      'factor_levels', factor_levels, ...
                      'time_wind', time_wind, ...
