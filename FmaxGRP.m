@@ -265,7 +265,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
             error('''wg_factor_levels'' indicates a within-subjects factor, but no ''wg_factor_names'' input was given.')
         end
     elseif ~isempty(wg_factor_names{1})
-        error('''wg_factor_names'' indicates a within-subjects factor, but no ''wg_factor_levels'' input was given.')
+        error('''wg_factor_names'' indicates a within-subjects factor, but no ''wg_factor_levels'' input was given.');
     end
     if sum(wg_factor_levels>2) > 2
         error('FmaxGRP cannot handle split plot designs with more than two within-subjects factors with more than two levels')
