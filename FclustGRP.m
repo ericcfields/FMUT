@@ -174,31 +174,7 @@
 %Copyright (c) 2015, David Groppe
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 11/28/16     - Moved calculations to sub function calc_F_clust_mass
-% 12/8/16      - Added abilty to set global variable VERBLEVEL. Added
-%                'mean_wind' option.
-% 2/14/17      - Added cluster ID to spreadsheet output
-% 3/31/17      - Moved spreadsheet output function to standalone
-% 4/7/17       - Fixed error in checking interaction method
-% 4/17/17      - Fixed inconsistency in used_tpt_id field with t-tests
-%                results; changed desired_alpha to desired_alphaORq;
-%                added plot_raster functionality; added estimated_alpha
-%                to results
-% 5/9/17       - Added informative error messages for incorrect
-%                electrode names
-% 6/2/17       - Electrode order in output when using include_chans now
-%                matches MUT functions
-% 6/12/17      - Added verblevel related reports
-% 6/14/17      - Updated error for incorrectly supplied electrode name;
-%                fixed command window output for one-way ANOVA
-% 6/20/17      - Command window output for mean window analyses
-% 6/21/17      - time_wind field of results struct is now accurate;
-%                changed used_tpt_ids field to cell array for mean window
-%                analyses
-% 6/27/17      - More information in command window output
-% 7/13/17      - int_method input eliminated; fixed spacing in command
-%                window output
-% 7/14/17      - Move command window output to separate function
+% 7/15/18  - First version
 
 function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, varargin)
 
@@ -323,7 +299,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         error('One or more ''use_groups'' inputs do not match groups found in GRP.group_desc.');
     end
     if length(use_groups) == 1
-        error('You must have more than one group to use FmaxGRP. For a fully within-subjects design, use FmaxGND.');
+        error('You must have more than one group to use FclustGRP. For a fully within-subjects design, use FclustGND.');
     end
     if ~isempty(wg_factor_levels)
         if length(wg_factor_names) ~= length(wg_factor_levels)
@@ -336,7 +312,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         error('''wg_factor_names'' indicates a within-subjects factor, but no ''wg_factor_levels'' input was given.');
     end
     if sum(wg_factor_levels>2) > 2
-        error('FmaxGRP cannot handle split plot designs with more than two within-subjects factors with more than two levels')
+        error('FclustGRP cannot handle split plot designs with more than two within-subjects factors with more than two levels')
     end
     if prod(wg_factor_levels) ~= length(bins)
         error('Number of bins does not match the design specified by thte ''wg_factor_levels'' input.')
@@ -381,6 +357,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
     %Find time points or mean windows to use and extract the data for
     %analysis
     the_data = [];
+    cond_subs = [];
     n_electrodes = length(electrodes);
     group_ids = find(ismember(GRP.group_desc, use_groups));
     for g = group_ids
@@ -396,7 +373,8 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
             watchit(sprintf('Some subjects in\n%s\nappear to be missing data from bins used in this test!\nSee: GRP.indiv_bins_ct.', GRP.GND_fnames{g}));
         end
         
-        cond_subs(1, g) = size(GND.indiv_erps, 4); %#ok<AGROW>
+        %Between subjects structure
+        cond_subs(1, end+1) = size(GND.indiv_erps, 4); %#ok<AGROW>
         
         if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
             [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));

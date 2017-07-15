@@ -128,8 +128,7 @@
 %
 %DESCRIPTION
 %Main effects are calculated by permuting within each condition of the other
-%factor(s). For a factor with two levels, this is equivalent to the tmaxGND 
-%function (but will of course give results as an F-test).
+%factor(s).
 %
 %For interaction effects where more than one factor has more than two levels, 
 %it is not possible to conduct a test that controls the Type I error exactly 
