@@ -147,7 +147,7 @@
 %https://github.com/ericcfields/FMUT/wiki
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 15 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -273,7 +273,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     elseif ~isempty(p.Results.exclude_chans)
         if ~all(ismember(p.Results.exclude_chans, chan_labels))
             missing_channels = p.Results.exclude_chans(~ismember(p.Results.exclude_chans, chan_labels));
-            error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
+            error([sprintf('The following channels appear in ''exclude_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
                    sprintf('%s ', missing_channels{:})])
         else
             electrodes = find(~ismember(chan_labels, p.Results.exclude_chans));

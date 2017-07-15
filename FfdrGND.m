@@ -117,7 +117,7 @@
 % Benjamini, Y., & Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. The Annals of Statistics, 29(4), 1165-1188. 
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 15 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -227,7 +227,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     elseif ~isempty(p.Results.exclude_chans)
         if ~all(ismember(p.Results.exclude_chans, chan_labels))
             missing_channels = p.Results.exclude_chans(~ismember(p.Results.exclude_chans, chan_labels));
-            error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
+            error([sprintf('The following channels appear in ''exclude_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
                    sprintf('%s ', missing_channels{:})])
         else
             electrodes = find(~ismember(chan_labels, p.Results.exclude_chans));

@@ -1,6 +1,6 @@
 %Test Various things
 %AUTHOR: Eric Fields
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 15 July 2017
 
 %Load a GND for testing
 if ispc()

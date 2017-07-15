@@ -1,11 +1,13 @@
-%Function to conduct an Fmax permutation test for ANOVA designs with a between
-%subjects factor
+%Function to conduct an cluster based permutation test for ANOVA with a
+%between subjects factor
 %
 %EXAMPLE USAGE
-% GRP = FmaxGRP(GRP, 'bins', 1:6, 'bg_factor_name', 'mood', ...
-%               'wg_factor_names', {'probability', 'emotion'}, ...
-%               'wg_factor_levels', [3, 2], 'time_wind', [500, 800], ...
-%               'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4);
+% GRP = FclustGRP(GRP, 'bins', 1:6, 'bg_factor_name', 'mood', ...
+%                 'wg_factor_names', {'probability', 'emotion'}, ...
+%                 'wg_factor_levels', [3, 2], 'time_wind', [500, 800], ...
+%                 'include_chans', {'Fz', 'Cz', 'Pz'}, 'n_perm', 1e4, ...
+%                 'chan_hood', 0.61);
+%
 %
 %REQUIRED INPUTS
 % GRP_or_fname      - A Mass Univariate Toolbox GRP struct or a string
@@ -32,9 +34,30 @@
 % use_groups     - A cell array of the groups to use in the test. Names must
 %                  match those in GRP.group_desc. {default: all groups
 %                  included}
-% time_wind      - 2D matrix of pairs of time values specifying the beginning 
+% chan_hood      - A scalar or a 2D symmetric binary matrix that indicates
+%                  which channels are considered neighbors of other 
+%                  channels. E.g., if chan_hood(2,10)=1, then Channel 2 
+%                  and Channel 10 are nieghbors. You can produce a 
+%                  chan_hood matrix using the function spatial_neighbors.m. 
+%                  If a scalar is provided, then all electrodes within that 
+%                  distance of a particular electrode are considered 
+%                  neighbors. Note, EEGLAB's electrode coordinates assume
+%                  the head has a radius of 1. See the help documentation 
+%                  of the function spatial_neighbors to see how you could
+%                  convert this distance threshold to centimeters. 
+%                  {default: 0.61}
+% head_radius    - The radius of the head in whatever units the Cartesian
+%                  coordinates in GRP.chanlocs are in. This is used to
+%                  convert scalar values of chan_hood into centimeters.
+%                  {default: []}
+% thresh_p       - The test-wise p-value threshold for cluster inclusion. If
+%                  a channel/time-point has a F-value that corresponds to an
+%                  uncorrected p-value greater than thresh_p, it is assigned
+%                  a p-value of 1 and not considered for clustering.
+%                  {default: 0.05}
+% time_wind      - 2D matrix of time values specifying the beginning 
 %                  and end of the time windows in ms (e.g., 
-%                  [200 400; 500, 800]). Every single time point in 
+%                  [500, 800]). Every single time point in 
 %                  the time window will be individually tested (i.e.,
 %                  maximal temporal resolution). Note, boundaries of time 
 %                  window(s) may not exactly correspond to desired time 
@@ -42,10 +65,8 @@
 %                  you only have samples every so many ms). 
 %                  {default: 0 ms to the end of the epoch}
 % mean_wind      - ['yes' or 'no'] If 'yes', the permutation test will be
-%                  performed on the mean amplitude within each time window 
-%                  specified by time_wind.  This sacrifices temporal 
-%                  resolution to increase test power by reducing the number
-%                  of comparisons.  If 'no', every single time point within
+%                  performed on the mean amplitude within the time window 
+%                  specified by time_wind.  If 'no', every single time point within
 %                  time_wind's time windows will be tested individually.
 %                  {default: 'no'}
 % exclude_chans  - A cell array of channel labels to exclude from the
@@ -82,7 +103,7 @@
 %                  the random number generator used in the permutation test 
 %                  to the same initial state it was in when the permutation 
 %                  test was conducted. Obviously other options/inputs must
-%                  also be the same to truly reproduce the test
+%                  also be the same to truly reproduce the test.
 % verblevel      - An integer specifiying the amount of information you want
 %                  the Mass Univariate Toolbox to provide about what it is 
 %                  doing during runtime.
@@ -93,6 +114,7 @@
 %                            with a data set {default value}
 %                        3 - stuff that might help you debug (show all
 %                            reports)
+%
 %
 %OUTPUT
 % GRP           - GRP struct, with results added in the F_tests field.
@@ -108,20 +130,19 @@
 % prm_pval      - The adj_pval field from the results struct. For a one-way
 %                 ANOVA, this is an electrodes x time points array of
 %                 p-values; for a multi-factor ANOVA, it is a struct with
-%                 multiple such arrays
+%                 multiple such arrays.
 % F_obs         - The F_obs field from the results struct. For a one-way
 %                 ANOVA, this is an electrodes x time points array of
 %                 Fs; for a multi-factor ANOVA, it is a struct with
-%                 multiple such arrays
-% F_crit        - The F_crit field from the results struct. For a one-way
-%                 ANOVA, this is a single number; for a multi-factor ANOVA, 
-%                 it is a struct with F_crit for each effect.
+%                 multiple such arrays.
+% clust_info    - The clust_info field from the results struct. This is a
+%                 struct that has sub-fields with information about each
+%                 observed cluster and it's statistical significance
 %
 %
 %DESCRIPTION
 %Main effects are calculated by permuting within each condition of the other
-%factor(s). For a factor with two levels, this is equivalent to the tmaxGND 
-%function (but will of course give results as an F-test).
+%factor(s).
 %
 %For interaction effects where more than one factor has more than two levels, 
 %it is not possible to conduct a test that controls the Type I error exactly 
@@ -132,11 +153,14 @@
 %For designs where an exact test is possible, this function uses a
 %restricted permutation method to conduct an exact test.
 %
+%The statistic used is the cluster mass: i.e., the sum of all the F-values
+%included in a given cluster.
+%
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
 %
-%VERSION DATE: 15 July 2017
 %AUTHOR: Eric Fields
+%VERSION DATE: 15 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -150,17 +174,37 @@
 %Copyright (c) 2015, David Groppe
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/11/17 - First version modified from FmaxGND
-% 7/13/17 - updated to eliminated int_method
-% 7/14/17 - Command window output moved to separate function
-% 7/15/17 - Added use_groups option
+% 11/28/16     - Moved calculations to sub function calc_F_clust_mass
+% 12/8/16      - Added abilty to set global variable VERBLEVEL. Added
+%                'mean_wind' option.
+% 2/14/17      - Added cluster ID to spreadsheet output
+% 3/31/17      - Moved spreadsheet output function to standalone
+% 4/7/17       - Fixed error in checking interaction method
+% 4/17/17      - Fixed inconsistency in used_tpt_id field with t-tests
+%                results; changed desired_alpha to desired_alphaORq;
+%                added plot_raster functionality; added estimated_alpha
+%                to results
+% 5/9/17       - Added informative error messages for incorrect
+%                electrode names
+% 6/2/17       - Electrode order in output when using include_chans now
+%                matches MUT functions
+% 6/12/17      - Added verblevel related reports
+% 6/14/17      - Updated error for incorrectly supplied electrode name;
+%                fixed command window output for one-way ANOVA
+% 6/20/17      - Command window output for mean window analyses
+% 6/21/17      - time_wind field of results struct is now accurate;
+%                changed used_tpt_ids field to cell array for mean window
+%                analyses
+% 6/27/17      - More information in command window output
+% 7/13/17      - int_method input eliminated; fixed spacing in command
+%                window output
+% 7/14/17      - Move command window output to separate function
 
+function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, varargin)
 
-function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargin)
-    
     warning('You are using a beta version of this function. It needs further testing and should NOT be considered error free.');
 
-    %% ~~~~~PARSE INPUT~~~~~
+%% ~~~~~PARSE INPUT~~~~~
 
     global VERBLEVEL
     
@@ -174,22 +218,25 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     p.addParameter('time_wind',     [],       @(x) (isnumeric(x) && size(x, 2)==2));
     p.addParameter('include_chans', [],       @(x) iscell(x));
     p.addParameter('exclude_chans', [],       @(x) iscell(x));
-    p.addParameter('n_perm',        1e4,      @(x) isnumeric(x));
+    p.addParameter('n_perm',        1e4,      @(x) (isnumeric(x) && isscalar(x)));
     p.addParameter('save_GRP',      'prompt', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))) || islogical(x));
     p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
-    p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
-    p.addParameter('reproduce_test',false,    @(x) (isnumeric(x) || (islogical(x) && ~x)));
+    p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && isscalar(x) && x<=1 && x>=0));
+    p.addParameter('reproduce_test',false,    @(x) (isnumeric(x) && isscalar(x)));
     p.addParameter('mean_wind',     'no',     @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
-    p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && length(x)==1 && x>=0 && x<=3));
+    p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && isscalar(x) && x>=0 && x<=3))
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
+    p.addParameter('chan_hood',     0.61,     @(x) (isnumeric(x) && (isscalar(x) || (ismatrix(x) && size(x,1)==size(x,2)))));
+    p.addParameter('head_radius',   [],       @(x) (isnumeric(x) && isscalar(x)));
+    p.addParameter('thresh_p',      0.05,     @(x) (isnumeric(x) && isscalar(x) && x>=0 && x<=1));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
     p.addParameter('plot_mn_topo',   []);
     
     p.parse(GRP_or_fname, varargin{:});
     
-    if isempty(p.Results.verblevel)
-        if isempty(VERBLEVEL)
+    if isempty(p.Results.verblevel),
+        if isempty(VERBLEVEL),
             VERBLEVEL=2;
         end
     else
@@ -213,10 +260,11 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     time_wind        = p.Results.time_wind;
     n_perm           = p.Results.n_perm;
     alpha            = p.Results.alpha;
+    chan_hood        = p.Results.chan_hood;
     
     %Check for required name-value inputs
     if isempty(bins)
-        error('''bins'' is a required input. See >>help FmaxGRP.');
+        error('''bins'' is a required input. See >>help FclustGRP.');
     end
     
     %Find id numbers for electrodes to use in analysis
@@ -244,15 +292,15 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         electrodes = 1:length(GRP.chanlocs);
     end
     
-    %MUT features not implemented here              
+    %MUT reatures not implemented here              
     if ~isempty(p.Results.time_block_dur)
-        error('The ''time_block_dur'' option is not implemented for FmaxGRP. You''ll need to divide the time windows manually.');
+        error('The ''time_block_dur'' option is not implemented for FclustGRP. You''ll need to divide the time windows manually.');
     end              
     if ~isempty(p.Results.plot_gui)
-        watchit('''plot_gui'' is not implemented for FmaxGRP.');
+        watchit('''plot_gui'' is not implemented for FclustGRP.');
     end
     if ~isempty(p.Results.plot_mn_topo)
-        watchit('''plot_mn_topo'' is not implemented for FmaxGRP.');
+        watchit('''plot_mn_topo'' is not implemented for FclustGRP.');
     end
     
     %Set defaults for missing arguments
@@ -267,13 +315,9 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     if ischar(wg_factor_names)
         wg_factor_names = {wg_factor_names};
     end
-    if ischar(use_groups)
-        use_groups = {use_groups};
-    end
     time_wind = sort(time_wind, 2);
     time_wind = sort(time_wind, 1);
-    
-    
+
     %Check for errors in input
     if ~all(ismember(use_groups, GRP.group_desc))
         error('One or more ''use_groups'' inputs do not match groups found in GRP.group_desc.');
@@ -312,7 +356,10 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
             error('You tried to reproduce test %d, but there are only %d tests in GRP.F_tests.', p.Results.reproduce_test, length(GRP.F_tests));
         end
     end
-
+    if ~isequal(size(time_wind), [1, 2])
+        error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
+    end
+    
     
     %% ~~~~~ SET-UP ~~~~~
 
@@ -329,6 +376,8 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         seed_state = defaultStream.State;
     end
     
+    %Find time points or mean windows to use and extract the data for
+    %analysis
     %Find time points or mean windows to use and extract the data for
     %analysis
     the_data = [];
@@ -349,61 +398,32 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         
         cond_subs(1, g) = size(GND.indiv_erps, 4); %#ok<AGROW>
         
-        %Get data (individual time points)
         if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
-            use_time_pts = [];
-            for i = 1:size(time_wind, 1)
-                [~, start_sample] = min(abs( GND.time_pts - time_wind(i, 1) ));
-                [~, end_sample  ] = min(abs( GND.time_pts - time_wind(i, 2) ));
-                time_wind(i, 1) = GND.time_pts(start_sample);
-                time_wind(i, 2) = GND.time_pts(end_sample);
-                use_time_pts = [use_time_pts start_sample:end_sample]; %#ok<AGROW>
-                if VERBLEVEL && g == group_ids(1)
-                    if i == 1
-                        fprintf('\nConducting Fmax permutation test from %d ms to %d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
-                    else
-                        fprintf(', %d ms to %d ms.', GND.time_pts(start_sample), GND.time_pts(end_sample));
-                    end
-                    if i == size(time_wind, 1)
-                        fprintf('\n');
-                    end
-                end
-            end
+            [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
+            [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
+            time_wind(1) = GND.time_pts(start_sample);
+            time_wind(2) = GND.time_pts(end_sample);
+            use_time_pts = start_sample:end_sample;
             n_time_pts = length(use_time_pts);
             the_data = cat(4, the_data, GND.indiv_erps(electrodes, use_time_pts, bins, :));
-        
-        %Get data (mean time window)
-        else
-            n_time_pts = size(time_wind, 1);
-            use_time_pts = cell(1, n_time_pts);
-            new_data = NaN(n_electrodes, n_time_pts, prod(wg_factor_levels), cond_subs(g));
-            for i = 1:size(time_wind, 1)
-                [~, start_sample] = min(abs( GND.time_pts - time_wind(i, 1) ));
-                [~, end_sample  ] = min(abs( GND.time_pts - time_wind(i, 2) ));
-                time_wind(i, 1) = GND.time_pts(start_sample);
-                time_wind(i, 2) = GND.time_pts(end_sample);
-                use_time_pts{i} = start_sample:end_sample;
-                new_data(:, i, :, :) = mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2);
-                if VERBLEVEL && g == group_ids(1)
-                    if i == 1
-                        fprintf('\nConducting Fmax permutation test in mean time windows %d-%d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
-                    else
-                        fprintf(', %d-%d ms', GND.time_pts(start_sample), GND.time_pts(end_sample));
-                    end
-                    if i == size(time_wind, 1)
-                        fprintf('\n');
-                    end
-                end
+            if VERBLEVEL && g == group_ids(1)
+                fprintf('\nConducting cluster mass permutation test from %d ms to %d ms.\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
             end
-            the_data = cat(4, the_data, new_data);
+        else
+            n_time_pts = 1;
+            [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
+            [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
+            time_wind(1) = GND.time_pts(start_sample);
+            time_wind(2) = GND.time_pts(end_sample);
+            the_data = cat(4, the_data, mean(GND.indiv_erps(electrodes, start_sample:end_sample, bins, :), 2));
+            if VERBLEVEL && g == group_ids(1)
+                fprintf('\nConducting cluster mass permutation test in the mean time window from %d ms to %d ms.\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
+            end
         end
-        
+        use_time_pts = start_sample:end_sample;
         clear GND
-    
     end
-    clear new_data
     
-    %Report test information
     if VERBLEVEL
         fprintf('Number of channels: %d\n', size(the_data, 1));
         fprintf('Number of time points: %d\n', size(the_data, 2));
@@ -429,28 +449,33 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     end
     [effects, effects_labels] = get_effects(factor_names);
     
+    %Get chan_hood matrix if input was distance scalar
+    if isscalar(chan_hood)
+        if VERBLEVEL; fprintf('\n'); end;
+        chan_hood = spatial_neighbors(GRP.chanlocs(electrodes), chan_hood, p.Results.head_radius);
+    end
+        
     
     %% ~~~~~ RUN PERMUTATION ANOVAS ~~~~~
     
     test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
-                                 'F_obs', NaN(n_electrodes, n_time_pts),  'Fmax_crit', NaN, ... 
-                                 'df', NaN(1, 2), 'estimated_alpha', NaN, 'exact_test', NaN), ... 
+                                 'F_obs', NaN(n_electrodes, n_time_pts), 'df', NaN(1, 2), 'clust_info', struct, ...
+                                 'estimated_alpha', NaN, 'exact_test', NaN), ...
                                  length(effects), 1);
     for i = 1:length(effects)
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
-        %Calculate test
-        test_results(i) = calc_Fmax(the_data, cond_subs, effects{i}+2, n_perm, alpha);       
+        test_results(i) = calc_Fclust(the_data, cond_subs, effects{i}+2, n_perm, alpha, chan_hood, p.Results.thresh_p);
     end
-    
+   
 
     %% ~~~~~ ADD RESULTS STRUCT TO GRP AND ASSIGN OTHER OUTPUT ~~~~~
     
     if (strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y'))
-        use_time_pts = {use_time_pts};
+        use_time_pts = {{use_time_pts}};
     end
-    %Create results struct with basic parameters
+    %Create results struct
     results = struct('bins', bins, ...
                      'use_groups', {use_groups}, ...
                      'factors', {factor_names}, ...
@@ -460,7 +485,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
                      'mean_wind', p.Results.mean_wind, ...
                      'include_chans', {{GRP.chanlocs(electrodes).labels}}, ...
                      'used_chan_ids', electrodes, ...
-                     'mult_comp_method', 'Fmax perm test', ...
+                     'mult_comp_method', 'cluster mass perm test', ...
                      'n_perm', n_perm, ...
                      'desired_alphaORq', alpha, ...
                      'estimated_alpha', [], ...
@@ -469,29 +494,29 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
                      'null_test', [], ...
                      'adj_pval', [], ...
                      'F_obs', [], ...
-                     'F_crit', [], ...
+                     'F_crit', NaN, ...
                      'df', [], ...              
-                     'chan_hood', NaN, ...
-                     'clust_info', NaN, ...
+                     'chan_hood', chan_hood, ...
+                     'clust_info', [], ...
                      'fdr_rej', NaN);
     
     %Add statistical results
     assert(length(effects) == length(test_results));
     if length(effects) == 1
-        results.null_test = test_results.h;
-        results.adj_pval  = test_results.p;
-        results.F_obs     = test_results.F_obs;
-        results.F_crit    = test_results.Fmax_crit;
-        results.df        = test_results.df;
+        results.null_test       = test_results.h;
+        results.adj_pval        = test_results.p;
+        results.F_obs           = test_results.F_obs;
+        results.df              = test_results.df;
+        results.clust_info      = test_results.clust_info;
         results.estimated_alpha = test_results.estimated_alpha;
         results.exact_test = test_results.exact_test;
     else
         for i = 1:length(effects)
-            results.null_test.(effects_labels{i}) = test_results(i).h;
-            results.adj_pval.(effects_labels{i})  = test_results(i).p;
-            results.F_obs.(effects_labels{i})     = test_results(i).F_obs;
-            results.F_crit.(effects_labels{i})    = test_results(i).Fmax_crit;
-            results.df.(effects_labels{i})        = test_results(i).df;
+            results.null_test.(effects_labels{i})       = test_results(i).h;
+            results.adj_pval.(effects_labels{i})        = test_results(i).p;
+            results.F_obs.(effects_labels{i})           = test_results(i).F_obs;
+            results.df.(effects_labels{i})              = test_results(i).df;
+            results.clust_info.(effects_labels{i})      = test_results(i).clust_info;
             results.estimated_alpha.(effects_labels{i}) = test_results(i).estimated_alpha;
             results.exact_test.(effects_labels{i}) = test_results(i).exact_test;
         end
@@ -506,12 +531,12 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     %Optional outputs
     if nargout > 2
-        prm_pval = results.adj_pval;
-        F_obs    = results.F_obs;
-        F_crit   = results.F_crit;
+        prm_pval   = results.adj_pval;
+        F_obs      = results.F_obs;
+        clust_info = results.clust_info;
     end
+ 
     
-
     %% ~~~~~ OUTPUT RESULTS ~~~~~
     
     %Output results to command window
@@ -545,9 +570,8 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
         end
         Ftest2xls(GRP, length(GRP.F_tests), p.Results.output_file);
         if VERBLEVEL
-            fprintf('DONE.\n\n')
+            fprintf('DONE.\n')
         end
     end
     
-
 end
