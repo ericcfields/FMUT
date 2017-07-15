@@ -16,6 +16,7 @@
 %                     GND variables use GNDs2GRP.m.  See Mass Univariate ERP 
 %                     Toolbox documentation for detailed information about the 
 %                     format of a GRP variable.
+% bins              - array with bins to use in ANOVA
 %
 %OPTIONAL INPUTS
 % wg_factor_names   - cell array with names of within-subject factors in fastest 
