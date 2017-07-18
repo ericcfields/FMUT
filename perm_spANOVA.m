@@ -23,7 +23,7 @@
 % exact_test    - Boolean specifying whether the test was an exact test
 %
 %
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 18 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -41,7 +41,8 @@ function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs,
         [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm);
         exact_test = true;
     elseif ndims(data) == 4
-        [F_dist, df_effect, df_res, exact_test] = twoway(data, cond_subs, dims, n_perm);
+        [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm);
+        exact_test = false;
     elseif ndims(data) > 4
         [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm);
         exact_test = false;
@@ -50,7 +51,7 @@ function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs,
 end
 
 
-function [F_dist, df_effect, df_res, exact_test] = twoway(data, cond_subs, dims, n_perm)
+function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
 
     global VERBLEVEL
 
@@ -67,9 +68,6 @@ function [F_dist, df_effect, df_res, exact_test] = twoway(data, cond_subs, dims,
     %Interaction residuals
     if length(dims) == 2
         int_res = get_int_res(data, cond_subs, dims);
-        exact_test = false;
-    else
-        exact_test = true;
     end
 
     %Calculate degrees of freedom
