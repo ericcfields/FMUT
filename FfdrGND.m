@@ -111,10 +111,10 @@
 % F_crit        - The F-value corresponding to the FDR adjusted
 %                 significance threshold
 %
-%FDR REFERENCES:
-% Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate: A practical and powerful approach to multiple testing. Journal of  the Royal Statistical Society. Series B (Methodological), 57(1), 289-300.
-% Benjamini, Y., Krieger, A. M., & Yekutieli, D. (2006). Adaptive linear step-up procedures that control the false discovery rate. Biometrika, 93(3), 491-507. 
-% Benjamini, Y., & Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. The Annals of Statistics, 29(4), 1165-1188. 
+%
+%See the FMUT documentation for more information:
+%https://github.com/ericcfields/FMUT/wiki
+%
 %
 %AUTHOR: Eric Fields
 %VERSION DATE: 15 July 2017
