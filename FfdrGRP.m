@@ -125,8 +125,10 @@
 % F_crit        - The F-value corresponding to the FDR adjusted
 %                 significance threshold
 %
+%
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
+%
 %
 %AUTHOR: Eric Fields
 %VERSION DATE: 15 July 2017

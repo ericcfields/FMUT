@@ -139,25 +139,9 @@
 %                 struct that has sub-fields with information about each
 %                 observed cluster and it's statistical significance
 %
-%
-%DESCRIPTION
-%Main effects are calculated by permuting within each condition of the other
-%factor(s).
-%
-%For interaction effects where more than one factor has more than two levels, 
-%it is not possible to conduct a test that controls the Type I error exactly 
-%at a specified level. For such designs, this function uses the permutation 
-%of residuals method first described by Still & White (1981) and Freedman & Lane (1983). 
-%The Type I error rate of this test is asymptotic to the nominal alpha as 
-%sample size and/or signal to noise ratio increase.
-%For designs where an exact test is possible, this function uses a
-%restricted permutation method to conduct an exact test.
-%
-%The statistic used is the cluster mass: i.e., the sum of all the F-values
-%included in a given cluster.
-%
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
+%
 %
 %AUTHOR: Eric Fields
 %VERSION DATE: 15 July 2017
