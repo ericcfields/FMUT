@@ -52,7 +52,7 @@
 
 function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction)
 
-    if nargin < 4
+    if nargin < 5
         correction = 'none';
     elseif ~any(strcmpi(correction, {'none', 'bonferroni', 'sidak', 'bh', 'by', 'bky'}))
         error('correction must be ''none'', ''bonferroni'', ''sidak'', ''bh'', ''by'', or ''bky''');
