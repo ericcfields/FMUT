@@ -83,7 +83,7 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
     
     %% Calculate Fmax correction
     
-    if step_down
+    if step_down == 1
         
         %Null distributions and critial values
         flat_F_dist = reshape(F_dist, [n_perm, n_electrodes*n_time_pts]);
@@ -112,6 +112,46 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         p = reshape(p(idx), [n_electrodes, n_time_pts]);
 
         assert(isequal(h, p<=alpha));
+        
+    elseif step_down == 2
+        
+        %Null distributions and critial values
+        flat_F_dist = reshape(F_dist, [n_perm, n_electrodes*n_time_pts]);
+        n_locations = n_electrodes * n_time_pts;
+        step_down_dist = NaN(size(flat_F_dist));
+        for j = 1:n_locations
+            [~,p] = sort(rand(n_perm, n_locations), 2);
+            idx = repmat((1-n_perm:0).', n_locations, 1) + p(:) * n_perm;
+            rand_flatFdist = reshape(flat_F_dist(idx),n_perm,n_locations);
+            step_down_dist(:, j) = max(rand_flatFdist(:, 1:j), [], 2);
+        end
+
+        step_down_dist = sort(step_down_dist(:, n_locations:-1:1), 1);
+        Fmax_crit = step_down_dist(ceil((1-alpha) * size(step_down_dist, 1)), :)';
+        
+        %Get ordered F-values
+        [sorted_F_obs, idx] = sort(F_obs(:), 'descend');
+        
+        %Null hypothesis test
+        h = sorted_F_obs > Fmax_crit;
+        stop_point = find(~h, 1);
+        h(stop_point:end) = false;
+        h = reshape(h(idx), [n_electrodes, n_time_pts]);
+        est_alpha = mean(step_down_dist(:,1) > Fmax_crit(1));
+        if VERBLEVEL
+            fprintf('Estimated alpha level is %f\n', est_alpha);
+        end
+        
+        %Calculate p-values
+        p = NaN(size(sorted_F_obs));
+        for i = 1:length(sorted_F_obs)
+            p(i) = mean(step_down_dist(:, i) > sorted_F_obs(i));
+        end
+        p(stop_point:end) = NaN;
+        p = reshape(p(idx), [n_electrodes, n_time_pts]);
+
+        assert(isequal(h, p<=alpha));
+
         
     else
     

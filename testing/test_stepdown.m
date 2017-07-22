@@ -1,16 +1,16 @@
 clearvars;
 
-n_exp = 1e3;
+n_exp = 1;
 cond_subs = [];
 n_electrodes = 1;
-n_time_pts = 1e3;
+n_time_pts = 1000;
 dims = 3;
 n_perm = 1e3;
 alpha = 0.05;
-step_down = true;
+step_down = 2;
 
-effect = 2;
-effect_length = 100;
+effect = 0;
+effect_length = 0;
 
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
                              'F_obs', NaN(n_electrodes, n_time_pts),  'Fmax_crit', NaN, ... 
@@ -19,7 +19,7 @@ test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_elec
 familywise_rej = NaN(1, n_exp);
 contrastwise_rej = NaN(1, n_exp);
 tic
-parfor exp = 1:n_exp
+for exp = 1:n_exp
 
     data = normrnd(0, 1, [n_electrodes, n_time_pts, 2, 16]);
     
@@ -45,5 +45,6 @@ if effect
     fprintf('Power = %f\n', mean(power));
     fprintf('FDR = %f\n', mean(FDR));
 end
+fprintf('\n');
 
 beep;
