@@ -20,6 +20,8 @@
 %                 calculate the AxB interaciton, dims  = [3, 4].
 % n_perm        - Number of permutations to use to calculate the null distribution
 % alpha         - Family-wise alpha level of the test
+% step_doan     - Use a step down procedure to calculate F-values after the
+%                 max at progressively smaller thresholds
 %
 %OUTPUT
 % test_results - A struct with results of the Fmax test
