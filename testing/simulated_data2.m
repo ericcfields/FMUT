@@ -1,7 +1,7 @@
 %Run simulated normal data to check Type I error rate and power
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 24 July 2017
 
 clearvars;
 
@@ -13,7 +13,7 @@ VERBLEVEL = 0;
 %Design
 n_electrodes = 1;
 n_time_pts = 1;
-wg_design = 3;
+wg_design = [2 2];
 cond_subs = [8 8];
 n_subs = sum(cond_subs);
 
@@ -28,7 +28,7 @@ alpha = 0.05;
 %Add effects
 wg_effect = 0;
 bg_effect = 0;
-int_effect = 0;
+int_effect = 5;
 
 %Pre-allocate results struct
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
@@ -69,6 +69,10 @@ parfor i = 1:n_exp
             data(:, :, 1, 2, Asubs) = data(:, :, 1, 2, Asubs) - int_effect;
             data(:, :, 2, 1, Asubs) = data(:, :, 1, 1, Asubs) - int_effect;
             data(:, :, 2, 2, Asubs) = data(:, :, 2, 2, Asubs) + int_effect;
+%             data(:, :, 1, 1, Bsubs) = data(:, :, 1, 1, Bsubs) - int_effect;
+%             data(:, :, 1, 2, Bsubs) = data(:, :, 1, 2, Bsubs) + int_effect;
+%             data(:, :, 2, 1, Bsubs) = data(:, :, 1, 1, Bsubs) + int_effect;
+%             data(:, :, 2, 2, Bsubs) = data(:, :, 2, 2, Bsubs) - int_effect;
         end
     end
     
