@@ -30,7 +30,7 @@
 % test_results - A struct with results of the mass univariate ANOVA
 %
 %
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 24 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -49,6 +49,7 @@
 % 7/13/17 - Updated to reflect that ANOVA sub-functions no longer require
 %           int_method input
 % 7/14/17 - Now handle between subjects factors
+% 7/24/17 - Moved reduced_data to ANOVA functions
 
 function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction)
 
@@ -64,19 +65,11 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
     
     %% Calculate ANOVA
 
-    %Eliminate factors not involved in this effect and reduce interactions
-    %via subtraction
-    [reduced_data, new_dims] = reduce_data(data, dims);
-    
     %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-        if ndims(reduced_data) == 3
-            [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, 1);
-        else
-            [F_dist, df_effect, df_res] = perm_spANOVA(reduced_data, cond_subs, new_dims, 1);
-        end
+        [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, 1);
     else
-        [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, 1);
+        [F_dist, df_effect, df_res] = perm_rbANOVA(data, dims, 1);
     end
     F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     uncorr_p = 1 - fcdf(F_obs, df_effect, df_res);

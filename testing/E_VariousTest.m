@@ -18,7 +18,7 @@ end
 data = normrnd(0, 1, [32, 167, 2, 2, 16]);
 
 %F-test
-F_dist = perm_rbANOVA(data, 10);
+F_dist = perm_rbANOVA(data, [3 4], 10);
 F_obs = squeeze(F_dist(1, :, :));
 
 %t-test
@@ -35,7 +35,7 @@ assert(all(F_obs(:) - t_vals(:).^2 < 1e-9))
 data = normrnd(0, 1, [32, 167, 2, 2, 2, 16]);
 
 %F-test
-F_dist = perm_rbANOVA(data, 10);
+F_dist = perm_rbANOVA(data, [3, 4, 5], 10);
 F_obs = squeeze(F_dist(1, :, :));
 
 %t-test

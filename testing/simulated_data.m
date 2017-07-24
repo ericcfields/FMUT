@@ -14,7 +14,7 @@ VERBLEVEL = 0;
 n_electrodes = 1;
 n_time_pts = 1;
 n_subs = 16;
-wg_design = [3 3 3];
+wg_design = [2 2 2];
 
 %Effect
 dims = [3 4 5];

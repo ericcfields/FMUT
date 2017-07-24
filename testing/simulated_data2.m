@@ -13,12 +13,12 @@ VERBLEVEL = 0;
 %Design
 n_electrodes = 1;
 n_time_pts = 1;
-wg_design = 2;
+wg_design = [3 3];
 cond_subs = [8 8];
 n_subs = sum(cond_subs);
 
 %Effect
-dims = [3 4];
+dims = [3 4 5];
 
 %Parameters
 n_exp = 1e3;
@@ -67,7 +67,7 @@ parfor i = 1:n_exp
         elseif ndims(data) == 5
             data(:, :, 1, 1, Asubs) = data(:, :, 1, 1, Asubs) + int_effect;
             data(:, :, 1, 2, Asubs) = data(:, :, 1, 2, Asubs) - int_effect;
-            data(:, :, 2, 1, Asubs) = data(:, :, 1, 1, Asubs) - int_effect;
+            data(:, :, 2, 1, Asubs) = data(:, :, 2, 1, Asubs) - int_effect;
             data(:, :, 2, 2, Asubs) = data(:, :, 2, 2, Asubs) + int_effect;
 %             data(:, :, 1, 1, Bsubs) = data(:, :, 1, 1, Bsubs) - int_effect;
 %             data(:, :, 1, 2, Bsubs) = data(:, :, 1, 2, Bsubs) + int_effect;
