@@ -1,13 +1,11 @@
 %Calculate F-observed and the empirical F-distribution for a
 %within-subjects ANOVA with up to three factors. This function calculates a
-%one-way ANOVA, two-way interaction, and three-way interaction. It is
-%assumed data is properly reduced before being sent to this function (see
-%reduce_data.m).
+%one-way ANOVA, two-way interaction, and three-way interaction.
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many
-%                 factors there are
+%                 factors there are.
 % n_perm        - Number of permutations to conduct
 %
 %OUTPUT
@@ -15,9 +13,10 @@
 %                 permutation. The first permutation is F-observed.
 % df_effect     - numerator degrees of freedom
 % df_res        - denominator degrees of freedom
+% exact_test    - Boolean specifying whether the test was an exact test
 %
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 24 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -31,16 +30,25 @@
 
 %%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
 % 6/22/17   - First version. Code re-organized from other functions.
+% 7/12/17   - Updated to work with BG-compliant get_int_res
+% 7/24/17   - Moved reduce_data here
 
-function [F_dist, df_effect, df_res] = perm_rbANOVA(data, n_perm)
+function [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm)
+
+    %Eliminate factors not involved in this effect and reduce interactions
+    %via subtraction
+    reduced_data = reduce_data(data, dims);
 
     %Calculate appropriate ANOVA
-    if ndims(data) == 4
-        [F_dist, df_effect, df_res] = oneway(data, n_perm);
-    elseif ndims(data) == 5
-        [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm);
-    elseif ndims(data) == 6
-        [F_dist, df_effect, df_res] = threeway_approx_int(data, n_perm);
+    if ndims(reduced_data) == 4
+        [F_dist, df_effect, df_res] = oneway(reduced_data, n_perm);
+        exact_test = true;
+    elseif ndims(reduced_data) == 5
+        [F_dist, df_effect, df_res] = twoway_approx_int(reduced_data, n_perm);
+        exact_test = false;
+    elseif ndims(reduced_data) == 6
+        [F_dist, df_effect, df_res] = threeway_approx_int(reduced_data, n_perm);
+        exact_test = false;
     end
 
 end
@@ -120,7 +128,7 @@ function [F_dist, df_effect, df_res] = twoway_approx_int(data, n_perm)
 
     %Subtract main effects within each subject so that the data is 
     %exchangeable under the null hypothesis for the interaction
-    int_res = get_int_res(data);
+    int_res = get_int_res(data, [], [3, 4]);
     
     %Calculate degrees of freedom
     %(Always the same, so no point calculating in the loop)
@@ -204,7 +212,7 @@ function [F_dist, df_effect, df_res] = threeway_approx_int(data, n_perm)
     %Subtract main effects then two-way effects within each subject so that 
     %the data is exchangeable under the null hypothesis for the three-way
     %interaction
-    int_res = get_int_res(data);
+    int_res = get_int_res(data, [], [3, 4, 5]);
     
     %Calculate degrees of freedom
     %(Always the same, so no point calculating in the loop)

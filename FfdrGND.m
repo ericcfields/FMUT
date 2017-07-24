@@ -117,7 +117,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 15 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -145,6 +145,7 @@
 %                   analyses
 % 6/23/17         - Moved corrections to sub-function
 % 7/13/17         - Updated for changes due to int_method elimination
+% 7/15/17         - 'use_groups' and 'group_n' added to F_tests
 
 function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargin)
 
@@ -227,7 +228,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     elseif ~isempty(p.Results.exclude_chans)
         if ~all(ismember(p.Results.exclude_chans, chan_labels))
             missing_channels = p.Results.exclude_chans(~ismember(p.Results.exclude_chans, chan_labels));
-            error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
+            error([sprintf('The following channels appear in ''exclude_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
                    sprintf('%s ', missing_channels{:})])
         else
             electrodes = find(~ismember(chan_labels, p.Results.exclude_chans));
@@ -364,7 +365,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                                  'F_obs', NaN(n_electrodes, n_time_pts), 'F_crit', NaN, 'df', NaN(1, 2)), ...
                                  length(effects), 1);
     for i = 1:length(effects)
-        test_results(i) = calc_param_ANOVA(the_data, effects{i}+2, q, method);
+        test_results(i) = calc_param_ANOVA(the_data, [], effects{i}+2, q, method);
     end
    
 
@@ -375,6 +376,8 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     end
     %Create results struct
     results = struct('bins', bins, ...
+                     'use_groups', NaN, ...
+                     'group_n', NaN, ...
                      'factors', {factor_names}, ...
                      'factor_levels', factor_levels, ...
                      'time_wind', time_wind, ...
@@ -431,81 +434,13 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
         F_crit     = results.F_crit;
     end
  
-    %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
     
+    %% ~~~~~ OUTPUT RESULTS ~~~~~
+    
+    %Output results to command window
     if VERBLEVEL
-        fprintf('\n##### RESULTS #####\n');
-        if length(effects) == 1
-                fprintf('\n%s effect\n', effects_labels{1});
-                if any(results.null_test(:))
-                    fprintf('Critical F-value: %.3f\n', results.F_crit);
-                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
-                            fcdf(results.F_crit, results.df(1), results.df(2), 'upper'));
-                    fprintf('Total number of significant differences: %d\n', sum(results.null_test(:)));
-                    fprintf('Estimated upper bound on expected number of false discoveries: %.1f.\n', sum(results.null_test(:))*q);
-                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
-                        for t = 1:size(time_wind, 1)
-                            fprintf('Significant electrodes for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
-                            fprintf('%s ', results.include_chans{results.null_test(:, t)});
-                            fprintf('\n');
-                        end
-                    else
-                        fprintf('Electrodes and time points with significant effects:\n');
-                        for t = 1:length(results.used_tpt_ids)
-                            if any(results.null_test(:, t))
-                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
-                                fprintf('%s ', results.include_chans{results.null_test(:, t)});
-                                fprintf('\n');
-                            end
-                        end
-                    end
-                    if ~strcmpi(method, 'bky')
-                        fprintf('All significant corrected p-values are between %f and %f.\n', ...
-                                max(results.adj_pval(results.adj_pval <= .05)), ... 
-                                min(results.adj_pval(:)));
-                    end
-                else
-                    fprintf('NO significant time points or electrodes.\n\n');
-                end
-        else
-            for i = 1:length(effects)
-                fprintf('\n%s effect\n', effects_labels{i});
-                if any(results.null_test.(effects_labels{i})(:))
-                    fprintf('Critical F-value: %.3f\n', results.F_crit.(effects_labels{i}));
-                    fprintf('That corresponds to a test-wise alpha level of %.3f.\n', ...
-                            fcdf(results.F_crit.(effects_labels{i}), results.df.(effects_labels{i})(1), results.df.(effects_labels{i})(2), 'upper'));
-                    fprintf('Total number of significant differences: %d\n', sum(results.null_test.(effects_labels{i})(:)));
-                    fprintf('Estimated upper bound on expected number of false discoveries: %.1f\n', sum(results.null_test.(effects_labels{i})(:))*q);
-                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
-                        for t = 1:size(time_wind, 1)
-                            fprintf('Significant electrodes for time windonw %d - %d: ', time_wind(t, 1), time_wind(t, 2));
-                            fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
-                            fprintf('\n');
-                        end
-                    else
-                        fprintf('Electrodes and time points with significant effects:\n');
-                        for t = 1:length(results.used_tpt_ids)
-                            if any(results.null_test.(effects_labels{i})(:, t))
-                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
-                                fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
-                                fprintf('\n');
-                            end
-                        end
-                    end
-                    if ~strcmpi(method, 'bky')
-                        fprintf('All significant corrected p-values are between %f and %f.\n', ...
-                                max(results.adj_pval.(effects_labels{i})(results.adj_pval.(effects_labels{i}) <= .05)), ... 
-                                min(results.adj_pval.(effects_labels{i})(:)));
-                    end
-                else
-                    fprintf('NO significant time points or electrodes.\n\n');
-                end
-            end
-        end
+        report_results(GND, length(GND.F_tests))
     end
-    
-    
-    %% ~~~~~ PLOT & SAVE RESULTS TO DISK ~~~~~
     
     %Plot results
     if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')

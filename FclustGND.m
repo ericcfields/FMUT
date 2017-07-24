@@ -134,7 +134,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 15 July 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -172,6 +172,8 @@
 % 6/27/17      - More information in command window output
 % 7/13/17      - int_method input eliminated; fixed spacing in command
 %                window output
+% 7/14/17      - Move command window output to separate function
+% 7/15/17      - use_groups and group_n to F_tests
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -259,7 +261,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     elseif ~isempty(p.Results.exclude_chans)
         if ~all(ismember(p.Results.exclude_chans, chan_labels))
             missing_channels = p.Results.exclude_chans(~ismember(p.Results.exclude_chans, chan_labels));
-            error([sprintf('The following channels appear in ''include_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
+            error([sprintf('The following channels appear in ''exclude_chans'' but do not appear in GND.chanlocs.labels:\n') ... 
                    sprintf('%s ', missing_channels{:})])
         else
             electrodes = find(~ismember(chan_labels, p.Results.exclude_chans));
@@ -402,7 +404,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         if VERBLEVEL
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
-        test_results(i) = calc_Fclust(the_data, effects{i}+2, n_perm, alpha, chan_hood, p.Results.thresh_p);
+        test_results(i) = calc_Fclust(the_data, [], effects{i}+2, n_perm, alpha, chan_hood, p.Results.thresh_p);
     end
    
 
@@ -413,6 +415,8 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     end
     %Create results struct
     results = struct('bins', bins, ...
+                     'use_groups', NaN, ...
+                     'group_n', NaN, ...
                      'factors', {factor_names}, ...
                      'factor_levels', factor_levels, ...
                      'time_wind', time_wind, ...
@@ -470,76 +474,14 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         F_obs      = results.F_obs;
         clust_info = results.clust_info;
     end
-    
-    %% ~~~~~ REPORT RESULTS TO COMMAND WINDOW ~~~~~
-    
-    if VERBLEVEL
-        fprintf('\n##### RESULTS #####\n\n');
-        if length(effects) == 1
-                fprintf('%s effect\n', effects_labels{1});
-                fprintf('# of clusters found: %d\n', length(results.clust_info.null_test));
-                fprintf('# of significant clusters found: %d\n', sum(results.clust_info.null_test));
-                if sum(results.clust_info.null_test)
-                    fprintf('Significant cluster p-values range from %f to %f.\n', ...
-                            max(results.clust_info.pval(results.clust_info.null_test)), ...
-                            min(results.clust_info.pval(results.clust_info.null_test)));
-                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
-                        for t = 1:size(time_wind, 1)
-                            fprintf('Electrodes in a significant cluster for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
-                            fprintf('%s ', results.include_chans{results.null_test(:, t)});
-                            fprintf('\n');
-                        end
-                        fprintf('\n');
-                    else
-                        fprintf('Electrodes and time points included in a significant cluster:\n');
-                        for t = 1:length(results.used_tpt_ids)
-                            if any(results.null_test(:, t))
-                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
-                                fprintf('%s ', results.include_chans{results.null_test(:, t)});
-                                fprintf('\n');
-                            end
-                        end
-                        fprintf('\n');
-                    end
-                else
-                    fprintf('All p-values >= %f\n\n', min(results.clust_info.pval));
-                end
-        else
-            for i = 1:length(effects)
-                fprintf('%s effect\n', effects_labels{i});
-                fprintf('# of clusters found: %d\n', length(results.clust_info.(effects_labels{i}).null_test));
-                fprintf('# of significant clusters found: %d\n', sum(results.clust_info.(effects_labels{i}).null_test));
-                if sum(results.clust_info.(effects_labels{i}).null_test)
-                    fprintf('Significant cluster p-values range from %f to %f.\n', ...
-                            max(results.clust_info.(effects_labels{i}).pval(results.clust_info.(effects_labels{i}).null_test)), ...
-                            min(results.clust_info.(effects_labels{i}).pval(results.clust_info.(effects_labels{i}).null_test)));
-                    if strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y')
-                        for t = 1:size(time_wind, 1)
-                            fprintf('Electrodes in a significant cluster for time window %d - %d: ', time_wind(t, 1), time_wind(t, 2));
-                            fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
-                            fprintf('\n');
-                        end
-                        fprintf('\n');
-                    else
-                        fprintf('Electrodes and time points included in a significant cluster:\n');
-                        for t = 1:length(results.used_tpt_ids)
-                            if any(results.null_test.(effects_labels{i})(:, t))
-                                fprintf('%d ms, electrode(s): ', GND.time_pts(results.used_tpt_ids(t)));
-                                fprintf('%s ', results.include_chans{results.null_test.(effects_labels{i})(:, t)});
-                                fprintf('\n');
-                            end
-                        end
-                        fprintf('\n');
-                    end
-                else
-                    fprintf('All p-values >= %f.\n\n', min(results.clust_info.(effects_labels{i}).pval));
-                end
-            end
-        end
-    end
  
     
-    %% ~~~~~ PLOT & SAVE RESULTS TO DISK ~~~~~
+    %% ~~~~~ OUTPUT RESULTS ~~~~~
+    
+    %Output results to command window
+    if VERBLEVEL
+        report_results(GND, length(GND.F_tests))
+    end
     
     %Plot results
     if ~strcmpi(p.Results.plot_raster, 'no') && ~strcmpi(p.Results.plot_raster, 'n')

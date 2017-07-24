@@ -5,6 +5,11 @@
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many
 %                 factors there are.
+% cond_subs     - Array giving the number of subjects in each condition of
+%                 the between subjects factor. For example, if cond_subs is
+%                 [8, 9], then there should be 17 subjects with the first 8
+%                 being in condition A and the next 9 being in condition B.
+%                 For fully within-subjects designs cond_subs = []
 % dims          - Dimensions of the data array involved in the effect to be
 %                 calculated. For example, if data is an electrode x time points
 %                 x Factor A x Factor B x subjects array and you want to
@@ -25,7 +30,7 @@
 % test_results - A struct with results of the mass univariate ANOVA
 %
 %
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 24 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -43,11 +48,12 @@
 % 6/23/17 - Added multiple comparisons corrections
 % 7/13/17 - Updated to reflect that ANOVA sub-functions no longer require
 %           int_method input
+% 7/14/17 - Now handle between subjects factors
+% 7/24/17 - Moved reduced_data to ANOVA functions
 
+function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction)
 
-function test_results = calc_param_ANOVA(data, dims, alphaORq, correction)
-
-    if nargin < 4
+    if nargin < 5
         correction = 'none';
     elseif ~any(strcmpi(correction, {'none', 'bonferroni', 'sidak', 'bh', 'by', 'bky'}))
         error('correction must be ''none'', ''bonferroni'', ''sidak'', ''bh'', ''by'', or ''bky''');
@@ -56,16 +62,21 @@ function test_results = calc_param_ANOVA(data, dims, alphaORq, correction)
     %Some useful numbers
     n_electrodes = size(data, 1);
     n_time_pts   = size(data, 2);
-
-    %Average across factors not involved in this effect
-    reduced_data = reduce_data(data, dims);
     
-    %Calculate ANOVA with single permutation to get F-obs
-    [F_dist, df_effect, df_res] = perm_rbANOVA(reduced_data, 1);
-    F_obs = reshape(F_dist, n_electrodes, n_time_pts);
+    %% Calculate ANOVA
+
+    %Calculate the ANOVA (F-obs and the permutation distribution)
+    if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
+        [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, 1);
+    else
+        [F_dist, df_effect, df_res] = perm_rbANOVA(data, dims, 1);
+    end
+    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     uncorr_p = 1 - fcdf(F_obs, df_effect, df_res);
     
-    %Calculate F-crit, p-values, and null test with appropriate correction
+    
+    %% Calculate F-crit, p-values, and null test with appropriate correction
+    
     switch correction
         case 'none'
             F_crit = finv(1-alphaORq, df_effect, df_res);
