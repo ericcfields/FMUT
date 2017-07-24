@@ -34,7 +34,7 @@
 % test_results - A struct with results of the cluster mass test
 %
 %
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 24 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -55,6 +55,7 @@
 % 6/22/17   - major re-organization of code to reduce repeated code
 % 7/13/17   - Updated for elimination of int_method input
 % 7/14/17   - Now handles betwee subjects factors
+% 7/24/17   - Moved reduced_data to ANOVA functions
 
 function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_hood, thresh_p)
 
@@ -66,20 +67,11 @@ function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_h
     
     %% Calculate ANOVA
     
-    %Eliminate factors not involved in this effect and reduce interactions
-    %via subtraction
-    [reduced_data, new_dims] = reduce_data(data, dims);
-    
     %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-        if ndims(reduced_data) == 3
-            [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
-            exact_test = true;
-        else
-            [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(reduced_data, cond_subs, new_dims, n_perm);
-        end
+        [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
     else
-        [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(reduced_data, n_perm);
+        [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm);
     end
     F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     

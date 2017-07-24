@@ -23,7 +23,7 @@
 % exact_test    - Boolean specifying whether the test was an exact test
 %
 %
-%VERSION DATE: 18 July 2017
+%VERSION DATE: 24 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -37,14 +37,18 @@
 
 function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm)
 
-    if ndims(data) == 3 && dims == 3
-        [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm);
+    %Eliminate factors not involved in this effect and reduce interactions
+    %via subtraction
+    [reduced_data, new_dims] = reduce_data(data, dims);
+
+    if ndims(reduced_data) == 3 && new_dims == 3
+        [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
         exact_test = true;
-    elseif ndims(data) == 4
-        [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm);
+    elseif ndims(reduced_data) == 4
+        [F_dist, df_effect, df_res] = twoway(reduced_data, cond_subs, new_dims, n_perm);
         exact_test = false;
-    elseif ndims(data) > 4
-        [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm);
+    elseif ndims(reduced_data) > 4
+        [F_dist, df_effect, df_res] = threeway(reduced_data, cond_subs, new_dims, n_perm);
         exact_test = false;
     end
     
