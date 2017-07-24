@@ -13,7 +13,7 @@ VERBLEVEL = 0;
 %Design
 n_electrodes = 1;
 n_time_pts = 1;
-wg_design = [2 2];
+wg_design = 2;
 cond_subs = [8 8];
 n_subs = sum(cond_subs);
 
@@ -28,7 +28,7 @@ alpha = 0.05;
 %Add effects
 wg_effect = 0;
 bg_effect = 0;
-int_effect = 5;
+int_effect = 0;
 
 %Pre-allocate results struct
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
@@ -62,8 +62,8 @@ parfor i = 1:n_exp
         if ndims(data) == 4 && isequal(dims, [3, 4])
             data(:, :, 1, Asubs)  =  data(:, :, 1, Asubs) + int_effect;
             data(:, :, 1, Bsubs) =  data(:, :, 1, Bsubs) - int_effect;
-            data(:, :, 3, Asubs)  =  data(:, :, 3, Asubs) - int_effect;
-            data(:, :, 3, Bsubs) =  data(:, :, 3, Bsubs) + int_effect;
+            data(:, :, 2, Asubs)  =  data(:, :, 2, Asubs) - int_effect;
+            data(:, :, 2, Bsubs) =  data(:, :, 2, Bsubs) + int_effect;
         elseif ndims(data) == 5
             data(:, :, 1, 1, Asubs) = data(:, :, 1, 1, Asubs) + int_effect;
             data(:, :, 1, 2, Asubs) = data(:, :, 1, 2, Asubs) - int_effect;
