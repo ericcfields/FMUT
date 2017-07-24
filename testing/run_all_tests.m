@@ -20,6 +20,8 @@ C_FclustGNDTest
 D_FfdrGNDTest
 E_VariousTest
 F_FmaxGRPTest
+G_FclustGRPTest
+H_FfdrGRPTest
 
 fprintf('\n\n')
 fprintf('All tests done!\n')
