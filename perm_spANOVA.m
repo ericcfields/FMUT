@@ -35,11 +35,19 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm)
+function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm, reduce)
 
     %Eliminate factors not involved in this effect and reduce interactions
     %via subtraction
-    [reduced_data, new_dims] = reduce_data(data, dims);
+    if nargin < 5
+        reduce = true;
+    end
+    if reduce
+        [reduced_data, new_dims] = reduce_data(data, dims);
+    else
+        reduced_data = data;
+        new_dims = dims;
+    end
 
     if ndims(reduced_data) == 3 && new_dims == 3
         [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
