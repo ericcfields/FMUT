@@ -33,11 +33,18 @@
 % 7/12/17   - Updated to work with BG-compliant get_int_res
 % 7/24/17   - Moved reduce_data here
 
-function [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm)
+function [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm, reduce)
 
     %Eliminate factors not involved in this effect and reduce interactions
     %via subtraction
-    reduced_data = reduce_data(data, dims);
+    if nargin < 4
+        reduce = true;
+    end
+    if reduce
+        reduced_data = reduce_data(data, dims);
+    else
+        reduced_data = data;
+    end
 
     %Calculate appropriate ANOVA
     if ndims(reduced_data) == 4
