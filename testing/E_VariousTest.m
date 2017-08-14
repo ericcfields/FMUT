@@ -16,9 +16,11 @@ end
 %%% Two-way %%%
 
 data = normrnd(0, 1, [32, 167, 2, 2, 16]);
+dims = [3, 4];
+n_perm = 10;
 
 %F-test
-F_dist = perm_rbANOVA(data, [3 4], 10);
+F_dist = perm_rbANOVA(data, dims, n_perm, false);
 F_obs = squeeze(F_dist(1, :, :));
 
 %t-test
@@ -33,9 +35,11 @@ assert(all(F_obs(:) - t_vals(:).^2 < 1e-9))
 %%% Three-way %%%
 
 data = normrnd(0, 1, [32, 167, 2, 2, 2, 16]);
+dims = [3, 4, 5];
+n_perm = 10;
 
 %F-test
-F_dist = perm_rbANOVA(data, [3, 4, 5], 10);
+F_dist = perm_rbANOVA(data, dims, n_perm, false);
 F_obs = squeeze(F_dist(1, :, :));
 
 %t-test
@@ -59,7 +63,7 @@ dims = [3, 4];
 n_perm = 10;
 
 %F-test
-F_dist = perm_spANOVA(data, cond_subs, dims, n_perm);
+F_dist = perm_spANOVA(data, cond_subs, dims, n_perm, false);
 F_obs = squeeze(F_dist(1, :, :));
 
 %t-test
@@ -77,7 +81,7 @@ dims = [3, 4, 5];
 n_perm = 10;
 
 %F-test
-F_dist = perm_spANOVA(data, cond_subs, dims, n_perm);
+F_dist = perm_spANOVA(data, cond_subs, dims, n_perm, false);
 F_obs = squeeze(F_dist(1, :, :));
 
 %t-test
