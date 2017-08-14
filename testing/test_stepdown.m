@@ -1,25 +1,25 @@
 clearvars;
 
-n_exp = 1;
+n_exp = 500;
 cond_subs = [];
 n_electrodes = 1;
 n_time_pts = 1000;
 dims = 3;
 n_perm = 1e3;
 alpha = 0.05;
-step_down = 2;
+step_down = 3;
 
-effect = 0;
-effect_length = 0;
+effect = 2;
+effect_length = 100;
 
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
                              'F_obs', NaN(n_electrodes, n_time_pts),  'Fmax_crit', NaN, ... 
                              'df', NaN(1, 2), 'estimated_alpha', NaN, 'exact_test', NaN), ...
-                             1000, 1);
+                             n_exp, 1);
 familywise_rej = NaN(1, n_exp);
 contrastwise_rej = NaN(1, n_exp);
 tic
-for exp = 1:n_exp
+parfor exp = 1:n_exp
 
     data = normrnd(0, 1, [n_electrodes, n_time_pts, 2, 16]);
     

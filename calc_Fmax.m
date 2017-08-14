@@ -20,7 +20,7 @@
 %                 calculate the AxB interaciton, dims  = [3, 4].
 % n_perm        - Number of permutations to use to calculate the null distribution
 % alpha         - Family-wise alpha level of the test
-% step_doan     - Use a step down procedure to calculate F-values after the
+% step_down     - Use a step down procedure to calculate F-values after the
 %                 max at progressively smaller thresholds
 %
 %OUTPUT
@@ -77,6 +77,10 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
     
     if step_down == 1
         
+        %%% Compare each F-value to distribution of F at the same
+        %%% position--e.g., the 50th largest observed F is compared to the
+        %%% the permutation distribution for Fmax-50 under the null
+        
         %Null distributions and critial values
         flat_F_dist = reshape(F_dist, [n_perm, n_electrodes*n_time_pts]);
         step_down_dist = sort(sort(flat_F_dist, 2, 'descend'), 1);
@@ -106,6 +110,9 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         assert(isequal(h, p<=alpha));
         
     elseif step_down == 2
+        
+        %%% Use random subsets from each permutation to estimate
+        %%% distribution of Fmax, Fmax-1, Fmax-2, and so on
         
         %Null distributions and critial values
         flat_F_dist = reshape(F_dist, [n_perm, n_electrodes*n_time_pts]);
@@ -143,6 +150,48 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         p = reshape(p(idx), [n_electrodes, n_time_pts]);
 
         assert(isequal(h, p<=alpha));
+        
+    elseif step_down == 3
+        
+        %%% Starting with Fmax and going to Fmax-1, Fmax-2, and so on,
+        %%% eliminated each time point/electrode if it is significanct to
+        %%% calculate the null distribution for the next comparison
+        
+        %Null distribution and critical values
+        flat_F_dist = reshape(F_dist, [n_perm, n_electrodes*n_time_pts]);
+        n_locations = n_electrodes * n_time_pts;
+        step_down_dist = NaN(size(flat_F_dist));
+        for j = 1:n_locations
+            [step_down_dist(:, j), max_idx] = max(flat_F_dist, [], 2);
+            flat_F_dist(:, max_idx(1)) = NaN;
+        end
+        
+        step_down_dist = sort(step_down_dist, 1);
+        Fmax_crit = step_down_dist(ceil((1-alpha) * size(step_down_dist, 1)), :)';
+        
+        %Get ordered F-values
+        [sorted_F_obs, idx] = sort(F_obs(:), 'descend');
+        
+        %Null hypothesis test
+        h = sorted_F_obs > Fmax_crit;
+        stop_point = find(~h, 1);
+        h(stop_point:end) = false;
+        h = reshape(h(idx), [n_electrodes, n_time_pts]);
+        est_alpha = mean(step_down_dist(:,1) > Fmax_crit(1));
+        if VERBLEVEL
+            fprintf('Estimated alpha level is %f\n', est_alpha);
+        end
+        
+        %Calculate p-values
+        p = NaN(size(sorted_F_obs));
+        for i = 1:length(sorted_F_obs)
+            p(i) = mean(step_down_dist(:, i) > sorted_F_obs(i));
+        end
+        p(stop_point:end) = NaN;
+        p = reshape(p(idx), [n_electrodes, n_time_pts]);
+
+        assert(isequal(h, p<=alpha));
+        
 
         
     else
