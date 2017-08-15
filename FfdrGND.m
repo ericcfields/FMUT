@@ -149,7 +149,7 @@
 
 function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargin)
 
-    warning('You are using a beta version of FfdrGND. It needs further testing and should NOT be considered error free.');
+    warning('You are using a beta version of FfdrGND. Some bugs may remain and results should be interpreted with caution.');
 
     %% ~~~~~PARSE INPUT~~~~~
 

@@ -152,7 +152,7 @@
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
     
-    warning('You are using a beta version of this function. It needs further testing and should NOT be considered error free.');
+    warning('You are using a beta version of FmaxGND. Some bugs may remain and results should be interpreted with caution.');
 
     %% ~~~~~PARSE INPUT~~~~~
 
