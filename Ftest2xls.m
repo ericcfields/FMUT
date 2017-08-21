@@ -79,11 +79,7 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
     %Create some variables for easier reference
     results = GND.F_tests(test_id);
     [~, effects_labels] = get_effects(results.factors);
-    if length(effects_labels) ==1
-        n_subs = results.df(2)/results.df(1) + 1;
-    else
-        n_subs = results.df.(effects_labels{1})(2)/results.df.(effects_labels{1})(1) + 1;
-    end
+    n_subs = sum(results.group_n);
     
     warning('off','MATLAB:xlswrite:AddSheet')
 

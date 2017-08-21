@@ -8,10 +8,11 @@
 Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
-VERSION DATE: 16 June 2017
+VERSION DATE: 21 August 2017
 """
 
 import sys
+import re
 import openpyxl
 if int(openpyxl.__version__[0]) < 2:
     raise RuntimeError('openpyxl must be version 2.0 or greater.')
@@ -30,11 +31,12 @@ def format_xls(spreadsheet):
     
     wb = openpyxl.load_workbook(spreadsheet)
     
-    #Delete Sheet1
-    if 'Sheet1' in wb.get_sheet_names():
-        s1 = wb.get_sheet_by_name('Sheet1')
-        wb.remove_sheet(s1)
-        wb.active = 0
+    #Delete blank sheets
+    for sheet_name in wb.get_sheet_names():
+        if re.match('Sheet\d', sheet_name):
+            sheet2remove = wb.get_sheet_by_name(sheet_name)
+            wb.remove_sheet(sheet2remove)
+    wb.active = 0
     
     #Define some fill styles for use below
     whiteFill = PatternFill(start_color='ffffff', end_color='ffffff', fill_type='solid')
