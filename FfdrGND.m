@@ -2,8 +2,7 @@
 %time points for one-way and factorial within-subjects ANOVA
 %
 %EXAMPLE USAGE
-%
-% GND = FfdrGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
+% >> GND = FfdrGND(GND, 'bins', 1:6, 'factor_names', {'probability', 'emotion'}, ...
 %                 'factor_levels', [3, 2], 'time_wind', [300, 900], ...
 %                 'include_chans', {'Fz', 'Cz', 'Pz'}, 'method', 'bh', 'q', 0.05) 
 %

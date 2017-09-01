@@ -1,5 +1,8 @@
 %Find all effects for a given repeated-measures ANOVA design.
 %
+%EXAMPLE USAGE
+% >> [effects, effects_labels] = get_effects({'Frequency', 'Priming'})
+%
 %REQUIRED INPUTS
 % factor_names   - A cell array of strings of the names of all factors in
 %                  the design

@@ -1,6 +1,9 @@
 %Calculate F-observed and the empirical F-distribution for an ANOVA with
 %one between subjects factor and up to two within subjects factors
 %
+%EXAMPLE USAGE
+% >> [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, [16, 16], [3, 4], 1e4)
+%
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many

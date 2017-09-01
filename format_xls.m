@@ -1,5 +1,8 @@
 %Add useful formatting to FMUT output spreadsheets
 %
+%EXAMPLE USAGE
+% >> format_xls('results.xlsx')
+%
 %REQUIRED INPUTS
 % spreadsheet - name of spreadsheet file to format
 %

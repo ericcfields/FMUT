@@ -1,6 +1,9 @@
 %Calculate parametric ANOVA at each time point and electrode with various
 %multiple comparisons corrections available.
 %
+%EXAMPLE USAGE
+% >> test_results = calc_param_ANOVA(data, [], [3, 4], 0.05, 'bh')
+%
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many

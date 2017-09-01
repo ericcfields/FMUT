@@ -12,6 +12,9 @@
 %   two levels (unless all factors have two levels, in which case subtract
 %   across all but one factor)
 %
+%EXAMPLE USAGE
+% >> [reduced_data, new_dims] = reduce_data(data, [3, 4])
+%
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many

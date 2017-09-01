@@ -2,6 +2,9 @@
 %within-subjects ANOVA with up to three factors. This function calculates a
 %one-way ANOVA, two-way interaction, and three-way interaction.
 %
+%EXAMPLE USAGE
+% >> [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, [3, 4], 1e4)
+%
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many
