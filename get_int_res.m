@@ -3,6 +3,9 @@
 %subtracted. If the data has three factors, the main effects and two-way
 %interactions will be subtracted.
 %
+%EXAMPLE USAGE
+% >> int_res = get_int_res(data, [], [3, 4])
+%
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many

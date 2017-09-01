@@ -1,8 +1,7 @@
 %Calculate Fmax corrected F-test.
-%For more inforamtion see: 
-%>> help FmaxGND
-%and
-%>> help FmaxGRP
+%
+%EXAMPLE USAGE
+% >> test_results = calc_Fmax(data, [], [3, 4], 1e4, 0.05)
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP

@@ -1,5 +1,8 @@
 %Output results of F-test to a spreadsheet.
 %
+%EXAMPLE USAGE
+% >> Ftest2xls(GND, 1, 'example.xlsx')
+%
 %REQUIRED INPUTS
 % GND            - A GND or GRP variable with F-test results
 % test_id        - The test number within the F_tests field of the GND

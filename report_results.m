@@ -1,15 +1,13 @@
 %Summarize results of F-test at the command window
 %
 %EXAMPLE USAGE
-%
-% report_results(GND, 1)
+% >> report_results(GND, 1)
 %
 %REQUIRED INPUTS
 % GND        - A GND or GRP variable with F-test results
 % test_id    - The test number of the results to report within the GND or
 %              GRP variable
 % 
-%
 %VERSION DATE: 14 July 2014
 %AUTHOR: Eric Fields
 %
