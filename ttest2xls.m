@@ -1,5 +1,8 @@
 %Output results of Mass Univariate Toolbox t-test to a spreadsheet.
 %
+%EXAMPLE USAGE
+% >> ttest2xls(GND, 1, 'results.xslx')
+%
 %REQUIRED INPUTS
 % GND            - A GND variable with t-test results
 % test_id        - The test number within the t_tests field of the GND

@@ -1,6 +1,9 @@
 %Calculate F-observed and the empirical F-distribution for a one-way
 %between subjects ANOVA
 %
+%EXAMPLE USAGE
+% >> [F_dist, df_effect, df_res] = perm_crANOVA(data, [16, 16], 1e4)
+%
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many

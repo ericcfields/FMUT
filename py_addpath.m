@@ -1,13 +1,14 @@
 %Add directory to import search path for the instance of 
 %the Python interpreter currently controlled by MATLAB
 %
+%EXAMPLE USAGE
+% >> py_addpath('C:\Documents\ERPResults')
+%
 %REQUIRED INPUTS
 % directory      - Directory to add the Python import search path
 % MATLAB_too     - If true (or 1), directory will also be added to the
 %                  MATLAB path. {default: false}
-% output_fname   - The filename for the spreadsheet that will be saved. If
-%                  you don't want to save in the current working directory, 
-%                  include a full filepath
+%
 %OPTIONAL OUTPUT
 % new_py_path    - a cell array of the directories on the updated
 %                  Python path; to get this output without updating the 

@@ -1,8 +1,7 @@
 %Calculate F-test cluster mass permutation effect.
-%For more information, see: 
-%>> help FclustGND
-%or
-%>> help FclustGRP
+%
+%EXAMPLE USAGE
+% >> test_results = calc_Fclust(data, [], [3, 4], 1e4, 0.05, chan_hood, 0.05)
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
