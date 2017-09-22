@@ -3,13 +3,10 @@
 %VERSION DATE: 15 July 2017
 
 %Load a GND for testing
-if ispc()
-    load('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\data\EmProb_13subs_Test.GND', '-mat');
-    load('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\data\Disflu_GroupLevel.GRP', '-mat');
-elseif ismac()
-    load('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/data/EmProb_13subs_Test.GND', '-mat');
-    load('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/data/Disflu_GroupLevel.GRP', '-mat')
-end
+FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+load(fullfile(FMUT_dir, 'testing', 'data', 'EmProb_13subs_Test.GND'), '-mat');
+load(fullfile(FMUT_dir, 'testing', 'data', 'Disflu_GroupLevel.GRP'), '-mat');
+
 
 %% Check F-values calculated by approximate int code RB
 

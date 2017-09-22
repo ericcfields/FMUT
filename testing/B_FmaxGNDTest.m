@@ -1,6 +1,6 @@
 %Test FmaxGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 22 September 2017
 
 global test_xls_output;
 if isempty(test_xls_output)
@@ -8,11 +8,8 @@ if isempty(test_xls_output)
 end
 
 %Load a GND for testing
-if ispc()
-    load('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\data\EmProb_13subs_Test.GND', '-mat');
-elseif ismac()
-    load('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/data/EmProb_13subs_Test.GND', '-mat');
-end
+FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+load(fullfile(FMUT_dir, 'testing', 'data', 'EmProb_13subs_Test.GND'), '-mat');
 
 %Define some general variables
 time_wind = [500, 800];
