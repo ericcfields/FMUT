@@ -8,11 +8,8 @@ if isempty(test_xls_output)
 end
 
 %Load GRP
-if ispc()
-    load('R:\Public\GK_lab\Eric\FMUT_development\FMUT\testing\data\Disflu_GroupLevel.GRP', '-mat');
-elseif ismac()
-    load('/Volumes/as-rsch-ncl1$/Public/GK_lab/Eric/FMUT_development/FMUT/testing/data/Disflu_GroupLevel.GRP', '-mat')
-end
+FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+load(fullfile(FMUT_dir, 'testing', 'data', 'Disflu_GroupLevel.GRP'), '-mat');
 
 %Define general variables
 time_wind = [300, 500];
