@@ -168,15 +168,15 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     p.addParameter('verblevel',     [],       @(x) (isnumeric(x) && length(x)==1 && x>=0 && x<=3))
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('q',             0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
-    p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky'})));
+    p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky', 'none', 'bonferroni', 'sidak'})));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
     p.addParameter('plot_mn_topo',   []);
     
     p.parse(GND_or_fname, varargin{:});
     
-    if isempty(p.Results.verblevel),
-        if isempty(VERBLEVEL),
+    if isempty(p.Results.verblevel)
+        if isempty(VERBLEVEL)
             VERBLEVEL=2;
         end
     else
