@@ -18,18 +18,18 @@ alpha = 0.05;
 step_down = 3;
 
 %Define effects
-effect = 0:.04:4;
-effect_length = length(effect);
+effect = 1;
+effect_length = 300;
 
 %Pre-allocate variables
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
                              'F_obs', NaN(n_electrodes, n_time_pts),  'Fmax_crit', NaN, ... 
                              'df', NaN(1, 2), 'estimated_alpha', NaN, 'exact_test', NaN), ...
                              n_exp, 1);
-familywise_rej = NaN(1, n_exp);
-contrastwise_rej = NaN(1, n_exp);
-power = NaN(1, n_exp);
-FDR = NaN(1, n_exp);
+familywise_rej     = NaN(1, n_exp);
+contrastwise_rej   = NaN(1, n_exp);
+contrastwise_power = NaN(1, n_exp);
+FDR                = NaN(1, n_exp);
 
 %Simulated experiments
 tic
@@ -47,9 +47,15 @@ parfor exp = 1:n_exp
     %Summarize experiment results
     familywise_rej(exp) = any(test_results(exp).h(effect_length+1:end));
     contrastwise_rej(exp) = mean(test_results(exp).h(effect_length+1:end));
-    if any(effect)
-        power(exp) = mean(test_results(exp).h(1:effect_length));
-        FDR(exp) = sum(test_results(exp).h(effect_length+1:end)) / (sum(test_results(exp).h));
+    if any(effect) && any(test_results(exp).h)
+        familywise_power(exp) = any(test_results(exp).h)
+        if any(test_results(exp).h)
+            contrastwise_power(exp) = mean(test_results(exp).h(1:effect_length));
+            FDR(exp) = sum(test_results(exp).h(effect_length+1:end)) / (sum(test_results(exp).h));
+        else
+            contrastwise_power(exp) = NaN;
+            FDR(exp) = NaN;
+        end
     end
     
 end
@@ -59,8 +65,9 @@ toc
 fprintf('\nFamily-wise error rate = %f\n', mean(familywise_rej));
 fprintf('Contrast-wise error rate = %f\n', mean(contrastwise_rej));
 if any(effect)
-    fprintf('Power = %f\n', mean(power));
-    fprintf('FDR = %f\n', mean(FDR));
+    fprintf('Family-wise power = %f\n', mean(familywise_power));
+    fprintf('Contrast-wise power = %f\n', nanmean(contrastwise_power));
+    fprintf('FDR = %f\n', nanmean(FDR));
 end
 fprintf('\n');
 
