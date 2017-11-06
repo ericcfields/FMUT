@@ -15,11 +15,11 @@ n_perm = 1e3;
 alpha = 0.05;
 
 %Step down procedure to use
-step_down = 3;
+step_down = false;
 
 %Define effects
 effect = 1;
-effect_length = 300;
+effect_length = 100;
 
 %Pre-allocate variables
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
@@ -28,6 +28,7 @@ test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_elec
                              n_exp, 1);
 familywise_rej     = NaN(1, n_exp);
 contrastwise_rej   = NaN(1, n_exp);
+familywise_power   = NaN(1, n_exp);
 contrastwise_power = NaN(1, n_exp);
 FDR                = NaN(1, n_exp);
 
@@ -48,7 +49,7 @@ parfor exp = 1:n_exp
     familywise_rej(exp) = any(test_results(exp).h(effect_length+1:end));
     contrastwise_rej(exp) = mean(test_results(exp).h(effect_length+1:end));
     if any(effect) && any(test_results(exp).h)
-        familywise_power(exp) = any(test_results(exp).h)
+        familywise_power(exp) = any(test_results(exp).h);
         if any(test_results(exp).h)
             contrastwise_power(exp) = mean(test_results(exp).h(1:effect_length));
             FDR(exp) = sum(test_results(exp).h(effect_length+1:end)) / (sum(test_results(exp).h));
