@@ -26,7 +26,7 @@
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 24 July 2017
+%VERSION DATE: 6 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -134,7 +134,8 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         h = sorted_F_obs > Fmax_crit;
         stop_point = find(~h, 1);
         h(stop_point:end) = false;
-        h = reshape(h(idx), [n_electrodes, n_time_pts]);
+        h(idx) = h;
+        h = reshape(h, [n_electrodes, n_time_pts]);
         est_alpha = mean(step_down_dist(:,1) > Fmax_crit(1));
         if VERBLEVEL
             fprintf('Estimated alpha level is %f\n', est_alpha);
@@ -146,7 +147,8 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
             p(i) = mean(step_down_dist(:, i) > sorted_F_obs(i));
         end
         p(stop_point:end) = NaN;
-        p = reshape(p(idx), [n_electrodes, n_time_pts]);
+        p(idx) = p;
+        p = reshape(p, [n_electrodes, n_time_pts]);
 
         assert(isequal(h, p<=alpha));
         
@@ -157,8 +159,8 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         %%% calculate the null distribution for the next comparison
         
         %Null distribution and critical values
-        flat_F_dist = reshape(F_dist, [n_perm, n_electrodes*n_time_pts]);
         n_locations = n_electrodes * n_time_pts;
+        flat_F_dist = reshape(F_dist, [n_perm, n_locations]);
         step_down_dist = NaN(size(flat_F_dist));
         for j = 1:n_locations
             [step_down_dist(:, j), max_idx] = max(flat_F_dist, [], 2);
@@ -175,7 +177,8 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         h = sorted_F_obs > Fmax_crit;
         stop_point = find(~h, 1);
         h(stop_point:end) = false;
-        h = reshape(h(idx), [n_electrodes, n_time_pts]);
+        h(idx) = h;
+        h = reshape(h, [n_electrodes, n_time_pts]);
         est_alpha = mean(step_down_dist(:,1) > Fmax_crit(1));
         if VERBLEVEL
             fprintf('Estimated alpha level is %f\n', est_alpha);
@@ -184,15 +187,14 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
         %Calculate p-values
         p = NaN(size(sorted_F_obs));
         for i = 1:length(sorted_F_obs)
-            p(i) = mean(step_down_dist(:, i) > sorted_F_obs(i));
+            p(i) = mean(step_down_dist(:, i) >= sorted_F_obs(i));
         end
         p(stop_point:end) = NaN;
-        p = reshape(p(idx), [n_electrodes, n_time_pts]);
+        p(idx) = p;
+        p = reshape(p, [n_electrodes, n_time_pts]);
 
         assert(isequal(h, p<=alpha));
-        
-
-        
+           
     else
     
         %Calculate Fmax distribution and Fmax critical value
