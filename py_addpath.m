@@ -15,7 +15,7 @@
 %                  Python path, use an empty string as the input:
 %                  py_path = py_addpath('')
 %
-%VERSION DATE: 23 June 2017
+%VERSION DATE: 3 Novemeber 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -32,6 +32,11 @@ function new_py_path = py_addpath(directory, MATLAB_too)
         error('Input must be a string')
     elseif ~exist(directory, 'dir') && ~isempty(directory)
         error('%s is not a valid directory', directory)
+    end
+    
+    %Convert relative path to absolute path
+    if ~isempty(directory)
+        directory = char(py.os.path.abspath(directory));
     end
     
     %add directory to Python path if not already present
