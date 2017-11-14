@@ -131,7 +131,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 14 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -144,8 +144,6 @@
 %This function may incorporate some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/15/17  - First version modified from FfdrGND
 
 function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargin)
 
@@ -288,6 +286,12 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     end
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
+    end
+    if min(time_wind(:)) < min(GRP.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GRP.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GRP.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GRP.time_pts), max(time_wind(:)));
     end
 
     

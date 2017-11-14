@@ -184,7 +184,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     %Assign GRP
     if ischar(GRP_or_fname)
-        load(GRP_or_fname, '-mat');
+        load(GRP_or_fname, '-mat'); %#ok<LOAD>
     elseif isstruct(GRP_or_fname)
         GRP = GRP_or_fname;
     else
@@ -286,9 +286,15 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
     end
-    if alpha <= .01 && n_perm < 5000,
+    if min(time_wind(:)) < min(GRP.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GRP.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GRP.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GRP.time_pts), max(time_wind(:)));
+    end
+    if alpha <= .01 && n_perm < 5000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
-    elseif alpha <=.05 && n_perm < 1000,
+    elseif alpha <=.05 && n_perm < 1000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
     end
     if p.Results.reproduce_test

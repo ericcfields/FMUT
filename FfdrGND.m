@@ -116,7 +116,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 21 August 2017
+%VERSION DATE: 14 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -129,22 +129,6 @@
 %This function may incorporate some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-%
-% 5/15/17         - First working version
-% 6/2/17          - Electrode order in output when using include_chans now
-%                   matches MUT functions
-% 6/3/17          - Fixed problems with factorial ANOVA
-% 6/12/17         - Added verblevel reports
-% 6/14/17         - Updated error for incorrectly supplied electrode name;
-%                   fixed command window output for one-way ANOVA
-% 6/20/17         - Command window output for mean window analyses
-% 6/21/17         - time_wind field of results struct is now accurate;
-%                   changed used_tpt_ids field to cell array for mean window
-%                   analyses
-% 6/23/17         - Moved corrections to sub-function
-% 7/13/17         - Updated for changes due to int_method elimination
-% 7/15/17         - 'use_groups' and 'group_n' added to F_tests
 
 function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargin)
 
@@ -185,7 +169,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     
     %Assign GND
     if ischar(GND_or_fname)
-        load(GND_or_fname, '-mat');
+        load(GND_or_fname, '-mat'); %#ok<LOAD>
     elseif isstruct(GND_or_fname)
         GND = GND_or_fname;
     else
@@ -274,6 +258,12 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     end
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
+    end
+    if min(time_wind(:)) < min(GND.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GND.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GND.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GND.time_pts), max(time_wind(:)));
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct.'));
