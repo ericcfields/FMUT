@@ -3,7 +3,6 @@
 %AUTHOR: Eric Fields
 %VERSION DATE: 14 July 2017
 
-
 A_setupTest
 
 global test_xls_output
