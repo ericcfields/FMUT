@@ -121,7 +121,7 @@
 %https://github.com/ericcfields/FMUT/wiki
 %
 %
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 14 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -134,12 +134,6 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 %This function incorporates some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
-
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/11/17 - First version modified from FmaxGND
-% 7/13/17 - updated to eliminated int_method
-% 7/14/17 - Command window output moved to separate function
-% 7/15/17 - Added use_groups option; use_groups and groups_n to F_tests
 
 
 function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargin)

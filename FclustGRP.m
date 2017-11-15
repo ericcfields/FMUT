@@ -363,6 +363,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         %Between subjects structure
         cond_subs(1, end+1) = size(GND.indiv_erps, 4); %#ok<AGROW>
         
+        %Get data (individual time points)
         if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
             [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
             [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
@@ -374,6 +375,8 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
             if VERBLEVEL && g == group_ids(1)
                 fprintf('\nConducting cluster mass permutation test from %d ms to %d ms.\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
             end
+            
+        %Get data (mean time window)    
         else
             n_time_pts = 1;
             [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
@@ -387,6 +390,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         end
         use_time_pts = start_sample:end_sample;
         clear GND
+        
     end
     
     if VERBLEVEL
