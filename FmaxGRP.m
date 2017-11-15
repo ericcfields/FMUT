@@ -121,7 +121,7 @@
 %https://github.com/ericcfields/FMUT/wiki
 %
 %
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 14 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -134,12 +134,6 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 %This function incorporates some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
-
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/11/17 - First version modified from FmaxGND
-% 7/13/17 - updated to eliminated int_method
-% 7/14/17 - Command window output moved to separate function
-% 7/15/17 - Added use_groups option; use_groups and groups_n to F_tests
 
 
 function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargin)
@@ -184,7 +178,7 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     
     %Assign GRP
     if ischar(GRP_or_fname)
-        load(GRP_or_fname, '-mat');
+        load(GRP_or_fname, '-mat'); %#ok<LOAD>
     elseif isstruct(GRP_or_fname)
         GRP = GRP_or_fname;
     else
@@ -286,9 +280,15 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
     end
-    if alpha <= .01 && n_perm < 5000,
+    if min(time_wind(:)) < min(GRP.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GRP.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GRP.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GRP.time_pts), max(time_wind(:)));
+    end
+    if alpha <= .01 && n_perm < 5000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
-    elseif alpha <=.05 && n_perm < 1000,
+    elseif alpha <=.05 && n_perm < 1000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
     end
     if p.Results.reproduce_test

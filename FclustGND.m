@@ -134,7 +134,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 21 August 2017
+%VERSION DATE: 14 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -147,33 +147,6 @@
 %This function incorporates some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 11/28/16     - Moved calculations to sub function calc_F_clust_mass
-% 12/8/16      - Added abilty to set global variable VERBLEVEL. Added
-%                'mean_wind' option.
-% 2/14/17      - Added cluster ID to spreadsheet output
-% 3/31/17      - Moved spreadsheet output function to standalone
-% 4/7/17       - Fixed error in checking interaction method
-% 4/17/17      - Fixed inconsistency in used_tpt_id field with t-tests
-%                results; changed desired_alpha to desired_alphaORq;
-%                added plot_raster functionality; added estimated_alpha
-%                to results
-% 5/9/17       - Added informative error messages for incorrect
-%                electrode names
-% 6/2/17       - Electrode order in output when using include_chans now
-%                matches MUT functions
-% 6/12/17      - Added verblevel related reports
-% 6/14/17      - Updated error for incorrectly supplied electrode name;
-%                fixed command window output for one-way ANOVA
-% 6/20/17      - Command window output for mean window analyses
-% 6/21/17      - time_wind field of results struct is now accurate;
-%                changed used_tpt_ids field to cell array for mean window
-%                analyses
-% 6/27/17      - More information in command window output
-% 7/13/17      - int_method input eliminated; fixed spacing in command
-%                window output
-% 7/14/17      - Move command window output to separate function
-% 7/15/17      - use_groups and group_n to F_tests
 
 function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, varargin)
 
@@ -208,8 +181,8 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     p.parse(GND_or_fname, varargin{:});
     
-    if isempty(p.Results.verblevel),
-        if isempty(VERBLEVEL),
+    if isempty(p.Results.verblevel)
+        if isempty(VERBLEVEL)
             VERBLEVEL=2;
         end
     else
@@ -218,7 +191,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %Assign GND
     if ischar(GND_or_fname)
-        load(GND_or_fname, '-mat');
+        load(GND_or_fname, '-mat'); %#ok<LOAD>
     elseif isstruct(GND_or_fname)
         GND = GND_or_fname;
     else
@@ -306,12 +279,18 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if ~isequal(size(time_wind), [1, 2])
         error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
     end
+    if min(time_wind(:)) < min(GND.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GND.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GND.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GND.time_pts), max(time_wind(:)));
+    end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
     end
-    if alpha <= .01 && n_perm < 5000,
+    if alpha <= .01 && n_perm < 5000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
-    elseif alpha <=.05 && n_perm < 1000,
+    elseif alpha <=.05 && n_perm < 1000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
@@ -344,7 +323,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %Some useful numbers
     n_subs       = size(GND.indiv_erps, 4);
-    n_electrodes = length(electrodes); 
+    n_electrodes = length(electrodes);
 
     %Find time points or mean windows to use and extract the data for
     %analysis
@@ -389,7 +368,7 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     
     %Get chan_hood matrix if input was distance scalar
     if isscalar(chan_hood)
-        if VERBLEVEL; fprintf('\n'); end;
+        if VERBLEVEL; fprintf('\n'); end
         chan_hood = spatial_neighbors(GND.chanlocs(electrodes), chan_hood, p.Results.head_radius);
     end
         

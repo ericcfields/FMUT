@@ -144,7 +144,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 14 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -156,9 +156,6 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 %This function incorporates some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
-
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/15/18  - First version
 
 function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, varargin)
 
@@ -195,8 +192,8 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
     
     p.parse(GRP_or_fname, varargin{:});
     
-    if isempty(p.Results.verblevel),
-        if isempty(VERBLEVEL),
+    if isempty(p.Results.verblevel)
+        if isempty(VERBLEVEL)
             VERBLEVEL=2;
         end
     else
@@ -205,7 +202,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
     
     %Assign GRP
     if ischar(GRP_or_fname)
-        load(GRP_or_fname, '-mat');
+        load(GRP_or_fname, '-mat'); %#ok<LOAD>
     elseif isstruct(GRP_or_fname)
         GRP = GRP_or_fname;
     else
@@ -304,9 +301,15 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
     end
-    if alpha <= .01 && n_perm < 5000,
+    if min(time_wind(:)) < min(GRP.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GRP.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GRP.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GRP.time_pts), max(time_wind(:)));
+    end
+    if alpha <= .01 && n_perm < 5000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
-    elseif alpha <=.05 && n_perm < 1000,
+    elseif alpha <=.05 && n_perm < 1000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));
     end
     if p.Results.reproduce_test
@@ -360,6 +363,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         %Between subjects structure
         cond_subs(1, end+1) = size(GND.indiv_erps, 4); %#ok<AGROW>
         
+        %Get data (individual time points)
         if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
             [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
             [~, end_sample  ] = min(abs( GND.time_pts - time_wind(2) ));
@@ -371,6 +375,8 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
             if VERBLEVEL && g == group_ids(1)
                 fprintf('\nConducting cluster mass permutation test from %d ms to %d ms.\n', GND.time_pts(start_sample), GND.time_pts(end_sample));
             end
+            
+        %Get data (mean time window)    
         else
             n_time_pts = 1;
             [~, start_sample] = min(abs( GND.time_pts - time_wind(1) ));
@@ -384,6 +390,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         end
         use_time_pts = start_sample:end_sample;
         clear GND
+        
     end
     
     if VERBLEVEL
@@ -413,7 +420,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
     
     %Get chan_hood matrix if input was distance scalar
     if isscalar(chan_hood)
-        if VERBLEVEL; fprintf('\n'); end;
+        if VERBLEVEL; fprintf('\n'); end
         chan_hood = spatial_neighbors(GRP.chanlocs(electrodes), chan_hood, p.Results.head_radius);
     end
         
