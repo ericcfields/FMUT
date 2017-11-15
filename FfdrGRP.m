@@ -131,7 +131,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 14 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -144,8 +144,6 @@
 %This function may incorporate some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/15/17  - First version modified from FfdrGND
 
 function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargin)
 
@@ -188,7 +186,7 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     
     %Assign GRP
     if ischar(GRP_or_fname)
-        load(GRP_or_fname, '-mat');
+        load(GRP_or_fname, '-mat'); %#ok<LOAD>
     elseif isstruct(GRP_or_fname)
         GRP = GRP_or_fname;
     else
@@ -289,6 +287,12 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
     end
+    if min(time_wind(:)) < min(GRP.time_pts)
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GRP.time_pts), min(time_wind(:)));
+    end
+    if max(time_wind(:)) > max(GRP.time_pts)
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GRP.time_pts), max(time_wind(:)));
+    end
 
     
     %% ~~~~~ SET-UP ~~~~~
@@ -316,6 +320,7 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
         %Between subjects structure
         cond_subs(1, end+1) = size(GND.indiv_erps, 4); %#ok<AGROW>
         
+        %Get data (individual time points)
         if ~strcmpi(p.Results.mean_wind, 'yes') && ~strcmpi(p.Results.mean_wind, 'y')
             use_time_pts = [];
             for i = 1:size(time_wind, 1)
@@ -337,6 +342,8 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
             end
             n_time_pts = length(use_time_pts);
             the_data = cat(4, the_data, GND.indiv_erps(electrodes, use_time_pts, bins, :));
+        
+        %Get data (mean time window)
         else
             n_time_pts = size(time_wind, 1);
             use_time_pts = cell(n_time_pts, 1);
@@ -361,6 +368,7 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
             end
             the_data = cat(4, the_data, new_data);
         end
+        
     end
     
     %Report test information
