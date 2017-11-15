@@ -288,10 +288,10 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
         error('When multiple time windows are provided, they cannot overlap.')
     end
     if min(time_wind(:)) < min(GRP.time_pts)
-        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GRP.time_pts), min(time_wind(:)));
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GRP.time_pts), min(time_wind(:)));
     end
     if max(time_wind(:)) > max(GRP.time_pts)
-        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GRP.time_pts), max(time_wind(:)));
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GRP.time_pts), max(time_wind(:)));
     end
 
     

@@ -281,10 +281,10 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
         error('When multiple time windows are provided, they cannot overlap.')
     end
     if min(time_wind(:)) < min(GND.time_pts)
-        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GND.time_pts), min(time_wind(:)));
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GND.time_pts), min(time_wind(:)));
     end
     if max(time_wind(:)) > max(GND.time_pts)
-        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GND.time_pts), max(time_wind(:)));
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GND.time_pts), max(time_wind(:)));
     end
     if alpha <= .01 && n_perm < 5000
         watchit(sprintf('You are probably using too few permutations for an alpha level of %f.',alpha));

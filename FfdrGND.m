@@ -260,10 +260,10 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
         error('When multiple time windows are provided, they cannot overlap.')
     end
     if min(time_wind(:)) < min(GND.time_pts)
-        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GND.time_pts), min(time_wind(:)));
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GND.time_pts), min(time_wind(:)));
     end
     if max(time_wind(:)) > max(GND.time_pts)
-        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GND.time_pts), max(time_wind(:)));
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GND.time_pts), max(time_wind(:)));
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct.'));

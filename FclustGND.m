@@ -280,10 +280,10 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
         error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
     end
     if min(time_wind(:)) < min(GND.time_pts)
-        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %d ms', min(GND.time_pts), min(time_wind(:)));
+        error('Epoch begins at %.1f ms, but ''time_wind'' input begins at %.1f ms', min(GND.time_pts), min(time_wind(:)));
     end
     if max(time_wind(:)) > max(GND.time_pts)
-        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %d ms', max(GND.time_pts), max(time_wind(:)));
+        error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GND.time_pts), max(time_wind(:)));
     end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
