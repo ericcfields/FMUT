@@ -14,7 +14,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 20 June 2017
+%VERSION DATE: 15 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -24,19 +24,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 3/31/17   - First version
-% 4/7/17    - Fixed small error
-% 5/9/17    - Added cluster summary output; fixed error in output of time
-%             point ids
-% 5/15/17   - Updated to work with FDR results
-% 5/17/17   - Added ability to use Python to format spreadsheet; added #
-%             subjects to test summary sheet
-% 5/24/17   - Updated for new xls formatting function; added optional argument
-%             to specify whether to format or not
-% 6/15/17   - Updated to work with xlwrite and improved output of critical
-%             values
-% 6/20/17   - Output for mean window analyses
 function ttest2xls(GND, test_id, output_fname, format_output)
     
     %% Set-up
@@ -88,7 +75,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                'GND', [GND.filepath GND.filename]; ...
                'Bin', results.bin; ...
                'Bin Description', GND.bin_info(results.bin).bindesc; ...
-               'Time Window', sprintf('%d - %d', round(results.time_wind(:))); ...
+               'Time Window', sprintf('%.0f - %.0f', round(results.time_wind(:))); ...
                'Mean window', results.mean_wind; ...
                'Electrodes', [sprintf('%s, ', results.include_chans{1:end-1}), results.include_chans{end}]; ...
                'Multiple comparisons correction method', results.mult_comp_method; ...
@@ -144,9 +131,9 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                 clust_sum{row+3, col+1} = sprintf('%s, ', results.include_chans{any(clust_tobs, 2)});
                 %temporal extent
                 if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
-                    clust_sum{row+4, col+1} = sprintf('Mean window: %d-%d', results.time_wind(1), results.time_wind(2));
+                    clust_sum{row+4, col+1} = sprintf('Mean window: %.0f-%.0f', results.time_wind(1), results.time_wind(2));
                 else
-                    clust_sum{row+4, col+1} = sprintf('%d - %d', ... 
+                    clust_sum{row+4, col+1} = sprintf('%.0f - %.0f', ... 
                                                       GND.time_pts(min(results.used_tpt_ids(any(clust_tobs, 1)))), ... 
                                                       GND.time_pts(max(results.used_tpt_ids(any(clust_tobs, 1)))));
                 end
@@ -154,19 +141,19 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                 [max_elec, max_timept] = find(abs(clust_tobs) == max(abs(clust_tobs(:)))); %find location of max F in cluster
                 clust_sum{row+5, col+1} = results.include_chans{max_elec};
                 if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
-                    clust_sum{row+6, col+1} = sprintf('Mean window: %d-%d', results.time_wind(1), results.time_wind(2));
+                    clust_sum{row+6, col+1} = sprintf('Mean window: %.0f-%.0f', results.time_wind(1), results.time_wind(2));
                 else
-                    clust_sum{row+6, col+1} = GND.time_pts(results.used_tpt_ids(max_timept));
+                    clust_sum{row+6, col+1} = sprintf('%.0f', GND.time_pts(results.used_tpt_ids(max_timept)));
                 end
                 %Spatial and temporal center (collapsed across the other
                 %dimension)
                 [~, max_elec_clust] = max(abs(sum(clust_tobs, 2)));
                 clust_sum{row+7, col+1} = results.include_chans{max_elec_clust};
                 if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
-                    clust_sum{row+8, col+1} = sprintf('Mean window: %d-%d', results.time_wind(1), results.time_wind(2));
+                    clust_sum{row+8, col+1} = sprintf('Mean window: %.0f-%.0f', results.time_wind(1), results.time_wind(2));
                 else
                     [~, max_time_clust] = max(abs(sum(clust_tobs, 1)));
-                    clust_sum{row+8, col+1} = GND.time_pts(results.used_tpt_ids(max_time_clust));
+                    clust_sum{row+8, col+1} = sprintf('%.0f', GND.time_pts(results.used_tpt_ids(max_time_clust)));
                 end
                 row = row+10;
             end
@@ -181,7 +168,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
     if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
         time_header = cell(1, size(results.time_wind, 1));
         for t = 1:size(results.time_wind, 1)
-            time_header{t} = sprintf('%d-%d', results.time_wind(t,1), results.time_wind(t,2));
+            time_header{t} = sprintf('%.0f-%.0f', results.time_wind(t,1), results.time_wind(t,2));
         end 
     else
         time_header = num2cell(GND.time_pts(results.used_tpt_ids));
