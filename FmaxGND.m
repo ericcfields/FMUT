@@ -122,33 +122,6 @@
 %This function incorporates some code from the Mass Univariate Toolbox, 
 %Copyright (c) 2015, David Groppe
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 11/28/16       - Moved calculatiosn to sub-function calc_Fmax
-% 12/8/16        - Added abilty to set global variable VERBLEVEL. Added
-%                  ability to specify multiple time windows and'mean_wind' 
-%                  option
-% 3/31/17        - Moved save to spreadsheet to standalone function
-% 4/7/17         - Fixed error in checking interaction method
-% 4/17/17        - Fixed inconsistency in used_tpt_id field with t-tests
-%                  results; changed desired_alpha to desired_alphaORq
-% 5/9/17         - Added informative error messages for incorrect
-%                  electrode names
-% 6/2/17         - Electrode order in output when using include_chans now
-%                  matches MUT functions; added estimate_alpha field to
-%                  results
-% 6/12/17        - Added estimated alpha to output; Added verblevel related
-%                  reports
-% 6/14/17        - Updated error report for incorrect channel names; fixed
-%                  bug in command window output for oneway ANOVA
-% 6/20/17        - Command window output for mean window analyses
-% 6/21/17        - time_wind field of results struct is now accurate;
-%                  changed used_tpt_ids field to cell array for mean window
-%                  analyses
-% 6/22/17        - Now using MATLAB input parsing system
-% 7/11/17        - Works with updated calc_Fmax
-% 7/13/17        - int_method input eliminated
-% 7/14/17        - Command window output moved to separate function
-% 7/15/17        - added use_groups and group_n to F_tests
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
     
