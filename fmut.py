@@ -8,7 +8,7 @@
 Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
-VERSION DATE: 21 August 2017
+VERSION DATE: 16 November 2017
 """
 
 import sys
@@ -74,10 +74,10 @@ def format_xls(spreadsheet):
                 cell.font = Font(sz=13, bold=True)
             #Format decimal places of stats
             for row in range(2, sheet.max_row+1):
-                if sheet['A'+str(row)].value == 'cluster mass':
+                if any(cell.value=='cluster mass' for cell in sheet[str(row)]):
                     for cell in sheet[row]:
                         cell.number_format = '0.00'
-                elif sheet['A'+str(row)].value == 'p-value':
+                elif any(cell.value=='p-value' for cell in sheet[str(row)]):
                     for cell in sheet[row]:
                         cell.number_format = '0.000'
             #Left align everything for easier viewing
