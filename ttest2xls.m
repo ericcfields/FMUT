@@ -67,9 +67,9 @@ function ttest2xls(GND, test_id, output_fname, format_output)
     %Create assign t-tests results for easier reference
     results = GND.t_tests(test_id);
     if isfield(GND, 'group_desc')
-        n_subs = GND.df + 2; %between subjects t-test
+        n_subs = results.df + 2; %between subjects t-test
     else
-        n_subs = GND.df + 1; %one sample t-test
+        n_subs = results.df + 1; %one sample t-test
     end
     
     warning('off', 'MATLAB:xlswrite:AddSheet')
