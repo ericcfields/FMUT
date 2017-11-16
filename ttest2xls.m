@@ -14,7 +14,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 15 November 2017
+%VERSION DATE: 16 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -66,8 +66,13 @@ function ttest2xls(GND, test_id, output_fname, format_output)
     
     %Create assign t-tests results for easier reference
     results = GND.t_tests(test_id);
+    if isfield(GND, 'group_desc')
+        n_subs = GND.df + 2; %between subjects t-test
+    else
+        n_subs = GND.df + 1; %one sample t-test
+    end
     
-    warning('off','MATLAB:xlswrite:AddSheet')
+    warning('off', 'MATLAB:xlswrite:AddSheet')
     
     %% Test summary
 
@@ -81,7 +86,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                'Multiple comparisons correction method', results.mult_comp_method; ...
                'Number of permutations', results.n_perm; ...
                'Alpha or q(FDR)', results.desired_alphaORq; ...
-               '# subjects', results.df+1};
+               '# subjects', n_subs};
     if ~strcmpi(results.mult_comp_method, 'cluster mass perm test')
         summary(end+1, :) = {'t critical value', results.crit_t(2)};
     end
@@ -131,7 +136,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                 clust_sum{row+3, col+1} = sprintf('%s, ', results.include_chans{any(clust_tobs, 2)});
                 %temporal extent
                 if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
-                    clust_sum{row+4, col+1} = sprintf('Mean window: %.0f-%.0f', results.time_wind(1), results.time_wind(2));
+                    clust_sum{row+4, col+1} = sprintf('Mean window: %.0f - %.0f', results.time_wind(1), results.time_wind(2));
                 else
                     clust_sum{row+4, col+1} = sprintf('%.0f - %.0f', ... 
                                                       GND.time_pts(min(results.used_tpt_ids(any(clust_tobs, 1)))), ... 
@@ -141,7 +146,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                 [max_elec, max_timept] = find(abs(clust_tobs) == max(abs(clust_tobs(:)))); %find location of max F in cluster
                 clust_sum{row+5, col+1} = results.include_chans{max_elec};
                 if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
-                    clust_sum{row+6, col+1} = sprintf('Mean window: %.0f-%.0f', results.time_wind(1), results.time_wind(2));
+                    clust_sum{row+6, col+1} = sprintf('Mean window: %.0f - %.0f', results.time_wind(1), results.time_wind(2));
                 else
                     clust_sum{row+6, col+1} = sprintf('%.0f', GND.time_pts(results.used_tpt_ids(max_timept)));
                 end
@@ -150,7 +155,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
                 [~, max_elec_clust] = max(abs(sum(clust_tobs, 2)));
                 clust_sum{row+7, col+1} = results.include_chans{max_elec_clust};
                 if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
-                    clust_sum{row+8, col+1} = sprintf('Mean window: %.0f-%.0f', results.time_wind(1), results.time_wind(2));
+                    clust_sum{row+8, col+1} = sprintf('Mean window: %.0f - %.0f', results.time_wind(1), results.time_wind(2));
                 else
                     [~, max_time_clust] = max(abs(sum(clust_tobs, 1)));
                     clust_sum{row+8, col+1} = sprintf('%.0f', GND.time_pts(results.used_tpt_ids(max_time_clust)));
@@ -168,7 +173,7 @@ function ttest2xls(GND, test_id, output_fname, format_output)
     if strcmpi(results.mean_wind, 'yes') || strcmpi(results.mean_wind, 'y')
         time_header = cell(1, size(results.time_wind, 1));
         for t = 1:size(results.time_wind, 1)
-            time_header{t} = sprintf('%.0f-%.0f', results.time_wind(t,1), results.time_wind(t,2));
+            time_header{t} = sprintf('%.0f - %.0f', results.time_wind(t,1), results.time_wind(t,2));
         end 
     else
         time_header = num2cell(GND.time_pts(results.used_tpt_ids));
