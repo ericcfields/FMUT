@@ -1,5 +1,2 @@
-rem Need Python 3.4 environment with pyinstaller
-call activate py34
 cd C:\Users\ecfne\Documents\Eric\Coding\FMUT_development\FMUT
 pyinstaller -F -n py_fmut fmut.py
-call deactivate

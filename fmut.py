@@ -2,7 +2,6 @@
 #Written in Python 3.6
 #Python 2 compliant as of 6/16/17 
 #Written in openpyxl 2.4, should work for any previous 2.x release
-#Compiled version uses Python 3.4
 
 """
 Python functions for the Factorial Mass ERP Univariate Toolbox
