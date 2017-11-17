@@ -116,7 +116,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 November 2017
+%VERSION DATE: 17 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -456,9 +456,9 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
             fprintf('\nWriting results to %s . . . ', p.Results.output_file)
         end
         Ftest2xls(GND, length(GND.F_tests), p.Results.output_file);
-        if VERBLEVEL
-            fprintf('DONE.\n\n')
-        end
+%         if VERBLEVEL
+%             fprintf('DONE.\n\n')
+%         end
     end
 
     
