@@ -21,12 +21,12 @@
 
 function [poi_files, missing_poi_files] = get_poi_paths()
 
-    poi_files = {fullfile(fileparts(which('add_poi_path')), 'poi_library/poi-3.8-20120326.jar')
-                 fullfile(fileparts(which('add_poi_path')), 'poi_library/poi-ooxml-3.8-20120326.jar')
-                 fullfile(fileparts(which('add_poi_path')), 'poi_library/poi-ooxml-schemas-3.8-20120326.jar')
-                 fullfile(fileparts(which('add_poi_path')), 'poi_library/xmlbeans-2.3.0.jar')
-                 fullfile(fileparts(which('add_poi_path')), 'poi_library/dom4j-1.6.1.jar')
-                 fullfile(fileparts(which('add_poi_path')), 'poi_library/stax-api-1.0.1.jar')};
+    poi_files = {fullfile(fileparts(which('get_poi_paths')), 'poi_library/poi-3.8-20120326.jar')
+                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/poi-ooxml-3.8-20120326.jar')
+                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/poi-ooxml-schemas-3.8-20120326.jar')
+                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/xmlbeans-2.3.0.jar')
+                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/dom4j-1.6.1.jar')
+                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/stax-api-1.0.1.jar')};
              
      missing_poi_files = poi_files(~ismember(poi_files, javaclasspath('-static')));
 
