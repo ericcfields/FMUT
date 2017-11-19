@@ -14,7 +14,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 16 November 2017
+%VERSION DATE: 18 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -28,6 +28,11 @@
 function Ftest2xls(GND, test_id, output_fname, format_output)
     
     %% Set-up
+    
+    global VERBLEVEL;
+    if isempty(VERBLEVEL)
+        VERBLEVEL = 2;
+    end
 
     %Set formatting option if no input
 	if nargin < 4 %#ok<ALIGN>
@@ -41,17 +46,32 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
         watchit(sprintf('Spreadsheet formatting on non-Windows systems is buggy.\nSee the FMUT documentation for an explanation and possible workaround.'))
     end
     
-    %Define function for writing to spreadsheet
+    %Define function for writing to spreadsheet and update Java class paht
+    %if necessary
     if ispc()
         writexls = @xlswrite;
-    else
-        % Add Java POI Libs to matlab javapath
-        javaaddpath(fullfile(fileparts(which('Ftest2xls')), 'poi_library/poi-3.8-20120326.jar'));
-        javaaddpath(fullfile(fileparts(which('Ftest2xls')), 'poi_library/poi-ooxml-3.8-20120326.jar'));
-        javaaddpath(fullfile(fileparts(which('Ftest2xls')), 'poi_library/poi-ooxml-schemas-3.8-20120326.jar'));
-        javaaddpath(fullfile(fileparts(which('Ftest2xls')), 'poi_library/xmlbeans-2.3.0.jar'));
-        javaaddpath(fullfile(fileparts(which('Ftest2xls')), 'poi_library/dom4j-1.6.1.jar'));
-        javaaddpath(fullfile(fileparts(which('Ftest2xls')), 'poi_library/stax-api-1.0.1.jar'));
+    else 
+        %POI path
+        poi_files = {fullfile(fileparts(which('add_poi_path')), 'poi_library/poi-3.8-20120326.jar')
+                     fullfile(fileparts(which('add_poi_path')), 'poi_library/poi-ooxml-3.8-20120326.jar')
+                     fullfile(fileparts(which('add_poi_path')), 'poi_library/poi-ooxml-schemas-3.8-20120326.jar')
+                     fullfile(fileparts(which('add_poi_path')), 'poi_library/xmlbeans-2.3.0.jar\n')
+                     fullfile(fileparts(which('add_poi_path')), 'poi_library/dom4j-1.6.1.jar')
+                     fullfile(fileparts(which('add_poi_path')), 'poi_library/stax-api-1.0.1.jar')};
+        %POI paths not currently on the static Java class path
+        missing_poi_files = poi_files(~ismember(poi_files, javaclasspath('-static')));
+        %Add POI file to dynamic Java class path if they aren't on the
+        %static path
+        if ~isempty(missing_poi_files)
+            if VERBLEVEL
+                watchit(sprintf(['POI libraries are not on the static Java class path.\n', ...
+                                 'This can delete global variables and create other problems.\n', ...
+                                 'You can avoid this by running add_poi_path.']));
+            end
+            for i = 1:length(missing_poi_files)
+                javaaddpath(missing_poi_files{i});
+            end
+        end
         writexls = @xlwrite;
     end
     
