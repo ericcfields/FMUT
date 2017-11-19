@@ -144,7 +144,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 November 2017
+%VERSION DATE: 17 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -540,7 +540,7 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         end
         Ftest2xls(GRP, length(GRP.F_tests), p.Results.output_file);
         if VERBLEVEL
-            fprintf('DONE.\n')
+            fprintf('\n\n')
         end
     end
     
