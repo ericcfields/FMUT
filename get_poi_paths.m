@@ -9,7 +9,7 @@
 % missing_poi_files  - Full paths for .jar files in the Apache POI library
 %                      that are not on the static Java class path
 %
-%VERSION DATE: 19 November 2017
+%VERSION DATE: 20 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -20,14 +20,17 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 
 function [poi_files, missing_poi_files] = get_poi_paths()
-
-    poi_files = {fullfile(fileparts(which('get_poi_paths')), 'poi_library/poi-3.8-20120326.jar')
-                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/poi-ooxml-3.8-20120326.jar')
-                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/poi-ooxml-schemas-3.8-20120326.jar')
-                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/xmlbeans-2.3.0.jar')
-                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/dom4j-1.6.1.jar')
-                 fullfile(fileparts(which('get_poi_paths')), 'poi_library/stax-api-1.0.1.jar')};
-             
-     missing_poi_files = poi_files(~ismember(poi_files, javaclasspath('-static')));
+    
+    %Find directory with POI library
+	poi_dir = fullfile(fileparts(which('get_poi_paths')), 'poi_library');
+    
+    %Find all .jar files within directory
+    poi_files = dir(poi_dir);
+    poi_files = {poi_files.name};
+    poi_files = poi_files(cell2mat(cellfun(@(x) ~isempty(strfind(x, '.jar')), poi_files, 'UniformOutput', false))); %#ok<STREMP>
+    poi_files = cellfun(@(x) [poi_dir filesep x], poi_files, 'UniformOutput', false);
+    
+    %Find which .jar files (if any) are not on the static Java class path
+    missing_poi_files = poi_files(~ismember(poi_files, javaclasspath('-static')));
 
 end

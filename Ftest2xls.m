@@ -14,7 +14,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 19 November 2017
+%VERSION DATE: 20 November 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -61,9 +61,8 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
                                  'This can delete global variables and create other problems.\n', ...
                                  'You can avoid this by running add_poi_path.']));
             end
-            for i = 1:length(missing_poi_files)
-                javaaddpath(missing_poi_files{i});
-            end
+            %Add each .jar file to the dynamic path
+            add_poi_path('-dynamic');
         end
         writexls = @xlwrite;
     end
