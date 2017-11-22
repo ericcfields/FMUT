@@ -247,14 +247,14 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     if length(factor_names) ~= length(factor_levels)
         error('The number of factors does not match in the ''factor_names'' and ''factor_levels'' inputs.');
     end
-    if length(factor_levels) > 2
-        watchit('This function has not been tested extensively with designs with more than two factors. Proceed with caution!');
-    end
     if prod(factor_levels) ~= length(bins)
         error('Number of bins does not match design.')
     end
-    if length(factor_levels)>3 && sum(factor_levels>2)>1
-        error('FMUT has limited support for designs with more than three factors.')
+    if sum(factor_levels>2) > 3
+        error('Designs with more than three factors with more than two levels are not supported by FfdrGND.')
+    end
+    if any(factor_levels == 1)
+        error('All factors must have more than one level.');
     end
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
