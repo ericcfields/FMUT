@@ -124,13 +124,6 @@
 %This function is based on code from the Mass Univariate Toolbox by David Groppe: 
 %Copyright (c) 2015, David Groppe: https://github.com/dmgroppe/Mass_Univariate_ERP_Toolbox/blob/master/LICENSE
 
-%%%%%%%%%%%%%%%% REVISION LOG %%%%%%%%%%%%%%%%%
-% 6/13/17      - Initial version in progress
-% 6/14/17      - Corrected problems with titles for one-way ANOVA
-% 6/22/17      - Changed color scale to differentiate from sig_raster
-% 7/13/17      - Updated for changes to estimated_alpha
-
-
 function [img, h_ax] = F_sig_raster(GND_GRP_specGND_or_fname,test_id,varargin)
 
 p=inputParser;

@@ -34,13 +34,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 6/22/17   - First version. Code re-organized from other functions.
-% 7/12/17   - Now handles betwee-subjects factors
-% 7/14/17   - Fixed bug with two-way interaction in the context of
-%             three-way SP ANOVA; converted to modular design with
-%             sub-functions
-
 function int_res = get_int_res(data, cond_subs, dims)
 
     if isempty(cond_subs) || length(cond_subs)==1 || ~any(dims == ndims(data))

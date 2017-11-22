@@ -18,9 +18,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 7/14/17  - Moved to separate function
-
 function report_results(GND, test_id)
 
     switch GND.F_tests(test_id).mult_comp_method

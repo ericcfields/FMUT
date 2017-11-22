@@ -31,11 +31,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 6/22/17   - First version. Code re-organized from other functions.
-% 7/12/17   - Updated to work with BG-compliant get_int_res
-% 7/24/17   - Moved reduce_data here
-
 function [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm, reduce)
 
     %Eliminate factors not involved in this effect and reduce interactions
