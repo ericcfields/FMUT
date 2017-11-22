@@ -45,15 +45,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 4/9/17  - Added documentation
-% 6/22/17 - Updated to eliminate repeated code
-% 6/23/17 - Added multiple comparisons corrections
-% 7/13/17 - Updated to reflect that ANOVA sub-functions no longer require
-%           int_method input
-% 7/14/17 - Now handle between subjects factors
-% 7/24/17 - Moved reduced_data to ANOVA functions
-
 function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction)
 
     if nargin < 5

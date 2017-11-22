@@ -64,23 +64,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%% REVISION HISTORY %%%%%%%%%%%%%%%%%%%%%%
-%4/6/17   - First version
-%4/7/17   - Several minor updates and improvements
-%4/8/17   - Added ability to specify different number of channels and
-%           samples; some code refactoring; a few errors corrected
-%4/18/17  - Added checks and informative messages for incorrect filepath and
-%           incorrect number of sampling points or electrodes; added check
-%           and error message for non-existent .flt file or incorrect
-%           filepath; fixed bug where gui_erp would cause error with no
-%           chanlocs file
-%6/1/17   - Fixed bug when using bins that don't start at 1
-%6/13/17  - GND.indiv_bin_ct now filled with -1
-%6/14/17  - bsln_wind field now spelled correctly
-%6/27/17  - Can now auto-save
-%7/3/17   - Filenames can now have spaces
-%7/10/17  - Fixed bug with saving GND
-
 function GND = flt2GND(infiles, varargin)
 
     warning('You are using a beta version of flt2GND. It needs further testing and should not be considered error free.');

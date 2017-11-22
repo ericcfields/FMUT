@@ -40,11 +40,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 6/22/17   - First version. Code re-organized from other functions.
-% 7/10/17   - Ignore between-subjects factor; return updated dims variable
-% 7/13/17   - Now reduces all interactions effects to the maximum extent
-%             possible
 
 function [reduced_data, new_dims] = reduce_data(data, dims)
 
