@@ -253,6 +253,9 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     if sum(factor_levels>2) > 3
         error('Designs with more than three factors with more than two levels are not supported by FfdrGND.')
     end
+    if any(factor_levels == 1)
+        error('All factors must have more than one level.');
+    end
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
     end

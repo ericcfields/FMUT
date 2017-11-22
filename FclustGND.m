@@ -273,6 +273,9 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if sum(factor_levels>2) > 3
         error('Designs with more than three factors with more than two levels are not supported by FclustGND.')
     end
+    if any(factor_levels == 1)
+        error('All factors must have more than one level.');
+    end
     if ~isequal(size(time_wind), [1, 2])
         error('''time_wind'' input must indicate a single time window with one starting point and one stopping point (e.g., [500, 800])');
     end

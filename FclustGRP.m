@@ -296,7 +296,10 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
         error('FclustGRP cannot handle split plot designs with more than two within-subjects factors with more than two levels')
     end
     if prod(wg_factor_levels) ~= length(bins)
-        error('Number of bins does not match the design specified by thte ''wg_factor_levels'' input.')
+        error('Number of bins does not match the design specified by the ''wg_factor_levels'' input.')
+    end
+    if any(wg_factor_levels == 1)
+        error('All factors must have more than one level.');
     end
     if ~isequal(reshape(time_wind', 1, []), unique(reshape(time_wind', 1, [])))
         error('When multiple time windows are provided, they cannot overlap.')
