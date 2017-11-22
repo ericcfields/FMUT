@@ -22,9 +22,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 11/28/16  - Moved to separate function from FmaxGND and FclustGND
-
 function [effects, effects_labels] = get_effects(factor_names)
 %Given factor names, return dimensions involved and effect names for all effects
     

@@ -45,17 +45,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 11/28/16  - Moved from FclustGND. See FclustGND revision log for earlier
-%             versions
-% 4/17/17   - Added estimated alpha
-% 6/12/17   - Added verblevel reports
-% 6/13/17   - null test for clusters are now logicals
-% 6/22/17   - major re-organization of code to reduce repeated code
-% 7/13/17   - Updated for elimination of int_method input
-% 7/14/17   - Now handles betwee subjects factors
-% 7/24/17   - Moved reduced_data to ANOVA functions
-
 function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_hood, thresh_p)
 
     global VERBLEVEL

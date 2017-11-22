@@ -36,15 +36,6 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-%%%%%%%%%%%%%%%%%%%  REVISION LOG   %%%%%%%%%%%%%%%%%%%
-% 11/28/16  - Moved from FmaxGND. See FmaxGND revision log for information
-%             on earlier versions
-% 6/12/17   - Added estimated alpha; added verblevel reports
-% 7/10/17   - Now supports between subjects factors
-% 7/13/17   - Updated for elimination of int_method input
-% 7/24/17   - Moved reduced_data to ANOVA functions
-
-
 
 function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
     
