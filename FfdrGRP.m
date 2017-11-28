@@ -134,9 +134,7 @@
 %VERSION DATE: 17 November 2017
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
-%are disclaimed. 
-%This is a beta version of this software. It needs additional testing 
-%and SHOULD NOT be considered error free. 
+%are disclaimed.  
 
 %Copyright (c) 2017, Eric Fields
 %All rights reserved.
