@@ -6,6 +6,7 @@
 %Add FMUT folder to search path
 FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
 addpath(FMUT_dir);
+addpath('C:\Users\ecfne\Documents\MATLAB\dmgroppe-Mass_Univariate_ERP_Toolbox-10dc5c7');
 
 %Add EEGLAB and MUT to path
 [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;

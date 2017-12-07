@@ -110,7 +110,7 @@
 % electrodes is based on the GND.chanlocs(x).theta coordinate.  Anterior to
 % posterior organization of electrodes is based on GND.chanlocs(x).radius.
 %
-%VERSION DATE: 13 July 2017
+%VERSION DATE: 7 December 2017
 %AUTHOR: Eric Fields (modified from sig_raster.m by David Groppe)
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -508,7 +508,7 @@ for a=left,
             mask(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq);
             img(ct,used_tpt_ids)=Fval(elec_id,:);
         else
-            img(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORqa).*sign(Fval(elec_id,:));
+            img(ct,used_tpt_ids)=(pval(elec_id,:)<results.desired_alphaORq).*sign(Fval(elec_id,:));
         end
     end
     chan_lab{ct}=GND.chanlocs(use_chans(elec_id)).labels;
