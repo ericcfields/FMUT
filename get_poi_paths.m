@@ -1,7 +1,7 @@
 %Return the full paths of the .jar files of the Apache POI library
 %
 %EXAMPLE USAGE
-% >> add_poi_path
+% >> get_poi_paths
 %
 %OUTPUT
 % poi_files          - Full paths for all .jar files in the Apache POI

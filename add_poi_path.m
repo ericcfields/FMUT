@@ -5,7 +5,7 @@
 %
 %INPUT
 % segment - if '-static', add POI library .jar files to the static path; if
-%           '-dynamic', add to the dynamic path.
+%           '-dynamic', add to the dynamic path. {default: '-static'}
 %
 %VERSION DATE: 20 November 2017
 %AUTHOR: Eric Fields
