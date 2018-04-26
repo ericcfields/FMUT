@@ -7,8 +7,8 @@
 % >> sub_data = get_sub_effects1(GND, 2, 'effect', 'Congruency')
 %
 %REQUIRED INPUTS
-% GND_or_fname       - A Mass Univariate Toolbox GND struct or a string
-%                      containing a filename of a GND structure that 
+% GND_or_fname       - A Mass Univariate Toolbox GND or GRP struct or a string
+%                      containing a filename of a GND or GRP structure that 
 %                      has been saved to disk (with full path if not in current
 %                      working directory)
 %  test_id           - [integer] The index # of the F-test results 
@@ -30,7 +30,7 @@
 %                    all locations significant in the F-test
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 20 April 2018
+%VERSION DATE: 24 April 2018
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -55,10 +55,29 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     %Assign GND
     if ischar(GND_or_fname) && exists(GND_or_fname, 'file')
         load(GND_or_fname, '-mat'); %#ok<LOAD>
+        if exists('GRP', 'var')
+            GNDorGRP = GRP;
+            clear GRP;
+        elseif exists('GND', 'var')
+            GNDorGRP = GND; %#ok<NODEF>
+        else
+            error('Did not find a GND or GRP variable in %s', GND_or_fname);
+        end
     elseif isstruct(GND_or_fname)
-        GND = GND_or_fname;
+        GNDorGRP = GND_or_fname;
     else
         error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct.');
+    end
+    
+    if isfield(GNDorGRP, 'GND_fnames')
+        GNDs = {};
+        for i = 1:length(GNDorGRP.GND_fnames)
+            load(GNDorGRP.GND_fnames{i}, '-mat')
+            GNDs{i} = GND; %#ok<AGROW>
+        end
+        clear GND
+    else
+        GNDs = {GNDorGRP};
     end
     
     %Assign variables
@@ -66,7 +85,7 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     clust_id = p.Results.clust_id;
     bins = p.Results.bins;
     output_file = p.Results.output_file;
-    results = GND.F_tests(test_id);
+    results = GNDorGRP.F_tests(test_id);
     
     %Assign defaults
     if isempty(bins)
@@ -86,7 +105,8 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     %% GET SUBJECT DATA
 
     %useful numbers
-    [n_electrodes, n_time_pts, ~, n_subs] = size(GND.indiv_erps);
+    n_electrodes = length(GNDorGRP.chanlocs);
+    n_time_pts = length(GNDorGRP.time_pts);
     n_bins = length(bins);
     
     %Find locations that are significant
@@ -99,20 +119,36 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     sig_locs = logical(sig_locs);
 
     %Extract mean amplitudes
-    sub_data = NaN(n_subs, n_bins);
-    for s = 1:n_subs
-        for b = 1:n_bins
-            data = GND.indiv_erps(:, :, b, s);
-            sub_data(s, b) = mean(data(sig_locs));
+    for i = 1:length(GNDs)
+        GND = GNDs{i};
+        if i == 1
+            if length(GNDs) > 1
+                sub_data = ['subject' 'group' {GND.bin_info(bins).bindesc}];
+            else
+                sub_data = ['subject' {GND.bin_info(bins).bindesc}];
+            end
+        end
+        n_subs = size(GND.indiv_erps, 4);
+        group_data = NaN(n_subs, n_bins);
+        for s = 1:n_subs
+            for b = 1:n_bins
+                bin = bins(b);
+                data = GND.indiv_erps(:, :, bin, s);
+                group_data(s, b) = mean(data(sig_locs));
+            end
+        end
+        assert(~any(isnan(group_data(:))));
+        if length(GNDs) > 1
+            sub_data = [sub_data; GND.indiv_subnames' repmat(GNDorGRP.group_desc(i), [n_subs, 1]) num2cell(group_data)]; %#ok<AGROW>
+        else
+            sub_data = [sub_data; GND.indiv_subnames' num2cell(group_data)]; %#ok<AGROW>
         end
     end
-    assert(~any(isnan(sub_data(:))));
 
     %% OUTPUT
     
     if output_file
-        output_cell = ['subject' {GND.bin_info(bins).bindesc}; GND.indiv_subnames' num2cell(sub_data)];
-        xlswrite(output_file, output_cell);
+        xlswrite(output_file, sub_data);
     end
     
 end
