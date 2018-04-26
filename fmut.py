@@ -7,7 +7,7 @@
 Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
-VERSION DATE: 16 November 2017
+VERSION DATE: 26 April 2018
 """
 
 import sys
@@ -114,7 +114,8 @@ def format_xls(spreadsheet):
             max_cell = get_column_letter(sheet.max_column) + str(sheet.max_row)
             clust_colors = ('36ec41', '003fbb', 'b4b500', 'c777ff', '00f7b8', '2f0067', '537e00', 'ff6dbf', '8befff', 'ff5227', '0171aa', 'a92900', '00727b', 'b60070', 'faffd1', '540042', 'a96500', 'e2caff', 'ffa177','6a001f')
             for clust in range(20):
-                clustFill = PatternFill(start_color=clust_colors[clust], end_color=clust_colors[clust], fill_type='solid')
+			    color_idx = clust % 20
+                clustFill = PatternFill(start_color=clust_colors[color_idx], end_color=clust_colors[color_idx], fill_type='solid')
                 sheet.conditional_formatting.add('B2:'+max_cell,
                         CellIsRule(operator='equal', formula=[clust+1], stopIfTrue=True, fill=clustFill))
             #Reduce font size and clear locations not included in cluster
