@@ -113,9 +113,9 @@ def format_xls(spreadsheet):
             #Apply a different color to each cluster
             max_cell = get_column_letter(sheet.max_column) + str(sheet.max_row)
             clust_colors = ('36ec41', '003fbb', 'b4b500', 'c777ff', '00f7b8', '2f0067', '537e00', 'ff6dbf', '8befff', 'ff5227', '0171aa', 'a92900', '00727b', 'b60070', 'faffd1', '540042', 'a96500', 'e2caff', 'ffa177','6a001f')
-            for c in range(20):
+            for c in range(100):
                 color_idx = c % 20
-                clust = color_idx + 1
+                clust = c + 1
                 clustFill = PatternFill(start_color=clust_colors[color_idx], end_color=clust_colors[color_idx], fill_type='solid')
                 sheet.conditional_formatting.add('B2:'+max_cell,
                         CellIsRule(operator='equal', formula=[clust], stopIfTrue=True, fill=clustFill))
