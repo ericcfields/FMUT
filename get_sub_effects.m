@@ -30,7 +30,7 @@
 %                    all locations significant in the F-test
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 24 April 2018
+%VERSION DATE: 6 June 2018
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -39,7 +39,7 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
+function [sub_data] = get_sub_effects(GND_or_fname, test_id, varargin)
 
     %% PARSE INPUT
     
@@ -69,6 +69,7 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
         error('The GND variable provided does not seem to be a valid GND struct or filepath to a GND struct.');
     end
     
+    %Load all GNDs in a GRP variable
     if isfield(GNDorGRP, 'GND_fnames')
         GNDs = {};
         for i = 1:length(GNDorGRP.GND_fnames)
@@ -96,10 +97,12 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     if length(results.factor_levels) > 1 && isempty(effect)
         error('You must specify which effect you want data from. See >> help get_sub_effects');
     end
-    if ~isempty(clust_id) && ~strcmpi(results.mult_comp_method, 'cluster mass perm test')
-        error('Test %d in the GND is not a cluster mass test', test_id);
-    elseif clust_id > length(results.clust_info.(effect).null_test)
-        error('There is no cluster %d for the %s effect', clust_id, effect);
+    if ~isempty(clust_id)
+        if ~strcmpi(results.mult_comp_method, 'cluster mass perm test')
+            error('Test %d in the GND is not a cluster mass test', test_id);
+        elseif clust_id > length(results.clust_info.(effect).null_test)
+            error('There is no cluster %d for the %s effect', clust_id, effect);
+        end
     end
 
     %% GET SUBJECT DATA
