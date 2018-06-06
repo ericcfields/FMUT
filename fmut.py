@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 #Written in Python 3.6
 #Python 2 compliant as of 6/16/17 
-#Written in openpyxl 2.4, should work for any previous 2.x release
+#Most recently updated/tested in openpyxl 2.5
 
 """
 Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
-VERSION DATE: 16 November 2017
+VERSION DATE: 6 June 2018
 """
 
 import sys
@@ -31,9 +31,9 @@ def format_xls(spreadsheet):
     wb = openpyxl.load_workbook(spreadsheet)
     
     #Delete blank sheets
-    for sheet_name in wb.get_sheet_names():
-        if re.match('Sheet\d', sheet_name):
-            sheet2remove = wb.get_sheet_by_name(sheet_name)
+    for sheet_name in wb.sheetnames:
+        if re.match(r'Sheet\d', sheet_name):
+            sheet2remove = wb[sheet_name]
             wb.remove_sheet(sheet2remove)
     wb.active = 0
     
@@ -41,9 +41,9 @@ def format_xls(spreadsheet):
     whiteFill = PatternFill(start_color='ffffff', end_color='ffffff', fill_type='solid')
     yellowHighlight = PatternFill(start_color='f7ff23', end_color='f7ff23', fill_type='solid')
     
-    for sheet_name in wb.get_sheet_names():
+    for sheet_name in wb.sheetnames:
         
-        sheet = wb.get_sheet_by_name(sheet_name)
+        sheet = wb[sheet_name]
         
         #Test summary sheet
         if sheet_name == 'test summary':
@@ -113,10 +113,12 @@ def format_xls(spreadsheet):
             #Apply a different color to each cluster
             max_cell = get_column_letter(sheet.max_column) + str(sheet.max_row)
             clust_colors = ('36ec41', '003fbb', 'b4b500', 'c777ff', '00f7b8', '2f0067', '537e00', 'ff6dbf', '8befff', 'ff5227', '0171aa', 'a92900', '00727b', 'b60070', 'faffd1', '540042', 'a96500', 'e2caff', 'ffa177','6a001f')
-            for clust in range(20):
-                clustFill = PatternFill(start_color=clust_colors[clust], end_color=clust_colors[clust], fill_type='solid')
+            for c in range(100):
+                color_idx = c % 20
+                clust = c + 1
+                clustFill = PatternFill(start_color=clust_colors[color_idx], end_color=clust_colors[color_idx], fill_type='solid')
                 sheet.conditional_formatting.add('B2:'+max_cell,
-                        CellIsRule(operator='equal', formula=[clust+1], stopIfTrue=True, fill=clustFill))
+                        CellIsRule(operator='equal', formula=[clust], stopIfTrue=True, fill=clustFill))
             #Reduce font size and clear locations not included in cluster
             for row in range(2, sheet.max_row+1):
                 for cell in sheet[row]:
