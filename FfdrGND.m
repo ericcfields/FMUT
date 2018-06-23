@@ -116,7 +116,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 17 November 2017
+%VERSION DATE: 23 June 2018
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -129,8 +129,6 @@
 
 
 function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargin)
-
-    warning('You are using a beta version of FfdrGND. Some bugs may remain and results should be interpreted with caution.');
 
     %% ~~~~~PARSE INPUT~~~~~
 

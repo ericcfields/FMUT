@@ -121,7 +121,7 @@
 %https://github.com/ericcfields/FMUT/wiki
 %
 %
-%VERSION DATE: 17 November 2017
+%VERSION DATE: 23 June 2018
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -135,8 +135,6 @@
 
 
 function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargin)
-    
-    warning('You are using a beta version of FmaxGRP. Some bugs may remain and results should be interpreted with caution.');
 
     %% ~~~~~PARSE INPUT~~~~~
 

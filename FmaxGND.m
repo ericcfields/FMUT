@@ -109,7 +109,7 @@
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
 %
-%VERSION DATE: 17 November 2017
+%VERSION DATE: 23 June 2018
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -123,8 +123,6 @@
 
 
 function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargin)
-    
-    warning('You are using a beta version of FmaxGND. Some bugs may remain and results should be interpreted with caution.');
 
     %% ~~~~~PARSE INPUT~~~~~
 
