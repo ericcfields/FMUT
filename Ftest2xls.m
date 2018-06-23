@@ -14,7 +14,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 20 November 2017
+%VERSION DATE: 23 June 2018
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
