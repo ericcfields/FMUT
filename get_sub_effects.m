@@ -1,7 +1,9 @@
 %Function to get effect data for each subject based on a mass univariate
 %test. Returns an array with a voltage value for each subject and each bin
 %averaged across the locations that were significnat in the mass univariate
-%analysis.
+%analysis. This can be used for follow-up analyses (e.g., following up an
+%interaction at the places where the interaction was significant or
+%correlating an effect with an individual difference measure).
 %
 %EXAMPLE USAGE
 % >> sub_data = get_sub_effects1(GND, 2, 'effect', 'Congruency')
@@ -17,8 +19,8 @@
 %                      the "F_tests" field of your variable (e.g., GND.F_tests)
 %
 %OPTIONAL INPUTS:
-%  effect           - The effect within the test to plot. Required for
-%                     factorial ANOVA.
+%  effect           - Name of the effect of interest (e.g., 'Probability or
+%                     'ProbabilityXEmotion'). Required for factorial ANOVA.
 %  clust_id         - For cluster mass tests, which cluster to average
 %                     across {default: all significant clusters}
 %  bins             - The bins to get data from. {default: all bins used in
@@ -26,11 +28,10 @@
 %  output_file      - Name of .xlsx file to output results. {default: no output}
 %
 %OUTPUT
-%  sub_data        - a subjects x bins matrix of the mean amplitude across
-%                    all locations significant in the F-test
+%  sub_data        - a cell array of the requested data
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 6 June 2018
+%VERSION DATE: 23 June 2018
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -39,7 +40,7 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function [sub_data] = get_sub_effects(GND_or_fname, test_id, varargin)
+function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
 
     %% PARSE INPUT
     
@@ -151,7 +152,11 @@ function [sub_data] = get_sub_effects(GND_or_fname, test_id, varargin)
     %% OUTPUT
     
     if output_file
-        xlswrite(output_file, sub_data);
+        try
+            xlswrite(output_file, sub_data);
+        catch
+            xlwrite(output_file, sub_data);
+        end
     end
     
 end
