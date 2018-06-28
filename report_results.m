@@ -8,7 +8,7 @@
 % test_id    - The test number of the results to report within the GND or
 %              GRP variable
 % 
-%VERSION DATE: 14 July 2014
+%VERSION DATE: 14 July 2017
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
