@@ -31,7 +31,7 @@
 %  sub_data        - a cell array of the requested data
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 23 June 2018
+%VERSION DATE: 5 September 2018
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -88,6 +88,13 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     bins = p.Results.bins;
     output_file = p.Results.output_file;
     results = GNDorGRP.F_tests(test_id);
+    if isempty(effect)
+        null_test = results.null_test;
+        clust_info = results.clust_info;
+    else
+        null_test = results.null_test.(effect);
+        clust_info = results.null_test.(effect);
+    end
     
     %Assign defaults
     if isempty(bins)
@@ -101,7 +108,7 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     if ~isempty(clust_id)
         if ~strcmpi(results.mult_comp_method, 'cluster mass perm test')
             error('Test %d in the GND is not a cluster mass test', test_id);
-        elseif clust_id > length(results.clust_info.(effect).null_test)
+        elseif clust_id > length(clust_info.null_test)
             error('There is no cluster %d for the %s effect', clust_id, effect);
         end
     end
@@ -116,9 +123,9 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     %Find locations that are significant
     sig_locs = zeros(n_electrodes, n_time_pts);
     if isempty(clust_id)
-        sig_locs(results.used_chan_ids, results.used_tpt_ids) = results.null_test.(effect);
+        sig_locs(results.used_chan_ids, results.used_tpt_ids) = null_test;
     else
-        sig_locs(results.used_chan_ids, results.used_tpt_ids) = ismember(results.clust_info.(effect).clust_ids, clust_id);
+        sig_locs(results.used_chan_ids, results.used_tpt_ids) = ismember(clust_info.clust_ids, clust_id);
     end
     sig_locs = logical(sig_locs);
 
