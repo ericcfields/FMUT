@@ -1,12 +1,14 @@
-%Function to get effect data for each subject based on a mass univariate
-%test. Returns an array with a voltage value for each subject and each bin
-%averaged across the locations that were significnat in the mass univariate
-%analysis. This can be used for follow-up analyses (e.g., following up an
-%interaction at the places where the interaction was significant or
-%correlating an effect with an individual difference measure).
+%Function to get amplitude averaged across the time points and electrodes
+%that were significant in a mass univariate test. Mean amplitude is
+%returned for each subject and bin involved in the test.
+%
+%Note that care should be taken with regard to analyses conducted on such
+%mean amplitudes: if analyses are not statistically indpendent of the
+%original mass univariate test, results will be biased (see Kriegeskorte et
+%al., Nature Neuroscience, 2009).
 %
 %EXAMPLE USAGE
-% >> sub_data = get_sub_effects1(GND, 2, 'effect', 'Congruency')
+% >> mean_amp_data = get_mean_amplitude(GND, 2, 'effect', 'Congruency');
 %
 %REQUIRED INPUTS
 % GND_or_fname       - A Mass Univariate Toolbox GND or GRP struct or a string
@@ -25,13 +27,14 @@
 %                     across {default: all significant clusters}
 %  bins             - The bins to get data from. {default: all bins used in
 %                     the F-test}
-%  output_file      - Name of .xlsx file to output results. {default: no output}
+%  output_file      - Name of .csv file to output results. {default: no output}
 %
 %OUTPUT
-%  sub_data        - a cell array of the requested data
+%  mean_amp_data    - struct with the requested data as well as bin and
+%                     subject information
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 5 September 2018
+%VERSION DATE: 14 March 2019
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -40,7 +43,7 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
+function mean_amp_data = get_mean_amplitude(GND_or_fname, test_id, varargin)
 
     %% PARSE INPUT
     
@@ -114,11 +117,18 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     end
 
     %% GET SUBJECT DATA
+    
+    %Initialize output
+    mean_amp_data = struct;
+    mean_amp_data.subjects = {};
+    mean_amp_data.bins = bins;
+    mean_amp_data.bindesc = {GNDorGRP.bin_info(bins).bindesc};
+    mean_amp_data.data = [];
 
     %useful numbers
     n_electrodes = length(GNDorGRP.chanlocs);
-    n_time_pts = length(GNDorGRP.time_pts);
-    n_bins = length(bins);
+    n_time_pts   = length(GNDorGRP.time_pts);
+    n_bins       = length(bins);
     
     %Find locations that are significant
     sig_locs = zeros(n_electrodes, n_time_pts);
@@ -132,14 +142,12 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
     %Extract mean amplitudes
     for i = 1:length(GNDs)
         GND = GNDs{i};
-        if i == 1
-            if length(GNDs) > 1
-                sub_data = ['subject' 'group' {GND.bin_info(bins).bindesc}];
-            else
-                sub_data = ['subject' {GND.bin_info(bins).bindesc}];
-            end
-        end
         n_subs = size(GND.indiv_erps, 4);
+        if length(GNDs) == 1
+            mean_amp_data.subjects = [mean_amp_data.subjects; GND.indiv_subnames'];
+        else
+            mean_amp_data.subjects = [mean_amp_data.subjects; repmat(GNDorGRP.group_desc(i), [n_subs,1]) GND.indiv_subnames'];
+        end
         group_data = NaN(n_subs, n_bins);
         for s = 1:n_subs
             for b = 1:n_bins
@@ -149,21 +157,29 @@ function sub_data = get_sub_effects(GND_or_fname, test_id, varargin)
             end
         end
         assert(~any(isnan(group_data(:))));
-        if length(GNDs) > 1
-            sub_data = [sub_data; GND.indiv_subnames' repmat(GNDorGRP.group_desc(i), [n_subs, 1]) num2cell(group_data)]; %#ok<AGROW>
-        else
-            sub_data = [sub_data; GND.indiv_subnames' num2cell(group_data)]; %#ok<AGROW>
-        end
+        mean_amp_data.data = [mean_amp_data.data; group_data];
     end
 
     %% OUTPUT
     
     if output_file
-        try
-            xlswrite(output_file, sub_data);
-        catch
-            xlwrite(output_file, sub_data);
+        f_out = fopen(output_file, 'w');
+        if length(GNDs) == 1
+            fprintf(f_out, 'subject_ids,%s\n', strjoin(mean_amp_data.bindesc, ',')); %header
+            for s = 1:size(mean_amp_data.data, 1)
+                data_str = num2str(mean_amp_data.data(s,:),'%f,');
+                data_str = data_str(1:end-1);
+                fprintf(f_out, '%s,%s\n', mean_amp_data.subjects{s}, data_str);
+            end
+        else
+            fprintf(f_out,'subject_ids,group,%s\n', strjoin(mean_amp_data.bindesc, ',')); %header
+            for s = 1:size(mean_amp_data.data, 1)
+                data_str = num2str(mean_amp_data.data(s,:),'%f,');
+                data_str = data_str(1:end-1);
+                fprintf(f_out, '%s,%s,%s\n', mean_amp_data.subjects{s,2}, mean_amp_data.subjects{s,1}, data_str);
+            end
         end
+        fclose(f_out);
     end
     
 end
