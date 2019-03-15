@@ -1,12 +1,12 @@
 %FMUT unit testing
 %General setup
 %AUTHOR: Eric Fields
-%VERSION DATE: 22 September 2017
+%VERSION DATE: 15 March 2019
 
 %Add FMUT folder to search path
 FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
 addpath(FMUT_dir);
-addpath('C:\Users\ecfne\Documents\MATLAB\dmgroppe-Mass_Univariate_ERP_Toolbox-10dc5c7');
+addpath('C:\Users\ecfne\Documents\MATLAB\dmgroppe-Mass_Univariate_ERP_Toolbox-d1e60d4');
 
 %Add EEGLAB and MUT to path
 [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;

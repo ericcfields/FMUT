@@ -34,7 +34,7 @@
 %                     subject information
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 March 2019
+%VERSION DATE: 15 March 2019
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -163,23 +163,31 @@ function mean_amp_data = get_mean_amplitude(GND_or_fname, test_id, varargin)
     %% OUTPUT
     
     if output_file
+        
+        %Get rid of commas to avoid problems in csv formatting
+        bin_info  = cellfun(@(x) strrep(x, ',', ''), mean_amp_data.bindesc,  'UniformOutput', false);
+        sub_info  = cellfun(@(x) strrep(x, ',', ''), mean_amp_data.subjects, 'UniformOutput', false);
+        
         f_out = fopen(output_file, 'w');
         if length(GNDs) == 1
-            fprintf(f_out, 'subject_ids,%s\n', strjoin(mean_amp_data.bindesc, ',')); %header
+            %Within-subjects
+            fprintf(f_out, 'subject_ids,%s\n', strjoin(bin_info, ',')); %header
             for s = 1:size(mean_amp_data.data, 1)
-                data_str = num2str(mean_amp_data.data(s,:),'%f,');
-                data_str = data_str(1:end-1);
-                fprintf(f_out, '%s,%s\n', mean_amp_data.subjects{s}, data_str);
+                data_str = num2str(mean_amp_data.data(s,:),'%f,'); %convert data to comma separated string
+                data_str = data_str(1:end-1); %remove trailing comma
+                fprintf(f_out, '%s,%s\n', sub_info{s}, data_str); %write line for subject s
             end
         else
-            fprintf(f_out,'subject_ids,group,%s\n', strjoin(mean_amp_data.bindesc, ',')); %header
+            %Betwen-subjects
+            fprintf(f_out,'subject_ids,group,%s\n', strjoin(bin_info, ',')); %header
             for s = 1:size(mean_amp_data.data, 1)
-                data_str = num2str(mean_amp_data.data(s,:),'%f,');
-                data_str = data_str(1:end-1);
-                fprintf(f_out, '%s,%s,%s\n', mean_amp_data.subjects{s,2}, mean_amp_data.subjects{s,1}, data_str);
+                data_str = num2str(mean_amp_data.data(s,:),'%f,'); %convert data to comma separated string
+                data_str = data_str(1:end-1); %remove trailing comma
+                fprintf(f_out, '%s,%s,%s\n', sub_info{s,2}, sub_info{s,1}, data_str); %write line for subject s
             end
         end
         fclose(f_out);
+        
     end
     
 end
