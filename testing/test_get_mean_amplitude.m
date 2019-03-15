@@ -18,7 +18,7 @@ GRP = FmaxGRP(GRP, ...
               'plot_raster',      'no');
           
 
-mean_data_GRP = get_mean_amplitude(GRP, 1, 'effect', 'expectedness', 'output_file', 'data/testGRP.csv');
+mean_data_GRP = get_mean_amplitude(GRP, 1, 'effect', 'expectedness', 'output_file', 'outputs/testGRP.csv');
 
 
 %% GND
@@ -34,4 +34,4 @@ GND = FmaxGND(GND, ...
               'save_GND',      'no', ...
               'plot_raster',   'no');
           
-mean_data_GND = get_mean_amplitude(GND, 1, 'effect', 'Emotion', 'output_file', 'data/testGND.csv');
+mean_data_GND = get_mean_amplitude(GND, 1, 'effect', 'Emotion', 'output_file', 'outputs/testGND.csv');
