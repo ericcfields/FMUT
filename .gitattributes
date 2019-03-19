@@ -1,2 +1,0 @@
-*.exe filter=lfs diff=lfs merge=lfs -text
-py_fmut filter=lfs diff=lfs merge=lfs -text
