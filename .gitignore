@@ -1,7 +1,21 @@
 #Files for git to ignore for FMUT
 
+### File types to ignore ###
+*.ffs_db
+*.lnk
+*.asv
+*.mat
+*.docx
+*.ffs_lock
+*.exe
+*.dll
+*.DS_Store
+*.mat
+*.GND
+*.GRP
+
 ### Folders to ignore ###
-__pycache__/*
+*__pycache__*
 dev/*
 py_fmut_mac/*
 py_fmut_win/*
