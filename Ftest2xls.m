@@ -14,7 +14,7 @@
 % format_output  - A boolean specifying whether to apply formatting to the 
 %                  spreadsheet output. {default: true}
 %
-%VERSION DATE: 23 June 2018
+%VERSION DATE: 29 March 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -261,7 +261,7 @@ function Ftest2xls(GND, test_id, output_fname, format_output)
     %Try to format
 	if format_output
 		try
-			format_xls(output_fname)
+			format_xls(output_fname, results.desired_alphaORq)
 		catch ME
 			watchit(sprintf('Could not format spreadsheet because of the following error:\n%s\n', ME.message))
 		end

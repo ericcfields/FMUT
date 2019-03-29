@@ -3,13 +3,15 @@
 %AUTHOR: Eric Fields
 %VERSION DATE: 15 March 2019
 
+%Add EEGLAB and MUT to path
+[ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
+
+%Remove FMUT directory within EEGLAB plugins folder
+rmpath(fullfile(fileparts(which('eeglab')), 'plugins', 'FMUT'));
+
 %Add FMUT folder to search path
 FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
 addpath(FMUT_dir);
-addpath('C:\Users\ecfne\Documents\MATLAB\dmgroppe-Mass_Univariate_ERP_Toolbox-d1e60d4');
-
-%Add EEGLAB and MUT to path
-[ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
 
 %Clear everything before testing
 close all;

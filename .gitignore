@@ -20,4 +20,4 @@ dev/*
 py_fmut_mac/*
 py_fmut_win/*
 testing/data/*
-testing/output/*
+testing/outputs/*

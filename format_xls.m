@@ -6,7 +6,7 @@
 %REQUIRED INPUTS
 % spreadsheet - name of spreadsheet file to format
 %
-%VERSION DATE: 17 November 2017
+%VERSION DATE: 29 March 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -16,11 +16,15 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function format_xls(spreadsheet)
+function format_xls(spreadsheet, alpha)
+
+    if nargin < 2
+        alpha = 0.05;
+    end
 
     %If full path is not provided assume spreadsheet is the current working
     %directory
-    if ~isdir(fileparts(spreadsheet))
+    if ~isdir(fileparts(spreadsheet)) %#ok<ISDIR>
         spreadsheet = [pwd filesep spreadsheet];
     end
 
@@ -35,8 +39,8 @@ function format_xls(spreadsheet)
     
     %Try using .py script
     try
-        py_addpath(func_dir)
-        py.fmut.format_xls(spreadsheet)
+        py_addpath(func_dir);
+        py.fmut.format_xls(spreadsheet, alpha);
         
     %If .py version doesn't work, use pyinstaller version
     catch

@@ -1,29 +1,27 @@
 # -*- coding: utf-8 -*-
-#Written in Python 3.6
+#Written in Python 3.7
 #Python 2 compliant as of 6/16/17 
-#Most recently updated/tested in openpyxl 2.5
+#Most recently updated/tested in openpyxl 2.6
 
 """
 Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
-VERSION DATE: 6 June 2018
+VERSION DATE: 29 March 2019
 """
 
 import sys
 import re
 import openpyxl
-if int(openpyxl.__version__[0]) < 2:
-    raise RuntimeError('openpyxl must be version 2.0 or greater.')
 from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl.utils import get_column_letter, column_index_from_string
+from openpyxl.utils import get_column_letter
 from openpyxl.formatting.rule import CellIsRule, ColorScaleRule
 
 if sys.version_info.major == 2:
     input = raw_input
     range = xrange
 
-def format_xls(spreadsheet):
+def format_xls(spreadsheet, alpha=0.05):
     """
     Take spreadsheet output from FMUT functions and apply formatting
     """
@@ -34,7 +32,7 @@ def format_xls(spreadsheet):
     for sheet_name in wb.sheetnames:
         if re.match(r'Sheet\d', sheet_name):
             sheet2remove = wb[sheet_name]
-            wb.remove_sheet(sheet2remove)
+            wb.remove(sheet2remove)
     wb.active = 0
     
     #Define some fill styles for use below
@@ -87,10 +85,10 @@ def format_xls(spreadsheet):
             #Bold and highlight significant clusters
             for row in range(1, sheet.max_row+1):
                 for cell in sheet[row]:
-                    if cell.value=='p-value' and cell.offset(row=0, column=1).value <= .05:
+                    if cell.value=='p-value' and cell.offset(row=0, column=1).value <= alpha:
                         cell.offset(row=0, column=1).fill = yellowHighlight
                         for r in range(cell.row-2, cell.row+7):
-                            for c in range(column_index_from_string(cell.column), column_index_from_string(cell.column)+2):
+                            for c in range(cell.column, cell.column+2):
                                 sheet.cell(row=r, column=c).font = Font(bold=True)
                         
                         
@@ -122,7 +120,7 @@ def format_xls(spreadsheet):
             #Reduce font size and clear locations not included in cluster
             for row in range(2, sheet.max_row+1):
                 for cell in sheet[row]:
-                    if column_index_from_string(cell.column) > 1:
+                    if cell.column > 1:
                         cell.font = Font(sz=10)
                     if not cell.value:
                         cell.value = None
@@ -137,7 +135,7 @@ def format_xls(spreadsheet):
             data_range = 'B2:'+max_cell
             for row in range(2, sheet.max_row+1):
                 for cell in sheet[row]:
-                    if cell.column != 'A':
+                    if cell.column != 1:
                         cell.number_format = '0.00'
                         cell.font = Font(sz=10)
             if sheet_name.endswith('F_obs'):
@@ -160,14 +158,14 @@ def format_xls(spreadsheet):
             data_range = 'B2:'+max_cell
             for row in range(2, sheet.max_row+1):
                 for cell in sheet[row]:
-                    if cell.column != 'A':
+                    if cell.column != 1:
                         cell.number_format = '0.000'
                         cell.font = Font(sz=10)
             sheet.conditional_formatting.add(data_range,
-                            CellIsRule(operator='greaterThan', formula=[0.05], stopIfTrue=True, fill=whiteFill))
+                            CellIsRule(operator='greaterThan', formula=[alpha], stopIfTrue=True, fill=whiteFill))
             sheet.conditional_formatting.add(data_range,
                             ColorScaleRule(start_type='num', start_value=0,  start_color='4e875b',
-                                           end_type='num',   end_value=0.05, end_color='c9ffd5'))
+                                           end_type='num',   end_value=alpha, end_color='c9ffd5'))
     
     #Save
     wb.save(spreadsheet)
