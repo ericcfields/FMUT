@@ -1,4 +1,4 @@
-#Factorial Mass Univariate ERP Toolbox (FMUT)
+# Factorial Mass Univariate ERP Toolbox (FMUT)
 
 **VERSION**  
 0.5.0-beta  
