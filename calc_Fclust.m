@@ -33,7 +33,7 @@
 % test_results - A struct with results of the cluster mass test
 %
 %
-%VERSION DATE: 24 July 2017
+%VERSION DATE: 3 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -82,9 +82,9 @@ function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_h
             n_clust_obs = n_clust;
         end
         %Find largest cluster mass for this permutation
-        for c = 1:n_clust,
+        for c = 1:n_clust
             use_mass = sum(F(clust_ids == c));
-            if use_mass > clust_mass_dist(i),
+            if use_mass > clust_mass_dist(i)
                 clust_mass_dist(i) = use_mass;
             end
         end 
