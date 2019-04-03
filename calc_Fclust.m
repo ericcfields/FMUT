@@ -45,15 +45,12 @@
 
 function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_hood, thresh_p)
 
-    global VERBLEVEL
-
     %Some useful numbers
     n_electrodes = size(data, 1);
     n_time_pts   = size(data, 2);
     
-    %% Calculate ANOVA
+    %%% Calculate ANOVA %%%
     
-    %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
         [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
     else
@@ -61,16 +58,43 @@ function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_h
     end
     F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     
+    %%% Calculate cluster correction %%%
     
+    thresh_F = finv(1-thresh_p, df_effect, df_res); 
+    [h, p, clust_info, est_alpha] = Fclust_corr(F_obs, F_dist, alpha, chan_hood, thresh_F);
     
+    %%% Output %%%
+    
+    test_results.h = h;
+    test_results.p = p;
+    test_results.F_obs = F_obs; 
+    test_results.df = [df_effect, df_res];
+    test_results.clust_info = clust_info;
+    if exact_test
+        test_results.estimated_alpha = est_alpha;
+        test_results.exact_test = true;
+    else
+        test_results.estimated_alpha = NaN;
+        test_results.exact_test = false;
+    end
+    
+end
+
+function [h, p, clust_info, est_alpha] = Fclust_corr(F_obs, F_dist, alpha, chan_hood, thresh_F)
+%Calculate cluster correction given the permutation F_distribution
+
+    global VERBLEVEL
+
     %% Find clusters and cluster ditribution
     
     if VERBLEVEL
         fprintf('Calculating clusters . . . ')
     end
     
+    %Some useful numbers
+    [n_perm, n_electrodes, n_time_pts] = size(F_dist);
+    
     %Find clusters and cluster mass distribution
-    thresh_F = finv(1-thresh_p, df_effect, df_res); 
     clust_mass_dist = zeros(n_perm, 1);
     for i = 1:n_perm
         F = reshape(F_dist(i, :, :), [n_electrodes, n_time_pts]);
@@ -115,24 +139,9 @@ function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_h
         fprintf('Estimated alpha level is %f\n', est_alpha);
     end
     
-    %% Output
-    
     clust_info = struct('null_test', null_test, ...
                         'pval', clust_pval, ...
                         'clust_mass', clust_mass_obs, ...
                         'clust_ids', clust_ids_obs);
-    
-    test_results.h = h;
-    test_results.p = p;
-    test_results.F_obs = F_obs; 
-    test_results.df = [df_effect, df_res];
-    test_results.clust_info = clust_info;
-    if exact_test
-        test_results.estimated_alpha = est_alpha;
-        test_results.exact_test = true;
-    else
-        test_results.estimated_alpha = NaN;
-        test_results.exact_test = false;
-    end
 
 end
