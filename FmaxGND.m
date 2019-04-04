@@ -54,7 +54,6 @@
 % n_perm         - number of permutations {default: 10,000}
 % alpha          - A number between 0 and 1 specifying the family-wise 
 %                  alpha level of the test. {default: 0.05}
-% step_down      - Use a step-down method to calculate significance.
 % plot_raster    - ['yes' or 'no'] If 'yes', a two-dimensional (time x channel)
 %                  binary "raster" diagram is created to illustrate the
 %                  results of the permutation tests. This figure can be reproduced 
@@ -137,7 +136,6 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     p.addParameter('include_chans', [],       @(x) iscell(x));
     p.addParameter('exclude_chans', [],       @(x) iscell(x));
     p.addParameter('n_perm',        1e4,      @(x) isnumeric(x));
-    p.addParameter('step_down',     false,    @(x) islogical(x));
     p.addParameter('save_GND',      'prompt', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))) || islogical(x));
     p.addParameter('output_file',   false,    @(x) (ischar(x) || islogical(x)));
     p.addParameter('alpha',         0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
@@ -368,7 +366,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
             fprintf('\nCalculating %s effect\n', effects_labels{i});
         end
         %Calculate test
-        test_results(i) = calc_Fmax(the_data, [], effects{i}+2, n_perm, alpha, p.Results.step_down);             
+        test_results(i) = calc_Fmax(the_data, [], effects{i}+2, n_perm, alpha);             
     end
     
 
@@ -376,11 +374,6 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     
     if (strcmpi(p.Results.mean_wind, 'yes') || strcmpi(p.Results.mean_wind, 'y'))
         use_time_pts = {use_time_pts};
-    end
-    if p.Results.step_down
-        mult_comp_method = 'step down Fmax perm test';
-    else
-        mult_comp_method = 'Fmax perm test';
     end
     %Create results struct with basic parameters
     results = struct('bins', bins, ...
@@ -393,7 +386,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                      'mean_wind', p.Results.mean_wind, ...
                      'include_chans', {{GND.chanlocs(electrodes).labels}}, ...
                      'used_chan_ids', electrodes, ...
-                     'mult_comp_method', mult_comp_method, ...
+                     'mult_comp_method', 'Fmax perm test', ...
                      'n_perm', n_perm, ...
                      'desired_alphaORq', alpha, ...
                      'estimated_alpha', [], ...
