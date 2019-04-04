@@ -9,6 +9,10 @@
 % data          - An electrode x time points x conditions x subjects array of ERP
 %                 data. Array will vary in number of dimensions based on how many
 %                 factors there are.
+% dims          - Dimensions involved in the effect. Given the structure of
+%                 the data specified above, for a two-way ANOVA 3 indicates 
+%                 the within-subjects factors, 4 indicates the between 
+%                 subjects factors, and [3, 4] indicates the interaction.
 % n_perm        - Number of permutations to conduct
 %
 %OUTPUT
