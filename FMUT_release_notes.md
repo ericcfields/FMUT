@@ -22,6 +22,9 @@ This is a backward compatible bug fix release. It is recommended that all users 
 * fixed bug in `fmut.py` due to changes in openpyxl's cell.column format 
 * Changed deprecated remove_sheets method in fmut.py
 
+### Refactoring
+* Basic permutation ANOVA functions now output F\_obs explicitly rather than implicitly (as the first permutation in F\_dist)
+
 
 # 0.4.0-beta
 
