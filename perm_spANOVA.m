@@ -2,7 +2,7 @@
 %one between subjects factor and up to two within subjects factors
 %
 %EXAMPLE USAGE
-% >> [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, [16, 16], [3, 4], 1e4)
+% >> [F_obs, F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, [16, 16], [3, 4], 1e4)
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
@@ -19,14 +19,15 @@
 % n_perm        - Number of permutations to conduct
 %
 %OUTPUT
+% F_obs         - electrode x time point matrix of unpermuted F-values
 % F_dist        - F-values at each time point and electrode for each
-%                 permutation. The first permutation is F-observed.
+%                 permutation.
 % df_effect     - numerator degrees of freedom
 % df_res        - denominator degrees of freedom
 % exact_test    - Boolean specifying whether the test was an exact test
 %
 %
-%VERSION DATE: 24 July 2017
+%VERSION DATE: 4 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -36,7 +37,7 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm, reduce)
+function [F_obs, F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm, reduce)
 
     %Eliminate factors not involved in this effect and reduce interactions
     %via subtraction
@@ -51,20 +52,20 @@ function [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs,
     end
 
     if ndims(reduced_data) == 3 && new_dims == 3
-        [F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
+        [F_obs, F_dist, df_effect, df_res] = perm_crANOVA(reduced_data, cond_subs, n_perm);
         exact_test = true;
     elseif ndims(reduced_data) == 4
-        [F_dist, df_effect, df_res] = twoway(reduced_data, cond_subs, new_dims, n_perm);
+        [F_obs, F_dist, df_effect, df_res] = twoway(reduced_data, cond_subs, new_dims, n_perm);
         exact_test = false;
     elseif ndims(reduced_data) > 4
-        [F_dist, df_effect, df_res] = threeway(reduced_data, cond_subs, new_dims, n_perm);
+        [F_obs, F_dist, df_effect, df_res] = threeway(reduced_data, cond_subs, new_dims, n_perm);
         exact_test = false;
     end
     
 end
 
 
-function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
+function [F_obs, F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
 
     global VERBLEVEL
 
@@ -93,7 +94,7 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
 
     %Perform n_perm permutations
     F_dist = NaN(n_perm, n_electrodes, n_time_pts);
-    for i = 1:n_perm;
+    for i = 1:n_perm
 
         %Permute the data
         if length(dims) == 1
@@ -119,7 +120,7 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
 
         %Calculate sums of squares
         A = 0; AS = 0; AB = 0; ABS = 0;
-        for p = 1:n_conds_A;
+        for p = 1:n_conds_A
             first = sum(cond_subs(1:p)) - cond_subs(p) + 1;
             last  = sum(cond_subs(1:p));
             A   = A   + sum(sum(perm_data(:, :, :, first:last), 3), 4).^2 / (cond_subs(p) * n_conds_B);
@@ -161,6 +162,9 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
         end
 
     end
+    
+    %Extract unpermuted F-values
+    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
 
     %degrees of freedom and exact test
     if length(dims) == 1
@@ -179,7 +183,7 @@ function [F_dist, df_effect, df_res] = twoway(data, cond_subs, dims, n_perm)
 end
 
 
-function [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
+function [F_obs, F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
 
     global VERBLEVEL
 
@@ -281,6 +285,9 @@ function [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
         
     end
     
+    %Extract unpermuted F-values
+    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
+    
     %degrees of freedom
     if isequal(dims, [3, 4])
         df_effect = dfBxC;
@@ -290,4 +297,3 @@ function [F_dist, df_effect, df_res] = threeway(data, cond_subs, dims, n_perm)
     df_res = dfBxCxBL;
 
 end
-

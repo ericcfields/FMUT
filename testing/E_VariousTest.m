@@ -1,6 +1,6 @@
 %Test Various things
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 4 April 2019
 
 %Load a GND for testing
 FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
@@ -17,8 +17,7 @@ dims = [3, 4];
 n_perm = 10;
 
 %F-test
-F_dist = perm_rbANOVA(data, dims, n_perm, false);
-F_obs = squeeze(F_dist(1, :, :));
+F_obs = perm_rbANOVA(data, dims, n_perm, false);
 
 %t-test
 data = squeeze(data(:, :, 1, :, :) - data(:, :, 2, :, :));
@@ -36,8 +35,7 @@ dims = [3, 4, 5];
 n_perm = 10;
 
 %F-test
-F_dist = perm_rbANOVA(data, dims, n_perm, false);
-F_obs = squeeze(F_dist(1, :, :));
+F_obs = perm_rbANOVA(data, dims, n_perm, false);
 
 %t-test
 data = squeeze(data(:, :, 1, :, :, :) - data(:, :, 2, :, :, :));
@@ -60,8 +58,7 @@ dims = [3, 4];
 n_perm = 10;
 
 %F-test
-F_dist = perm_spANOVA(data, cond_subs, dims, n_perm, false);
-F_obs = squeeze(F_dist(1, :, :));
+F_obs = perm_spANOVA(data, cond_subs, dims, n_perm, false);
 
 %t-test
 data = reshape(data(:, :, 1, :) - data(:, :, 2, :), [32, 167, 16]);
@@ -78,8 +75,7 @@ dims = [3, 4, 5];
 n_perm = 10;
 
 %F-test
-F_dist = perm_spANOVA(data, cond_subs, dims, n_perm, false);
-F_obs = squeeze(F_dist(1, :, :));
+F_obs = perm_spANOVA(data, cond_subs, dims, n_perm, false);
 
 %t-test
 data = reshape(data(:, :, 1, :, :) - data(:, :, 2, :, :), [32, 167, 2, 16]);

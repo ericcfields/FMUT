@@ -2,7 +2,7 @@
 %between subjects ANOVA
 %
 %EXAMPLE USAGE
-% >> [F_dist, df_effect, df_res] = perm_crANOVA(data, [16, 16], 1e4)
+% >> [F_obs, F_dist, df_effect, df_res] = perm_crANOVA(data, [16, 16], 1e4)
 %
 %REQUIRED INPUTS
 % data          - An electrode x time points x conditions x subjects array of ERP
@@ -15,13 +15,14 @@
 % n_perm        - Number of permutations to conduct
 %
 %OUTPUT
+% F_obs         - electrode x time point matrix of unpermuted F-values
 % F_dist        - F-values at each time point and electrode for each
 %                 permutation. The first permutation is F-observed.
 % df_effect     - numerator degrees of freedom
 % df_res        - denominator degrees of freedom
 %
 %
-%VERSION DATE: 10 July 2017
+%VERSION DATE: 4 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -32,7 +33,7 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 
 
-function [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm)
+function [F_obs, F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm)
 
     global VERBLEVEL
 
@@ -54,7 +55,7 @@ function [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm)
     %Perform n_perm permutations
     F_dist = NaN(n_perm, n_electrodes, n_time_pts);
 
-    for i = 1:n_perm;
+    for i = 1:n_perm
 
         %Permute the data
         if i ==1
@@ -65,7 +66,7 @@ function [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm)
 
         %Calculate sums of squares
         A = 0;
-        for a = 1:n_conds;
+        for a = 1:n_conds
             first = sum(cond_subs(1:a)) - cond_subs(a) + 1;
             last  = sum(cond_subs(1:a));
             A = A + ((sum(perm_data(:, :, first:last), 3).^2) / cond_subs(a));
@@ -90,6 +91,9 @@ function [F_dist, df_effect, df_res] = perm_crANOVA(data, cond_subs, n_perm)
         end
 
     end
+    
+    %Extract unpermuted F-values
+    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
 
     %degrees of freedom
     df_effect = dfA;
