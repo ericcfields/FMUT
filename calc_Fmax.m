@@ -32,7 +32,7 @@
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
 
-%Copyright (c) 2017, Eric Fields
+%Copyright (c) 2017-2019, Eric Fields
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
