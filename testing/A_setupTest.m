@@ -1,13 +1,13 @@
 %FMUT unit testing
 %General setup
 %AUTHOR: Eric Fields
-%VERSION DATE: 3 April 2019
+%VERSION DATE: 4 April 2019
 
 %Add EEGLAB and MUT to path
 [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
 
 %Remove FMUT directory within EEGLAB plugins folder
-rmpath(fullfile(fileparts(which('eeglab')), 'plugins', 'FMUT_0.4.1'));
+rmpath(fullfile(fileparts(which('eeglab')), 'plugins', 'FMUT_0.5.0-alpha'));
 
 %Add FMUT folder to search path
 FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
