@@ -35,50 +35,20 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 
 function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
+     
+    %%% Calculate ANOVA %%%
     
-    global VERBLEVEL
-    
-    %Some useful numbers
-    n_electrodes = size(data, 1);
-    n_time_pts   = size(data, 2);
-    
-    
-    %% Calculate ANOVA
-    
-    %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
         [F_obs, F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
     else
         [F_obs, F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm);
     end
     
+    %%% Calculate Fmax correction %%%
     
-    %% Calculate Fmax correction
+    [h, p, Fmax_crit, est_alpha] = Fmax_corr(F_obs, F_dist, alpha);
     
-    %Calculate Fmax distribution and Fmax critical value
-    Fmax_dist = max(max(F_dist, [], 2), [], 3);
-    Fmax_dist = sort(Fmax_dist);
-    Fmax_crit = Fmax_dist(ceil((1-alpha) * length(Fmax_dist)));
-
-    %Null hypothesis test
-    h = F_obs > Fmax_crit;
-    est_alpha = mean(Fmax_dist>Fmax_crit);
-    if VERBLEVEL
-        fprintf('Estimated alpha level is %f\n', est_alpha);
-    end
-
-    %Calculate p-value
-    p = NaN(n_electrodes, n_time_pts);
-    for e = 1:n_electrodes
-        for t = 1:n_time_pts
-            p(e,t) = mean(Fmax_dist >= F_obs(e,t));
-        end
-    end
-
-    assert(isequal(h, p<=alpha));
-    
-    
-    %% Output
+    %%% Output %%%
     
     test_results.h = h;
     test_results.p = p;
@@ -94,4 +64,3 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha)
     end
 
 end
-
