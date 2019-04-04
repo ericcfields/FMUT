@@ -12,8 +12,6 @@ The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
 
 ## Release Notes
 
-This is a backward compatible bug fix release. It is recommended that all users upgrade.
-
 ### New features
 * Added alpha input to `fmut.format_xls` and `format_xls` so that highlighting reflects desired alpha; currently only works with non-compiled version
 
@@ -23,7 +21,10 @@ This is a backward compatible bug fix release. It is recommended that all users 
 * Changed deprecated remove_sheets method in fmut.py
 
 ### Refactoring
+(These changes are unlikely to affect most users, but could affect your code if you have called some sub-functions directly.)  
+
 * Basic permutation ANOVA functions now output F\_obs explicitly rather than implicitly (as the first permutation in F\_dist)
+* Code applying the Fmax and cluster corrections to ANOVA output have now been moved to separate functions: `Fclust_corr` and `Fmax_corr`. This was primarily to allow for more efficient simulation work (i.e., calculate the permutation ANOVA once and then applying each correction to the output).
 
 
 # 0.4.0-beta

@@ -34,6 +34,9 @@ function [h, p, Fmax_crit, est_alpha] = Fmax_corr(F_obs, F_dist, alpha)
     
     global VERBLEVEL;
     
+    %Some useful numbers
+    [~, n_electrodes, n_time_pts] = size(F_dist);
+    
     %Calculate Fmax distribution and Fmax critical value
     Fmax_dist = max(max(F_dist, [], 2), [], 3);
     Fmax_dist = sort(Fmax_dist);
