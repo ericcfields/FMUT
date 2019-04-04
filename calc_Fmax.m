@@ -26,7 +26,7 @@
 % test_results - A struct with results of the Fmax test
 %
 %
-%VERSION DATE: 6 November 2017
+%VERSION DATE: 4 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -53,11 +53,10 @@ function test_results = calc_Fmax(data, cond_subs, dims, n_perm, alpha, step_dow
     
     %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-        [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
+        [F_obs, F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
     else
-        [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm);
+        [F_obs, F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm);
     end
-    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     
     
     %% Calculate Fmax correction

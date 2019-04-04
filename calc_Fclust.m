@@ -33,7 +33,7 @@
 % test_results - A struct with results of the cluster mass test
 %
 %
-%VERSION DATE: 3 April 2019
+%VERSION DATE: 4 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -44,19 +44,14 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 
 function test_results = calc_Fclust(data, cond_subs, dims, n_perm, alpha, chan_hood, thresh_p)
-
-    %Some useful numbers
-    n_electrodes = size(data, 1);
-    n_time_pts   = size(data, 2);
     
     %%% Calculate ANOVA %%%
     
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-        [F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
+        [F_obs, F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm);
     else
-        [F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm);
+        [F_obs, F_dist, df_effect, df_res, exact_test] = perm_rbANOVA(data, dims, n_perm);
     end
-    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     
     %%% Calculate cluster correction %%%
     

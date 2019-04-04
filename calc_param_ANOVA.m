@@ -59,11 +59,10 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
 
     %Calculate the ANOVA (F-obs and the permutation distribution)
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-        [F_dist, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, 1);
+        [F_obs, ~, df_effect, df_res] = perm_spANOVA(data, cond_subs, dims, 1);
     else
-        [F_dist, df_effect, df_res] = perm_rbANOVA(data, dims, 1);
+        [F_obs, ~, df_effect, df_res] = perm_rbANOVA(data, dims, 1);
     end
-    F_obs = reshape(F_dist(1, :, :), [n_electrodes, n_time_pts]);
     uncorr_p = 1 - fcdf(F_obs, df_effect, df_res);
     
     
