@@ -2,7 +2,7 @@
 %distribution
 %
 %EXAMPLE USAGE
-% >> [h, p, clust_info, est_alpha] = Fclust_corr(F_obs, F_dist, 0.05, 75, 3.84)
+% >> [h, p, clust_info, est_alpha] = Fclust_corr(F_obs, F_dist, 0.05, chan_hood, 3.84)
 %
 %REQUIRED INPUTS
 % F_obs          - An electrode x time points array of observed F-values
@@ -25,7 +25,7 @@
 %                  permutation method
 %
 %
-%VERSION DATE: 4 April 2019
+%VERSION DATE: 16 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
