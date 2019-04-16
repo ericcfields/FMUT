@@ -1,4 +1,4 @@
-# 0.5.0-beta
+# 0.5.0-alpha
 
 ## Installation instructions
 
