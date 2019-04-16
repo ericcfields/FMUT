@@ -1,5 +1,8 @@
 #Files for git to ignore for FMUT
 
+### Files to ignore ###
+py_fmut.spec
+
 ### File types to ignore ###
 *.ffs_db
 *.lnk
@@ -21,3 +24,5 @@ py_fmut_mac/*
 py_fmut_win/*
 testing/data/*
 testing/outputs/*
+build/*
+dist/*
