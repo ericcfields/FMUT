@@ -6,7 +6,7 @@
 %REQUIRED INPUTS
 % spreadsheet - name of spreadsheet file to format
 %
-%VERSION DATE: 29 March 2019
+%VERSION DATE: 18 April 2019
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -16,11 +16,7 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function format_xls(spreadsheet, alpha)
-
-    if nargin < 2
-        alpha = 0.05;
-    end
+function format_xls(spreadsheet)
 
     %If full path is not provided assume spreadsheet is the current working
     %directory
@@ -40,7 +36,7 @@ function format_xls(spreadsheet, alpha)
     %Try using .py script
     try
         py_addpath(func_dir);
-        py.fmut.format_xls(spreadsheet, alpha);
+        py.fmut.format_xls(spreadsheet);
         
     %If .py version doesn't work, use pyinstaller version
     catch

@@ -13,7 +13,7 @@ The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
 ## Release Notes
 
 ### New features
-* Added alpha input to `fmut.format_xls` and `format_xls` so that highlighting reflects desired alpha; currently only works with non-compiled version
+* Updated Python code for spreadsheet formatting so that highlighting will reflect the alpha level of the test (rather than always assuming alpha=0.05). The pyinstaller frozen versions have not been updated yet.
 
 ### Bug fixes
 * `get_mean_amplitude` now removes commas from group and bin names in csv output to avoid formatting issues
