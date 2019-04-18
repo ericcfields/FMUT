@@ -7,7 +7,7 @@
 Python functions for the Factorial Mass ERP Univariate Toolbox
 
 AUTHOR: Eric Fields
-VERSION DATE: 29 March 2019
+VERSION DATE: 18 April 2019
 """
 
 import sys
@@ -21,7 +21,7 @@ if sys.version_info.major == 2:
     input = raw_input
     range = xrange
 
-def format_xls(spreadsheet, alpha=0.05):
+def format_xls(spreadsheet):
     """
     Take spreadsheet output from FMUT functions and apply formatting
     """
@@ -49,10 +49,12 @@ def format_xls(spreadsheet, alpha=0.05):
             sheet.column_dimensions['B'].width = 200
             for cell in sheet['B']:
                 cell.alignment = Alignment(horizontal='left')
-            #Format critical values
+            #Format critical values and get alpha level of test
             for row in range(1, sheet.max_row+1):
                 if 'critical value' in sheet['A'+str(row)].value:
                     sheet['B'+str(row)].number_format = '0.00'
+                elif 'Alpha' in sheet['A'+str(row)].value:
+                    alpha = sheet['B'+str(row)].value
         
         #cluster_summary sheet
         if sheet_name == 'cluster summary':
