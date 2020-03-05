@@ -19,6 +19,7 @@ The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
 * `get_mean_amplitude` now removes commas from group and bin names in csv output to avoid formatting issues
 * fixed bug in `fmut.py` due to changes in openpyxl's cell.column format 
 * Changed deprecated remove_sheets method in fmut.py
+* An error is now generated when a chan_hood matrix is not symmetrical
 
 ### Refactoring
 (These changes are unlikely to affect most users, but could affect your code if you have called some sub-functions directly.)  

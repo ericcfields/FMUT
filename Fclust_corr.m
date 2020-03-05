@@ -25,7 +25,7 @@
 %                  permutation method
 %
 %
-%VERSION DATE: 16 April 2019
+%VERSION DATE: 4 March 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -40,6 +40,10 @@ function [h, p, clust_info, est_alpha] = Fclust_corr(F_obs, F_dist, alpha, chan_
     global VERBLEVEL
     if VERBLEVEL
         fprintf('Calculating clusters . . . ')
+    end
+    
+    if ~isequal(chan_hood, chan_hood')
+        error('Your chan_hood matrix is not symmetric')
     end
     
     %Some useful numbers
