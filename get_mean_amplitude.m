@@ -16,7 +16,7 @@
 %                      has been saved to disk (with full path if not in current
 %                      working directory)
 %  test_id           - [integer] The index # of the F-test results 
-%                      stored in the GND/GRP/specGND variable that you wish to visualize.  
+%                      stored in the GND/GRP/specGND variable  
 %                      To see what test results are available, look at 
 %                      the "F_tests" field of your variable (e.g., GND.F_tests)
 %
@@ -34,7 +34,7 @@
 %                     subject information
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 March 2019
+%VERSION DATE: 4 March 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
