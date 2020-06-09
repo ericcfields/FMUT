@@ -41,7 +41,7 @@
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
 
-%Copyright (c) 2017, Eric Fields
+%Copyright (c) 2020, Eric Fields
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
@@ -71,19 +71,7 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
     
     %Greenhouse-Geisser correction
     if greenhouse_geisser
-        if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-            error('Greenhouse-Geisser correction is currently only implemented for fully repetaed measures ANOVA');
-        end
-        reduced_data = reduce_data(data, dims);
-        if ndims(reduced_data) ~= 4
-            error('Greenhouse-Geisser correction is currently only implemented for one-way RM ANOVA');
-        end
-        epsilon = NaN([size(reduced_data, 1), size(reduced_data, 2)]);
-        for e = 1:size(data, 1)
-            for t = 1:size(data, 2)
-                epsilon(e,t) = epsGG(squeeze(reduced_data(e, t, :, :))');
-            end
-        end
+        epsilon = GG(data, cond_subs, dims);
         df_effect = df_effect*epsilon;
         df_res = df_res*epsilon;
     end
