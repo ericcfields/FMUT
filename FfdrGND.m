@@ -37,6 +37,8 @@
 %                  tests are independent and tends to be slightly less
 %                  powerful than 'bh' when few or no null hypothese are
 %                  false. {default: 'bh'}
+% greenhouse_geisser - ['yes' or 'no']. If 'yes', apply the
+%                      Greenhouse-Geisser correction to ANOVA results
 % time_wind      - 2D matrix of time values specifying the beginning 
 %                  and end of the time windows in ms (e.g., 
 %                  [500, 800]). Every single time point in 
@@ -116,7 +118,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 23 June 2018
+%VERSION DATE: 9 June 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -149,6 +151,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('q',             0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
     p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky', 'none', 'bonferroni', 'sidak'})));
+    p.addParameter('greenhouse_geisser', 'no', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
     p.addParameter('plot_mn_topo',   []);
@@ -349,8 +352,14 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), 'p', NaN(n_electrodes, n_time_pts), ... 
                                  'F_obs', NaN(n_electrodes, n_time_pts), 'F_crit', NaN, 'df', NaN(1, 2)), ...
                                  length(effects), 1);
+    
+    if ~strcmpi(p.Results.greenhouse_geisser, 'yes') && ~strcmpi(p.Results.greenhouse_geisser, 'y')
+        greenhouse_geisser = false;
+    else
+        greenhouse_geisser = true;
+    end
     for i = 1:length(effects)
-        test_results(i) = calc_param_ANOVA(the_data, [], effects{i}+2, q, method);
+        test_results(i) = calc_param_ANOVA(the_data, [], effects{i}+2, q, method, greenhouse_geisser);
     end
    
 

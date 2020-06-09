@@ -1,6 +1,6 @@
 %Test FmaxGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 9 June 2020
 
 global test_xls_output
 if isempty(test_xls_output)
@@ -85,7 +85,8 @@ GND = FfdrGND(GND, ...
               'exclude_chans', {'centroparietal_cluster'}, ...
               'save_GND',      'no', ...
               'verblevel',     2, ...
-              'plot_raster',   'no');
+              'plot_raster',   'no', ...
+              'greenhouse_geisser', 'yes');
 
 %F==t^2
 assert(all(all(GND.F_tests(end).F_obs.ProbabilityXEmotion - GND.grands_t(1:32, start_sample:end_sample, 51).^2 < 1e-4)));
@@ -101,7 +102,7 @@ GND = tfdrGND(GND, 54, ...
               'verblevel',     2);
 
 %Critical F == critical t^2
-assert(GND.F_tests(end).F_crit.Emotion - GND.t_tests(end).crit_t(1)^2 < 1e-4);
+assert(GND.F_tests(end).F_crit.Emotion(1) - GND.t_tests(end).crit_t(1)^2 < 1e-4);
 %P-values are the same
 assert(all(all(GND.F_tests(end).adj_pval.Emotion - GND.t_tests(end).adj_pval < 1e-4)))
 

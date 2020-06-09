@@ -12,6 +12,9 @@ The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
 
 ## Release Notes
 
+### New features
+* Parametric ANOVAs (used with FDR corrections) can now employ a Greenhouse-Geisser correction.
+
 ### Bug fixes
 * `get_mean_amplitude` now removes commas from group and bin names in csv output to avoid formatting issues
 * Updated Python code for spreadsheet formatting so that highlighting will reflect the alpha level of the test (rather than always assuming alpha=0.05). Due to problems with pyinstaller, the frozen versions have not been updated.

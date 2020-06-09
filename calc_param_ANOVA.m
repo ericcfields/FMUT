@@ -23,17 +23,19 @@
 %                 Rate (bh, bk, or bky corrections)
 %
 %OPTIONAL INPUTS
-% correction    - A string indicating a multiple comparisons correction.
-%                 Options are 'none', 'bonferroni', 'sidak', 'bh' (classic 
-%                 Benjamini & Hochberg 1995) procedure, 'by' (Benjamini & 
-%                 Yekutieli, 2001), or 'bky' (Benjamini, Krieger, &
-%                 Yekutieli, 2006). {default: 'none'}.
+% correction          - A string indicating a multiple comparisons correction.
+%                       Options are 'none', 'bonferroni', 'sidak', 'bh' (classic 
+%                       Benjamini & Hochberg 1995) procedure, 'by' (Benjamini & 
+%                       Yekutieli, 2001), or 'bky' (Benjamini, Krieger, &
+%                       Yekutieli, 2006). {default: 'none'}.
+% greenhouse_geisser  - A boolean indicating whether to apply the
+%                       Greenhouse-Geisser correction
 %
 %OUTPUT
 % test_results - A struct with results of the mass univariate ANOVA
 %
 %
-%VERSION DATE: 24 July 2017
+%VERSION DATE: 9 June 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -43,8 +45,11 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction)
+function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction, greenhouse_geisser)
 
+    if nargin < 6
+        greenhouse_geisser = false;
+    end
     if nargin < 5
         correction = 'none';
     elseif ~any(strcmpi(correction, {'none', 'bonferroni', 'sidak', 'bh', 'by', 'bky'}))
@@ -63,6 +68,27 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
     else
         [F_obs, ~, df_effect, df_res] = perm_rbANOVA(data, dims, 1);
     end
+    
+    %Greenhouse-Geisser correction
+    if greenhouse_geisser
+        if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
+            error('Greenhouse-Geisser correction is currently only implemented for fully repetaed measures ANOVA');
+        end
+        reduced_data = reduce_data(data, dims);
+        if ndims(reduced_data) ~= 4
+            error('Greenhouse-Geisser correction is currently only implemented for one-way RM ANOVA');
+        end
+        epsilon = NaN([size(reduced_data, 1), size(reduced_data, 2)]);
+        for e = 1:size(data, 1)
+            for t = 1:size(data, 2)
+                epsilon(e,t) = epsGG(squeeze(reduced_data(e, t, :, :))');
+            end
+        end
+        df_effect = df_effect*epsilon;
+        df_res = df_res*epsilon;
+    end
+    
+    %Get p-values
     uncorr_p = 1 - fcdf(F_obs, df_effect, df_res);
     
     
