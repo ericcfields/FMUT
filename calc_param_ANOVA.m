@@ -23,13 +23,13 @@
 %                 Rate (bh, bk, or bky corrections)
 %
 %OPTIONAL INPUTS
-% correction          - A string indicating a multiple comparisons correction.
-%                       Options are 'none', 'bonferroni', 'sidak', 'bh' (classic 
-%                       Benjamini & Hochberg 1995) procedure, 'by' (Benjamini & 
-%                       Yekutieli, 2001), or 'bky' (Benjamini, Krieger, &
-%                       Yekutieli, 2006). {default: 'none'}.
-% greenhouse_geisser  - A boolean indicating whether to apply the
-%                       Greenhouse-Geisser correction
+% correction       - A string indicating a multiple comparisons correction.
+%                    Options are 'none', 'bonferroni', 'sidak', 'bh' (classic 
+%                    Benjamini & Hochberg 1995) procedure, 'by' (Benjamini & 
+%                    Yekutieli, 2001), or 'bky' (Benjamini, Krieger, &
+%                    Yekutieli, 2006). {default: 'none'}.
+% sphericity_corr  - ['none' or 'gg']. Indicates whether to apply a
+%                     sphericity correction {default: 'none'}
 %
 %OUTPUT
 % test_results - A struct with results of the mass univariate ANOVA
@@ -45,10 +45,10 @@
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 
-function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction, greenhouse_geisser)
+function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correction, sphericity_corr)
 
     if nargin < 6
-        greenhouse_geisser = false;
+        sphericity_corr = 'none';
     end
     if nargin < 5
         correction = 'none';
@@ -70,10 +70,12 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
     end
     
     %Greenhouse-Geisser correction
-    if greenhouse_geisser
+    if strcmpi(sphericity_corr, 'gg')
         epsilon = GG(data, cond_subs, dims);
         df_effect = df_effect*epsilon;
         df_res = df_res*epsilon;
+    elseif ~strcmpi(sphericity_corr, 'none')
+        error('sphericity_corr input must be ''none'' or ''gg''');
     end
     
     %Get p-values

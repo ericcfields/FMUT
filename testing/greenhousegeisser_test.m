@@ -14,7 +14,7 @@ data = randn([n_electrodes, n_time_pts, 3, 2, n_subs]);
 epsilon = GG(data, [], [3,4]);
 
 %Calculate ANOVA
-test_results = calc_param_ANOVA(data, [], [3,4], 0.05, 'none', true);
+test_results = calc_param_ANOVA(data, [], [3,4], 0.05, 'none', 'gg');
 
 %Check results for a random electrode and time poin
 e = randi([1,n_electrodes]);

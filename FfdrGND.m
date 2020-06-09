@@ -151,7 +151,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('q',             0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
     p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky', 'none', 'bonferroni', 'sidak'})));
-    p.addParameter('greenhouse_geisser', 'no', @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
+    p.addParameter('sphericity_corr', 'none', @(x) (any(strcmpi(x, {'gg', 'none'}))));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
     p.addParameter('plot_mn_topo',   []);
@@ -353,13 +353,8 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
                                  'F_obs', NaN(n_electrodes, n_time_pts), 'F_crit', NaN, 'df', NaN(1, 2)), ...
                                  length(effects), 1);
     
-    if ~strcmpi(p.Results.greenhouse_geisser, 'yes') && ~strcmpi(p.Results.greenhouse_geisser, 'y')
-        greenhouse_geisser = false;
-    else
-        greenhouse_geisser = true;
-    end
     for i = 1:length(effects)
-        test_results(i) = calc_param_ANOVA(the_data, [], effects{i}+2, q, method, greenhouse_geisser);
+        test_results(i) = calc_param_ANOVA(the_data, [], effects{i}+2, q, method, p.Results.sphericity_corr);
     end
    
 
