@@ -131,7 +131,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 23 June 2018
+%VERSION DATE: 9 June 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed.  
@@ -296,7 +296,6 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     
     %% ~~~~~ SET-UP ~~~~~
     
-
     %Find time points or mean windows to use and extract the data for
     %analysis
     the_data = [];
@@ -436,6 +435,7 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
                      'estimated_alpha', NaN, ...
                      'seed_state', NaN, ...
                      'exact_test', NaN, ...
+                     'sphericity_corr', 'none', ...
                      'null_test', [], ...
                      'adj_pval', [], ...
                      'F_obs', [], ...

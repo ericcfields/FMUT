@@ -37,7 +37,7 @@ fprintf('p(LB) = %.3f\n', test_results_lb.p(e,t));
 %Create ANOVA table
 oneway_data = reshape(data, n_electrodes, n_time_pts, [], n_subs);
 T = [cell2table(cellfun(@(x) sprintf('S%d', x), num2cell(1:n_subs)', 'UniformOutput', false), 'VariableNames', {'sub'}) ...
-    array2table(squeeze(oneway_data(e,t,:,:))')];
+     array2table(squeeze(oneway_data(e,t,:,:))')];
 T.Properties.VariableNames = {'sub', 'A1B1', 'A2B1' ,'A3B1', 'A1B2', 'A2B2' ,'A3B2'};
 
 %Output to csv for checking in jamovi/SPSS

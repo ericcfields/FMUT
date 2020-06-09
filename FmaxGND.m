@@ -108,13 +108,13 @@
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
 %
-%VERSION DATE: 23 June 2018
+%VERSION DATE: 9 June 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
 
-%Copyright (c) 2017, Eric Fields
+%Copyright (c) 2020, Eric Fields
 %All rights reserved.
 %This code is free and open source software made available under the 3-clause BSD license.
 %This function incorporates some code from the Mass Univariate Toolbox, 
@@ -392,6 +392,7 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
                      'estimated_alpha', [], ...
                      'seed_state', seed_state, ...
                      'exact_test', [], ...
+                     'sphericity_corr', NaN, ...
                      'null_test', [], ...
                      'adj_pval', [], ...
                      'F_obs', [], ...

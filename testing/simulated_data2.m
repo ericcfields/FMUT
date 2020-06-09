@@ -18,7 +18,7 @@ cond_subs = [8 8];
 n_subs = sum(cond_subs);
 
 %Effect
-dims = [3];
+dims = [3, 4, 5];
 
 %Parameters
 n_exp = 1e3;
@@ -28,7 +28,7 @@ alpha = 0.05;
 %Add effects
 wg_effect = 0;
 bg_effect = 0;
-int_effect = 5;
+int_effect = 0;
 
 %Pre-allocate results struct
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
