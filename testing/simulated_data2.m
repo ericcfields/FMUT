@@ -18,7 +18,7 @@ cond_subs = [8 8];
 n_subs = sum(cond_subs);
 
 %Effect
-dims = [3 4 5];
+dims = [3];
 
 %Parameters
 n_exp = 1e3;
@@ -28,7 +28,7 @@ alpha = 0.05;
 %Add effects
 wg_effect = 0;
 bg_effect = 0;
-int_effect = 0;
+int_effect = 5;
 
 %Pre-allocate results struct
 test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
@@ -44,7 +44,7 @@ test_results = repmat(struct('h', NaN(n_electrodes, n_time_pts), ...
 %% Simulate experiments
 
 tic
-parfor i = 1:n_exp
+for i = 1:n_exp
     
     %Simulate null data
     data = normrnd(0, 1, [n_electrodes, n_time_pts, wg_design, n_subs]);
@@ -77,7 +77,8 @@ parfor i = 1:n_exp
     end
     
     %Calculate ANOVA
-    test_results(i) = calc_Fmax(data, cond_subs, dims, n_perm, alpha);
+    %test_results(i) = calc_Fmax(data, cond_subs, dims, n_perm, alpha);
+    test_results(i) = calc_param_ANOVA(data, cond_subs, dims, alpha, 'none', 'none');
     
 end
 toc

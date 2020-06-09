@@ -28,8 +28,10 @@
 %                    Benjamini & Hochberg 1995) procedure, 'by' (Benjamini & 
 %                    Yekutieli, 2001), or 'bky' (Benjamini, Krieger, &
 %                    Yekutieli, 2006). {default: 'none'}.
-% sphericity_corr  - ['none' or 'gg']. Indicates whether to apply a
-%                     sphericity correction {default: 'none'}
+% sphericity_corr  -  Indicates whether to apply a sphericity correction 
+%                     with options of 'none', Greenhouse-Geisser ('gg'),
+%                     Hyunh-Feldt('hf'), or lower bound ('lb') 
+%                     {default: 'none'}
 %
 %OUTPUT
 % test_results - A struct with results of the mass univariate ANOVA
@@ -49,6 +51,8 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
 
     if nargin < 6
         sphericity_corr = 'none';
+    elseif ~any(strcmpi(sphericity_corr, {'none', 'gg', 'hf', 'lb'}))
+        error('sphericity_corr must be ''none'', ''gg'', ''hf'', ''lb''');
     end
     if nargin < 5
         correction = 'none';
@@ -70,12 +74,10 @@ function test_results = calc_param_ANOVA(data, cond_subs, dims, alphaORq, correc
     end
     
     %Greenhouse-Geisser correction
-    if strcmpi(sphericity_corr, 'gg')
-        epsilon = GG(data, cond_subs, dims);
+    if ~strcmpi(sphericity_corr, 'none')
+        epsilon = estimate_epsilon(data, cond_subs, dims, sphericity_corr);
         df_effect = df_effect*epsilon;
         df_res = df_res*epsilon;
-    elseif ~strcmpi(sphericity_corr, 'none')
-        error('sphericity_corr input must be ''none'' or ''gg''');
     end
     
     %Get p-values

@@ -37,8 +37,10 @@
 %                  tests are independent and tends to be slightly less
 %                  powerful than 'bh' when few or no null hypothese are
 %                  false. {default: 'bh'}
-% greenhouse_geisser - ['yes' or 'no']. If 'yes', apply the
-%                      Greenhouse-Geisser correction to ANOVA results
+% sphericity_corr  -  Indicates whether to apply a sphericity correction 
+%                     with options of 'none', Greenhouse-Geisser ('gg'),
+%                     Hyunh-Feldt('hf'), or lower bound ('lb') 
+%                     {default: 'none'}
 % time_wind      - 2D matrix of time values specifying the beginning 
 %                  and end of the time windows in ms (e.g., 
 %                  [500, 800]). Every single time point in 
@@ -151,7 +153,7 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('q',             0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
     p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky', 'none', 'bonferroni', 'sidak'})));
-    p.addParameter('sphericity_corr', 'none', @(x) (any(strcmpi(x, {'gg', 'none'}))));
+    p.addParameter('sphericity_corr', 'none', @(x) (any(strcmpi(x, {'gg', 'hf', 'lb', 'none'}))));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
     p.addParameter('plot_mn_topo',   []);
