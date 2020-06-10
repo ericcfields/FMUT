@@ -2,7 +2,7 @@
 
 ## Installation instructions
 
-1. Download FMUT_0.5.0-beta.zip.
+1. Download FMUT_0.5.0.zip.
 2. Unzip it.
 3. Put the folder of files someplace sensible (e.g., in your "MATLAB" directory).
 4. [Add the folder](https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html) to the set of "paths" MATLAB searches when trying to answer a function call.
@@ -13,7 +13,11 @@ The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
 ## Release Notes
 
 ### New features
-* Parametric ANOVAs (used with FDR corrections) can now employ a Greenhouse-Geisser correction.
+* `FfdrGND` (and relevant sub-functions) can now include a sphericity correction as long as there are no more than two factors with more than two levels
+
+### Backwards compatibility
+* A new field, `sphericity_corr`, has been added to the `F_tests` struct. Attempts to add results to a GND or GRP with results missing this field (i.e., from a previous version of FMUT) will result in an error.
+* See also Refactoring section below
 
 ### Bug fixes
 * `get_mean_amplitude` now removes commas from group and bin names in csv output to avoid formatting issues
