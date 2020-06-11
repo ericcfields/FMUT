@@ -1,7 +1,7 @@
 # Factorial Mass Univariate ERP Toolbox (FMUT)
 
 **VERSION**  
-0.5.0-alpha
+0.5.0
 
 **AUTHOR**  
 Eric Fields  
