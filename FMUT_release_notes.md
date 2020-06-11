@@ -1,4 +1,4 @@
-# 0.5.0-alpha
+# 0.5.0
 
 ## Installation instructions
 
@@ -13,11 +13,7 @@ The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
 ## Release Notes
 
 ### New features
-* `FfdrGND` (and relevant sub-functions) can now include a sphericity correction as long as there are no more than two factors with more than two levels
-
-### Backwards compatibility
-* A new field, `sphericity_corr`, has been added to the `F_tests` struct. Attempts to add results to a GND or GRP with results missing this field (i.e., from a previous version of FMUT) will result in an error.
-* See also Refactoring section below
+* `FfdrGND` (and relevant sub-functions) can now include a sphericity correction as long as there are no more than two factors with more than two levels.
 
 ### Bug fixes
 * `get_mean_amplitude` now removes commas from group and bin names in csv output to avoid formatting issues

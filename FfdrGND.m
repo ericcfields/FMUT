@@ -120,7 +120,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -268,6 +268,9 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     end
     if ~all(all(GND.indiv_bin_ct(:, bins)))
         watchit(sprintf('Some subjects appear to be missing data from bins used in this test!\nSee: GND.indiv_bins_ct.'));
+    end
+    if ~strcmpi(p.Results.sphericity_corr, 'none') && sum(factor_levels>2)>1
+        error('Sphericity corrections are currently not available for designs with more than one factor with more than two levels');
     end
 
     
@@ -419,6 +422,11 @@ function [GND, results, adj_pval, F_obs, F_crit] = FfdrGND(GND_or_fname, varargi
     if ~isfield(GND, 'F_tests') || isempty(GND.F_tests)
         GND.F_tests = results;
     else
+        %Add sphericity_corr field if existing results were generated with
+        %with FMUT version <0.5
+        if ~isfield(GND.F_tests, 'sphericity_corr')
+            [GND.F_tests(:).sphericity_corr] = deal('none');
+        end
         GND.F_tests(end+1) = results;
     end
     

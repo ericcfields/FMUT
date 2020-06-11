@@ -108,7 +108,7 @@
 %See the FMUT documentation for more information:
 %https://github.com/ericcfields/FMUT/wiki
 %
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -428,6 +428,9 @@ function [GND, results, prm_pval, F_obs, F_crit] = FmaxGND(GND_or_fname, varargi
     if ~isfield(GND, 'F_tests') || isempty(GND.F_tests)
         GND.F_tests = results;
     else
+        if ~isfield(GND.F_tests, 'sphericity_corr')
+            [GND.F_tests(:).sphericity_corr] = deal('none');
+        end
         GND.F_tests(end+1) = results;
     end
     

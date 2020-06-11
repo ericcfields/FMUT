@@ -1,5 +1,5 @@
-%Calculate the Greenhouse-Geisser or Hyunh-Feldt estimate of epsilon at all 
-%time points and electrodes
+%Calculate the Greenhouse-Geisser, Hyunh-Feldt, or lower bound estimate 
+%of epsilon at all time points and electrodes
 %
 %EXAMPLE USAGE
 % >> epsilon = estimate_epsilon(data, [], 3, 'gg');
@@ -19,13 +19,13 @@
 %                 calculate the main effect of A, dims = 3. If you want to
 %                 calculate the AxB interaciton, dims  = [3, 4].
 % method        - 'gg': Greenhouse-Geisser, 'hf':Hyunh-Feldt, or 'lb':
-%                 lower bound
+%                 lower bound {default: 'gg'}
 %
 %OUTPUT
-% epsilon      - electrode x time point array of GG estimate of epsilon
+% epsilon      - electrode x time point array of epsilon estimate
 %
 %
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -50,11 +50,6 @@ function epsilon = estimate_epsilon(data, cond_subs, dims, method)
     %Get data reduced for analysis
     reduced_data = reduce_data(data, dims);
     
-    %Get some useful numbers
-    assert(ndims(reduced_data)==4);
-    [n_electrodes, n_time_pts, n_conds, n_subs] = size(reduced_data);
-    df_effect = n_conds - 1;
-    
     %This function currently only works for one-way fully repeated measures designs
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
         error('estimate_epsilon curently only implemented for fully repetaed measures ANOVA');
@@ -62,6 +57,10 @@ function epsilon = estimate_epsilon(data, cond_subs, dims, method)
     if ndims(reduced_data) ~= 4
         error('estimate_epsilon currently does not support more than one factor with more than 2 levels');
     end
+    
+    %Get some useful numbers
+    [n_electrodes, n_time_pts, n_conds, n_subs] = size(reduced_data);
+    df_effect = n_conds - 1;
     
     if strcmpi(method, 'lb')
         

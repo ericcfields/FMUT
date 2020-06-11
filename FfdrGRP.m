@@ -131,7 +131,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed.  
@@ -166,6 +166,7 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     p.addParameter('plot_raster',   'yes',    @(x) (any(strcmpi(x, {'yes', 'no', 'n', 'y'}))));
     p.addParameter('q',             0.05,     @(x) (isnumeric(x) && x<=1 && x>=0));
     p.addParameter('method',        'bh',     @(x) any(strcmpi(x, {'bh', 'by', 'bky', 'none', 'bonferroni', 'sidak'})));
+    p.addParameter('sphericity_corr', 'none', @(x) (any(strcmpi(x, {'gg', 'hf', 'lb', 'none'}))));
     p.addParameter('time_block_dur', []);
     p.addParameter('plot_gui',       []);
     p.addParameter('plot_mn_topo',   []);
@@ -291,6 +292,9 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     end
     if max(time_wind(:)) > max(GRP.time_pts)
         error('Epoch ends at %.1f ms, but ''time_wind'' input ends at %.1f ms', max(GRP.time_pts), max(time_wind(:)));
+    end
+    if ~strcmpi(p.Results.sphericity_corr, 'none')
+        error('Sphericity corrections are currently not available for designs with a between subject factor');
     end
 
     
@@ -469,6 +473,9 @@ function [GRP, results, adj_pval, F_obs, F_crit] = FfdrGRP(GRP_or_fname, varargi
     if ~isfield(GRP, 'F_tests') || isempty(GRP.F_tests)
         GRP.F_tests = results;
     else
+        if ~isfield(GRP.F_tests, 'sphericity_corr')
+            [GRP.F_tests(:).sphericity_corr] = deal('none');
+        end
         GRP.F_tests(end+1) = results;
     end
     

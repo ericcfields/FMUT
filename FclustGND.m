@@ -134,7 +134,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -441,6 +441,9 @@ function [GND, results, prm_pval, F_obs, clust_info] = FclustGND(GND_or_fname, v
     if ~isfield(GND, 'F_tests') || isempty(GND.F_tests)
         GND.F_tests = results;
     else
+        if ~isfield(GND.F_tests, 'sphericity_corr')
+            [GND.F_tests(:).sphericity_corr] = deal('none');
+        end
         GND.F_tests(end+1) = results;
     end
     

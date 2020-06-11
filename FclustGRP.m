@@ -144,7 +144,7 @@
 %
 %
 %AUTHOR: Eric Fields
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
 %are disclaimed. 
@@ -496,6 +496,9 @@ function [GRP, results, prm_pval, F_obs, clust_info] = FclustGRP(GRP_or_fname, v
     if ~isfield(GRP, 'F_tests') || isempty(GRP.F_tests)
         GRP.F_tests = results;
     else
+        if ~isfield(GRP.F_tests, 'sphericity_corr')
+            [GRP.F_tests(:).sphericity_corr] = deal('none');
+        end
         GRP.F_tests(end+1) = results;
     end
     

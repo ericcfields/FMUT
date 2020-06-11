@@ -3,9 +3,12 @@
 %returned for each subject and bin involved in the test.
 %
 %Note that care should be taken with regard to analyses conducted on such
-%mean amplitudes: if analyses are not statistically indpendent of the
-%original mass univariate test, results will be biased. See:
-%Kriegeskorte, N., Simmons, W. K., Bellgowan, P. S., & Baker, C. I. (2009). Circular analysis in systems neuroscience: the dangers of double dipping. Nature Neuroscience, 12(5), 535.
+%mean amplitudes: 
+%If analyses are not statistically indpendent of the original mass univariate 
+%test, results will be biased. See:
+%Kriegeskorte, N., Simmons, W. K., Bellgowan, P. S., & Baker, C. I. (2009). 
+%Circular analysis in systems neuroscience: the dangers of double dipping. 
+%Nature Neuroscience, 12(5), 535. https://doi.org/10.1038/nn.2303
 %
 %EXAMPLE USAGE
 % >> mean_amp_data = get_mean_amplitude(GND, 2, 'effect', 'Congruency');

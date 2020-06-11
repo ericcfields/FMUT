@@ -121,7 +121,7 @@
 %https://github.com/ericcfields/FMUT/wiki
 %
 %
-%VERSION DATE: 9 June 2020
+%VERSION DATE: 11 June 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -490,6 +490,9 @@ function [GRP, results, prm_pval, F_obs, F_crit] = FmaxGRP(GRP_or_fname, varargi
     if ~isfield(GRP, 'F_tests') || isempty(GRP.F_tests)
         GRP.F_tests = results;
     else
+        if ~isfield(GRP.F_tests, 'sphericity_corr')
+            [GRP.F_tests(:).sphericity_corr] = deal('none');
+        end
         GRP.F_tests(end+1) = results;
     end
     

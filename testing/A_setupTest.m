@@ -3,6 +3,8 @@
 %AUTHOR: Eric Fields
 %VERSION DATE: 4 March 2020
 
+clear all; close all; path(pathdef);
+
 %Add EEGLAB and MUT to path
 [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;
 
