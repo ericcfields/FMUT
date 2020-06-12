@@ -1,6 +1,7 @@
 %Test FclustGND function
+%
 %AUTHOR: Eric Fields
-%VERSION DATE: 14 July 2017
+%VERSION DATE: 12 June 2020
 
 global test_xls_output;
 if isempty(test_xls_output)
@@ -9,7 +10,7 @@ end
 
 %Load a GND for testing
 %Load a GND for testing
-FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+FMUT_dir = fileparts(fileparts(which('C_FclustGNDTest')));
 load(fullfile(FMUT_dir, 'testing', 'data', 'EmProb_13subs_Test.GND'), '-mat');
 
 %Define general variables
@@ -118,4 +119,3 @@ GND = clustGND(GND, 51, ...
  
 %F==t^2
 assert(all(GND.F_tests(end).F_obs.ProbabilityXEmotion - GND.t_tests(end).data_t.^2 < 1e-9))
-          

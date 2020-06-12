@@ -1,6 +1,7 @@
 %Test FmaxGND function
+%
 %AUTHOR: Eric Fields
-%VERSION DATE: 22 September 2017
+%VERSION DATE: 12 June 2020
 
 global test_xls_output;
 if isempty(test_xls_output)
@@ -8,7 +9,7 @@ if isempty(test_xls_output)
 end
 
 %Load a GND for testing
-FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+FMUT_dir = fileparts(fileparts(which('B_FmaxGNDTest')));
 load(fullfile(FMUT_dir, 'testing', 'data', 'EmProb_13subs_Test.GND'), '-mat');
 
 %Define some general variables

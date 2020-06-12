@@ -1,5 +1,6 @@
 %FMUT unit testing
 %General setup
+%
 %AUTHOR: Eric Fields
 %VERSION DATE: 12 June 2020
 
@@ -12,7 +13,7 @@ clear all; close all; path(pathdef); %#ok<CLALL>
 rmpath(fileparts(which('FclustGND')));
 
 %Add FMUT folder to search path
-FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+FMUT_dir = fileparts(fileparts(which('A_setupTest')));
 addpath(FMUT_dir);
 
 %Clear everything before testing

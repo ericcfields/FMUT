@@ -1,6 +1,7 @@
 %Test FmaxGRP function
+%
 %AUTHOR: Eric Fields
-%VERSION DATE: 15 July 2017
+%VERSION DATE: 12 June 2020
 
 global test_xls_output
 if isempty(test_xls_output)
@@ -8,7 +9,7 @@ if isempty(test_xls_output)
 end
 
 %Load GRP
-FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+FMUT_dir = fileparts(fileparts(which('A_setupTest')));
 load(fullfile(FMUT_dir, 'testing', 'data', 'Disflu_GroupLevel.GRP'), '-mat');
 
 %Define some general variables

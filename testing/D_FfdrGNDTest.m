@@ -1,4 +1,5 @@
 %Test FfdrGND function
+%
 %AUTHOR: Eric Fields
 %VERSION DATE: 12 June 2020
 
@@ -9,7 +10,7 @@ end
 
 %Load a GND for testing
 %Load a GND for testing
-FMUT_dir = fileparts(fileparts(mfilename('fullpath')));
+FMUT_dir = fileparts(fileparts(which('A_setupTest')));
 load(fullfile(FMUT_dir, 'testing', 'data', 'EmProb_13subs_Test.GND'), '-mat');
 
 %Define general variables
