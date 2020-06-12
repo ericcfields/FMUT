@@ -1,9 +1,9 @@
 %FMUT unit testing
 %General setup
 %AUTHOR: Eric Fields
-%VERSION DATE: 4 March 2020
+%VERSION DATE: 12 June 2020
 
-clear all; close all; path(pathdef);
+clear all; close all; path(pathdef); %#ok<CLALL>
 
 %Add EEGLAB and MUT to path
 [ALLEEG, EEG, CURRENTSET, ALLCOM] = eeglab;

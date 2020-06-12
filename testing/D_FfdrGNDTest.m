@@ -1,6 +1,6 @@
-%Test FmaxGND function
+%Test FfdrGND function
 %AUTHOR: Eric Fields
-%VERSION DATE: 10 June 2020
+%VERSION DATE: 12 June 2020
 
 global test_xls_output
 if isempty(test_xls_output)

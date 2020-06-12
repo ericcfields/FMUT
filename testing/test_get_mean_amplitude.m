@@ -1,3 +1,8 @@
+%Test get mean amplitude function
+%
+%Author: Eric FIelds
+%Version Date: 12 June 2020
+
 clearvars; close all;
 
 %Load a GND for testing

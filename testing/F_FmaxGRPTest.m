@@ -1,4 +1,4 @@
-%Test FmaxGND function
+%Test FmaxGRP function
 %AUTHOR: Eric Fields
 %VERSION DATE: 15 July 2017
 

@@ -1,4 +1,4 @@
-%Test FfdrGND function
+%Test FfdrGRP function
 %AUTHOR: Eric Fields
 %VERSION DATE: 15 July 2017
 

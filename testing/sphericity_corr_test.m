@@ -1,4 +1,4 @@
-%Test Greenhouse-Geisser correction
+%Test sphericity corrections
 %
 %Author: Eric Fields
 %Version Date: 9 June 2020
