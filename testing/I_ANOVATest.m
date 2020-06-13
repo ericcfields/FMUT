@@ -3,12 +3,16 @@
 %Author: Eric Fields
 %Version Date: 12 June 2020
 
-%% RB DESIGNS PARAMETRIC ANOVA
-
 %Simulation parameters
 n_electrodes = 32;
 n_time_pts = 40;
 n_subs = 16;
+
+%Between subjects designs
+cond_subs = [8, 8];
+
+
+%% RB DESIGNS PARAMETRIC ANOVA
 
 %Designs to test
 anova_designs = {5, ...
@@ -34,8 +38,12 @@ for m = 1:length(anova_designs)
     
     wg_design = anova_designs{m};
     
+    if sum(wg_design>2) > 2 && ~isempty(cond_subs)
+        continue
+    end
+    
     %Choose random sphericity correction
-    if sum(wg_design>2) < 2
+    if sum(wg_design>2) < 2 && isempty(cond_subs)
         sphericity_corr = sphericity_corrections{randi(numel(sphericity_corrections))};
     else
         sphericity_corr = 'none';
@@ -58,14 +66,16 @@ for m = 1:length(anova_designs)
     %MATLAB ANOVA
     oneway_data = reshape(data, n_electrodes, n_time_pts, [], n_subs);
     rm_data = squeeze(oneway_data(e,t,:,:))';
-    [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, var_names);
+    [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, cond_subs, var_names);
 
     %Calculate all effects in model and compare to MATLAB ANOVA
     for i = 1:length(effects)
 
+        %%% Within subjects effects %%%
+        
         %FMUT calculations
         dims = effects{i}+2;
-        test_results = calc_param_ANOVA(data, [], dims, 0.05, 'none', sphericity_corr);
+        test_results = calc_param_ANOVA(data, cond_subs, dims, 0.05, 'none', sphericity_corr);
 
         %Check results for a random electrode and time point
         rm_table_row = ['(Intercept):' strrep(effects_labels{i}, 'X', ':')];
@@ -74,14 +84,34 @@ for m = 1:length(anova_designs)
         else
             suff = sphericity_corr;
         end
-        assert(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]} < 1e-9);
+        assert(abs(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]}) < 1e-9);
+        
+        %%% Between subjects effects
+        if ~isempty(cond_subs)
+            
+            %FMUT calculations
+            dims = [effects{i}+2 ndims(data)];
+            test_results = calc_param_ANOVA(data, cond_subs, dims, 0.05, 'none', sphericity_corr);
+
+            %Check results for a random electrode and time point
+            rm_table_row = ['group:' strrep(effects_labels{i}, 'X', ':')];
+            if strcmp(sphericity_corr, 'none')
+                suff = '';
+            else
+                suff = sphericity_corr;
+            end
+            assert(abs(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]}) < 1e-9);
+            
+        end
 
     end
     
 end
 
 
-function [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, var_names)
+%% ANOVA function
+
+function [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, cond_subs, var_names)
 %Calculate ANOVA with MATLAB's stats module
 %
 %INPUTS
@@ -144,17 +174,28 @@ function [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, var_names)
     for row = 1:size(withindesign, 1)
         col_names{row+1} = strjoin(withindesign{row, :}, '');
     end
-
+    
     %Create ANOVA table
     T = [cell2table(cellfun(@(x) sprintf('S%d', x), num2cell(1:n_subs)', 'UniformOutput', false), 'VariableNames', {'sub'}) ...
          array2table(rm_data)];
     T.Properties.VariableNames = col_names;
-
+    group = {};
+    
     %MATLAB repeated measure ANOVA
-    model_formula = sprintf('%s-%s~1', T.Properties.VariableNames{2}, T.Properties.VariableNames{end});
+    if isempty(cond_subs)
+        model_formula = sprintf('%s-%s~1', T.Properties.VariableNames{2}, T.Properties.VariableNames{end});
+    else
+        for g = 1:length(cond_subs)
+            group = [group; repmat({sprintf('G%d', g)}, cond_subs(g), 1)]; %#ok<AGROW>
+        end
+        T(:, 'group') = group;
+        model_formula = sprintf('%s-%s~1+group', T.Properties.VariableNames{2}, T.Properties.VariableNames{end-1});
+    end
     rm = fitrm(T, model_formula, 'WithinDesign', withindesign);
     [~, effects_labels] = get_effects(var_names);
     reg_design = strrep(strjoin(effects_labels, '+'), 'X', '*');
     ranovatbl = ranova(rm, 'WithinModel', reg_design);
+    
+    writetable(T, 'outputs/sp_test.csv');
     
 end

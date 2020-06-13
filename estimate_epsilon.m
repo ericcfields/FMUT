@@ -25,7 +25,7 @@
 % epsilon      - electrode x time point array of epsilon estimate
 %
 %
-%VERSION DATE: 11 June 2020
+%VERSION DATE: 13 June 2020
 %AUTHOR: Eric Fields
 %
 %NOTE: This function is provided "as is" and any express or implied warranties 
@@ -52,7 +52,7 @@ function epsilon = estimate_epsilon(data, cond_subs, dims, method)
     
     %This function currently only works for one-way fully repeated measures designs
     if ~isempty(cond_subs) && ~isequal(cond_subs, 0) && length(cond_subs) > 1
-        error('estimate_epsilon curently only implemented for fully repetaed measures ANOVA');
+        error('estimate_epsilon curently only implemented for fully repeated measures ANOVA');
     end
     if ndims(reduced_data) ~= 4
         error('estimate_epsilon currently does not support more than one factor with more than 2 levels');
