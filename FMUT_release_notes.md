@@ -1,3 +1,20 @@
+# 0.5.1
+
+## Installation instructions
+
+1. Download FMUT_0.5.1.zip.
+2. Unzip it.
+3. Put the folder of files someplace sensible (e.g., in your "MATLAB" directory).
+4. [Add the folder](https://www.mathworks.com/help/matlab/matlab_env/add-remove-or-reorder-folders-on-the-search-path.html) to the set of "paths" MATLAB searches when trying to answer a function call.
+5. For Mac and Linux users: Run `>> add_poi_path` at the MATLAB command line, then close and restart MATLAB.
+
+The FMUT documentation can be found at: https://github.com/ericcfields/FMUT/wiki
+
+## Release Notes
+
+### Bug fixes
+* Error is now produced for unequal sample sizes with split plot designs.
+
 # 0.5.0
 
 ## Installation instructions
