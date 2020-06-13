@@ -15,7 +15,8 @@ cond_subs = [8, 8];
 %% RB DESIGNS PARAMETRIC ANOVA
 
 %Designs to test
-anova_designs = {5, ...
+anova_designs = {2, ...
+                 5, ...
                  [2, 2], ...
                  [4, 2], ...
                  [3, 4], ...
@@ -67,6 +68,7 @@ for m = 1:length(anova_designs)
     oneway_data = reshape(data, n_electrodes, n_time_pts, [], n_subs);
     rm_data = squeeze(oneway_data(e,t,:,:))';
     [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, cond_subs, var_names);
+    %disp(ranovatbl);
 
     %Calculate all effects in model and compare to MATLAB ANOVA
     for i = 1:length(effects)
@@ -86,7 +88,8 @@ for m = 1:length(anova_designs)
         end
         assert(abs(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]}) < 1e-9);
         
-        %%% Between subjects effects
+        %%% Group interactions %%%
+        
         if ~isempty(cond_subs)
             
             %FMUT calculations
@@ -105,6 +108,11 @@ for m = 1:length(anova_designs)
         end
 
     end
+    
+    %%% Group main effect %%%
+        
+    test_results = calc_param_ANOVA(data, cond_subs, ndims(data), 0.05, 'none', sphericity_corr);
+    assert(abs(test_results.p(e,t) - ranovatbl{'group', ['pValue' suff]}) < 1e-9);
     
 end
 

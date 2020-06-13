@@ -38,6 +38,10 @@
 %This code is free and open source software made available under the 3-clause BSD license.
 
 function [F_obs, F_dist, df_effect, df_res, exact_test] = perm_spANOVA(data, cond_subs, dims, n_perm, reduce)
+    
+    if ~all(cond_subs == cond_subs(1))
+        error('Split plot ANOVA is currently only available for designs with equal sample sizes');
+    end
 
     %Eliminate factors not involved in this effect and reduce interactions
     %via subtraction
