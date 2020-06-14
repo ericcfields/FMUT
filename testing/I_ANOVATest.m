@@ -125,6 +125,35 @@ for bg_factor = [false, true]
     
 end
 
+%% CR ANOVA
+
+%Sample sizes
+cond_subs = [8, 8, 8];
+
+%Generate data
+data = randn([n_electrodes, n_time_pts, sum(cond_subs)]);
+
+%Choose random electrode and time point for testing
+e = 1; %randi([1,n_electrodes]);
+t = 1; %randi([1,n_time_pts]);
+
+%Create group input
+group = {};
+for g = 1:length(cond_subs)
+    group = [group; repmat({sprintf('G%d', g)}, cond_subs(g), 1)]; %#ok<AGROW>
+end
+
+%MATLAB ANOVA
+cr_data = squeeze(data(e, t, :));
+[~, cranovatbl] = anovan(cr_data, {group}, 'display', 'off');
+
+%FMUT ANOVA
+test_results = calc_param_ANOVA(data, cond_subs, 3, 0.05, 'none', 'none');
+
+%Check that they are equal
+assert(cranovatbl{2, 7} - test_results.p(e,t) < 1e-9);
+
+
 %% ANOVA function
 
 function [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, cond_subs, var_names)
