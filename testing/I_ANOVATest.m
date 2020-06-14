@@ -8,11 +8,7 @@ n_electrodes = 32;
 n_time_pts = 40;
 n_subs = 16;
 
-%Between subjects designs
-cond_subs = [8, 8];
-
-
-%% RB DESIGNS PARAMETRIC ANOVA
+%% RB & SP DESIGNS PARAMETRIC ANOVA
 
 %Designs to test
 anova_designs = {2, ...
@@ -34,88 +30,99 @@ anova_designs = {2, ...
                  [3, 4, 2, 3]};
 
 sphericity_corrections = {'none', 'GG', 'HF', 'LB'};
-             
-for m = 1:length(anova_designs)
+
+for bg_factor = [false, true]
     
-    wg_design = anova_designs{m};
-    
-    if sum(wg_design>2) > 2 && ~isempty(cond_subs)
-        continue
-    end
-    
-    %Choose random sphericity correction
-    if sum(wg_design>2) < 2 && isempty(cond_subs)
-        sphericity_corr = sphericity_corrections{randi(numel(sphericity_corrections))};
+    if bg_factor
+        cond_subs = [8,8];
     else
-        sphericity_corr = 'none';
+        cond_subs = [];
     end
 
-    %Simulate data
-    data = randn([n_electrodes, n_time_pts, wg_design, n_subs]);
-    
-    %Choose random electrode and time point for testing
-    e = randi([1,n_electrodes]);
-    t = randi([1,n_time_pts]);
+    for m = 1:length(anova_designs)
 
-    %Generic variable names
-    var_names = cell(1, length(wg_design));
-    for i = 1:length(wg_design)
-        var_names{i} = char(64+i);
-    end
-    [effects, effects_labels] = get_effects(var_names);
+        wg_design = anova_designs{m};
 
-    %MATLAB ANOVA
-    oneway_data = reshape(data, n_electrodes, n_time_pts, [], n_subs);
-    rm_data = squeeze(oneway_data(e,t,:,:))';
-    [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, cond_subs, var_names);
-    %disp(ranovatbl);
-
-    %Calculate all effects in model and compare to MATLAB ANOVA
-    for i = 1:length(effects)
-
-        %%% Within subjects effects %%%
-        
-        %FMUT calculations
-        dims = effects{i}+2;
-        test_results = calc_param_ANOVA(data, cond_subs, dims, 0.05, 'none', sphericity_corr);
-
-        %Check results for a random electrode and time point
-        rm_table_row = ['(Intercept):' strrep(effects_labels{i}, 'X', ':')];
-        if strcmp(sphericity_corr, 'none')
-            suff = '';
-        else
-            suff = sphericity_corr;
+        if sum(wg_design>2) > 2
+            continue;
         end
-        assert(abs(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]}) < 1e-9);
-        
-        %%% Group interactions %%%
-        
-        if ~isempty(cond_subs)
-            
+
+        %Choose random sphericity correction
+        if sum(wg_design>2) < 2 && isempty(cond_subs)
+            sphericity_corr = sphericity_corrections{randi(numel(sphericity_corrections))};
+        else
+            sphericity_corr = 'none';
+        end
+
+        %Simulate data
+        data = randn([n_electrodes, n_time_pts, wg_design, n_subs]);
+
+        %Choose random electrode and time point for testing
+        e = 1; %randi([1,n_electrodes]);
+        t = 1; %randi([1,n_time_pts]);
+
+        %Generic variable names
+        var_names = cell(1, length(wg_design));
+        for i = 1:length(wg_design)
+            var_names{i} = char(64+i);
+        end
+        [effects, effects_labels] = get_effects(var_names);
+
+        %MATLAB ANOVA
+        oneway_data = reshape(data, n_electrodes, n_time_pts, [], n_subs);
+        rm_data = squeeze(oneway_data(e,t,:,:))';
+        [rm, ranovatbl] = matlab_ANOVA(rm_data, wg_design, cond_subs, var_names);
+        %disp(ranovatbl);
+
+        %Calculate all effects in model and compare to MATLAB ANOVA
+        for i = 1:length(effects)
+
+            %%% Within subjects effects %%%
+
             %FMUT calculations
-            dims = [effects{i}+2 ndims(data)];
+            dims = effects{i}+2;
             test_results = calc_param_ANOVA(data, cond_subs, dims, 0.05, 'none', sphericity_corr);
 
             %Check results for a random electrode and time point
-            rm_table_row = ['group:' strrep(effects_labels{i}, 'X', ':')];
+            rm_table_row = ['(Intercept):' strrep(effects_labels{i}, 'X', ':')];
             if strcmp(sphericity_corr, 'none')
                 suff = '';
             else
                 suff = sphericity_corr;
             end
             assert(abs(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]}) < 1e-9);
-            
+
+            %%% Group interactions %%%
+
+            if ~isempty(cond_subs)
+
+                %FMUT calculations
+                dims = [effects{i}+2 ndims(data)];
+                test_results = calc_param_ANOVA(data, cond_subs, dims, 0.05, 'none', sphericity_corr);
+
+                %Check results for a random electrode and time point
+                rm_table_row = ['group:' strrep(effects_labels{i}, 'X', ':')];
+                if strcmp(sphericity_corr, 'none')
+                    suff = '';
+                else
+                    suff = sphericity_corr;
+                end
+                assert(abs(test_results.p(e,t) - ranovatbl{rm_table_row, ['pValue' suff]}) < 1e-9);
+
+            end
+
+        end
+
+        %%% Group main effect %%%
+
+        if ~isempty(cond_subs)
+            test_results = calc_param_ANOVA(data, cond_subs, ndims(data), 0.05, 'none', sphericity_corr);
+            assert(abs(test_results.p(e,t) - ranovatbl{'group', ['pValue' suff]}) < 1e-9);
         end
 
     end
     
-    %%% Group main effect %%%
-        
-    test_results = calc_param_ANOVA(data, cond_subs, ndims(data), 0.05, 'none', sphericity_corr);
-    assert(abs(test_results.p(e,t) - ranovatbl{'group', ['pValue' suff]}) < 1e-9);
-    
 end
-
 
 %% ANOVA function
 
