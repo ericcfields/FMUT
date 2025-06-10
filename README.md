@@ -7,7 +7,7 @@
 Eric Fields  
 
 **CONTACT**  
-fieldsec@westminster.edu 
+e_fields2@uncg.edu
   
 The Factorial Mass Univariate ERP Toolbox (FMUT) is an extension to David Groppe's Mass Univariate ERP Toolbox. The FMUT implements permutation and false discovery rate based mass univariate statistics for ANOVA and factorial designs for event-related potential (ERP) data.
 
